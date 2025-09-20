@@ -18,34 +18,34 @@
       background: linear-gradient(135deg, var(--bg1), var(--bg2));
       color: var(--text);
       display: flex;
-      flex-direction: column;            /* footer poussé en bas */
-      min-height: 100vh;
+      flex-direction: column;
+      min-height: 100dvh;
     }
-    .wrap {
-      flex: 1;                           /* prend l'espace dispo */
+    main {
+      flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       text-align: center;
-      padding: 24px 20px;                /* espace pour éviter chevauchement */
+      padding: 24px 20px;
+      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+      gap: 10px;
     }
     img.logo {
       max-width: 200px;
       height: auto;
-      margin-bottom: 20px;
     }
     h1 {
       font-size: clamp(1.8rem, 2.2vw + 1rem, 2.2rem);
-      margin: 0 0 8px 0;
+      margin: 8px 0 4px 0;
     }
     .lang {
       display: none;
-      margin-top: 8px;
-      margin-bottom: 1.2em;
+      margin-top: 6px;
       max-width: 560px;
       line-height: 1.5;
-      font-size: clamp(1rem, 0.8vw + 0.8rem, 1.1rem);
+      font-size: clamp(1rem, 0.8vw + 0.8rem, 1.08rem);
     }
     a.cta {
       display: inline-block;
@@ -59,24 +59,27 @@
     }
     a.cta:hover { background: var(--accent-hover); transform: translateY(-1px) scale(1.03); }
     .note {
-      margin-top: 14px;                  /* espace au-dessus du bandeau */
+      margin-top: 18px;
       font-size: 0.95em;
       color: var(--accent);
       font-weight: bold;
+      text-align: center;
+      min-height: 1.2em;
     }
     footer {
-      padding: 14px 12px;                /* footer non absolu */
+      margin-top: auto;
+      padding: 14px 16px;
       font-size: 0.85em;
       color: var(--muted);
       text-align: center;
       background: transparent;
     }
     .flags {
-      position: fixed;                   /* reste en haut sans influencer la mise en page */
-      top: env(safe-area-inset-top, 16px);
-      right: 16px;
+      position: fixed;
+      top: env(safe-area-inset-top, 12px);
+      right: 12px;
       display: flex;
-      gap: 10px;
+      gap: 8px;
       z-index: 10;
     }
     .flags img {
@@ -85,28 +88,26 @@
       cursor: pointer;
       border: 1px solid var(--border);
       border-radius: 4px;
-      transition: transform .2s ease, border-color .2s ease;
       background: #222;
+      transition: transform .2s ease, border-color .2s ease;
     }
-    .flags img:hover { transform: scale(1.1); border-color: var(--accent); }
+    .flags img:hover { transform: scale(1.08); border-color: var(--accent); }
     @media (max-width: 360px) {
       img.logo { max-width: 160px; }
+      .note { font-size: 0.9em; }
     }
   </style>
 </head>
 <body>
-  <!-- Sélecteur de langue -->
   <div class="flags" aria-label="Language selector">
     <img src="https://flagcdn.com/w20/fr.png" alt="FR" onclick="setLang('fr')">
     <img src="https://flagcdn.com/w20/gb.png" alt="EN" onclick="setLang('en')">
   </div>
 
-  <main class="wrap">
-    <!-- Logo + titre -->
+  <main>
     <img src="connectmeifucan-logo.jpg" alt="Connect Me If U Can Logo" class="logo">
     <h1>🎮 Connect Me If U Can</h1>
 
-    <!-- FR -->
     <div id="fr" class="lang">
       ✨ Transforme ton salon en escape game connecté.<br>
       🔦 Lumières • Sons • Objets connectés.<br>
@@ -115,7 +116,6 @@
       <div class="note">💡 Projet personnel – en cours de création</div>
     </div>
 
-    <!-- EN -->
     <div id="en" class="lang">
       ✨ Turn your living room into a connected escape game.<br>
       🔦 Lights • Sounds • Smart objects.<br>
@@ -136,7 +136,6 @@
       if (target) target.style.display = 'block';
       document.documentElement.lang = (lang === 'fr') ? 'fr' : 'en';
     }
-    // Détection auto (FR si navigateur FR, sinon EN)
     (function() {
       var userLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
       setLang(userLang.startsWith('fr') ? 'fr' : 'en');
