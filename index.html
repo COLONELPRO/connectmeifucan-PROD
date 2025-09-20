@@ -2,136 +2,144 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Connect Me If U Can</title>
-  <link rel="icon" type="image/jpeg" href="connectmeifucan-logo.jpg"> <!-- favicon -->
+  <link rel="icon" type="image/jpeg" href="connectmeifucan-logo.jpg">
   <style>
+    :root {
+      --bg1:#0d0d0d; --bg2:#1c1c1c; --text:#fff; --muted:#aaa;
+      --accent:#ffcc00; --accent-hover:#ffaa00; --border:#444;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #0d0d0d, #1c1c1c);
-      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+    }
+    main {
+      flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
       text-align: center;
-      padding: 0 20px;
+      padding: 24px 20px;
+      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+      gap: 10px;
     }
     img.logo {
       max-width: 200px;
-      margin-bottom: 20px;
+      height: auto;
     }
     h1 {
-      font-size: 2.2em;
-      margin-bottom: 0.3em;
+      font-size: clamp(1.8rem, 2.2vw + 1rem, 2.2rem);
+      margin: 8px 0 4px 0;
     }
     .lang {
       display: none;
-      margin-bottom: 1.5em;
-      max-width: 500px;
-      line-height: 1.4;
-      font-size: 1.1em;
+      margin-top: 6px;
+      max-width: 560px;
+      line-height: 1.5;
+      font-size: clamp(1rem, 0.8vw + 0.8rem, 1.08rem);
     }
-    a {
+    a.cta {
       display: inline-block;
       padding: 12px 28px;
-      background: #ffcc00;
+      background: var(--accent);
       color: #000;
-      font-weight: bold;
+      font-weight: 700;
       text-decoration: none;
-      border-radius: 8px;
-      transition: 0.3s;
+      border-radius: 10px;
+      transition: transform .2s ease, background .2s ease;
     }
-    a:hover {
-      background: #ffaa00;
-      transform: scale(1.05);
+    a.cta:hover { background: var(--accent-hover); transform: translateY(-1px) scale(1.03); }
+    .note {
+      margin-top: 18px;
+      font-size: 0.95em;
+      color: var(--accent);
+      font-weight: bold;
+      text-align: center;
+      min-height: 1.2em;
     }
     footer {
-      position: absolute;
-      bottom: 20px;
-      font-size: 0.8em;
-      color: #aaa;
+      margin-top: auto;
+      padding: 14px 16px;
+      font-size: 0.85em;
+      color: var(--muted);
       text-align: center;
-      width: 100%;
+      background: transparent;
     }
     .flags {
-      position: absolute;
-      top: 20px;
-      right: 20px;
+      position: fixed;
+      top: env(safe-area-inset-top, 12px);
+      right: 12px;
       display: flex;
-      gap: 10px;
+      gap: 8px;
+      z-index: 10;
     }
     .flags img {
       width: 32px;
       height: 22px;
       cursor: pointer;
-      border: 1px solid #444;
+      border: 1px solid var(--border);
       border-radius: 4px;
-      transition: 0.2s;
+      background: #222;
+      transition: transform .2s ease, border-color .2s ease;
     }
-    .flags img:hover {
-      transform: scale(1.1);
-      border-color: #ffcc00;
-    }
-    .note {
-      margin-top: 15px;
-      font-size: 0.95em;
-      color: #ffcc00;
-      font-weight: bold;
+    .flags img:hover { transform: scale(1.08); border-color: var(--accent); }
+    @media (max-width: 360px) {
+      img.logo { max-width: 160px; }
+      .note { font-size: 0.9em; }
     }
   </style>
 </head>
 <body>
-  <!-- Logo -->
-  <img src="connectmeifucan-logo.jpg" alt="Connect Me If U Can Logo" class="logo">
-
-  <!-- Sélecteur de langue -->
-  <div class="flags">
+  <div class="flags" aria-label="Language selector">
     <img src="https://flagcdn.com/w20/fr.png" alt="FR" onclick="setLang('fr')">
     <img src="https://flagcdn.com/w20/gb.png" alt="EN" onclick="setLang('en')">
   </div>
 
-  <!-- Titre -->
-  <h1>🎮 Connect Me If U Can</h1>
+  <main>
+    <img src="connectmeifucan-logo.jpg" alt="Connect Me If U Can Logo" class="logo">
+    <h1>🎮 Connect Me If U Can</h1>
 
-  <!-- Version FR -->
-  <div id="fr" class="lang">
-    ✨ Transforme ton salon en escape game connecté.<br>
-    🔦 Lumières • Sons • Objets connectés.<br>
-    ⏳ Voyage à travers le temps : 1850 → 2050.<br><br>
-    <a href="https://linktr.ee/connectmeifucan" target="_blank">Découvrir</a>
-    <div class="note">💡 Projet personnel – en cours de création</div>
-  </div>
+    <div id="fr" class="lang">
+      ✨ Transforme ton salon en escape game connecté.<br>
+      🔦 Lumières • Sons • Objets connectés.<br>
+      ⏳ Voyage à travers le temps : 1850 → 2050.<br><br>
+      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Découvrir</a>
+      <div class="note">💡 Projet personnel – en cours de création</div>
+    </div>
 
-  <!-- Version EN -->
-  <div id="en" class="lang">
-    ✨ Turn your living room into a connected escape game.<br>
-    🔦 Lights • Sounds • Smart objects.<br>
-    ⏳ Travel through time: 1850 → 2050.<br><br>
-    <a href="https://linktr.ee/connectmeifucan" target="_blank">Discover</a>
-    <div class="note">💡 Personal project – in progress</div>
-  </div>
-  
-  <!-- Footer -->
+    <div id="en" class="lang">
+      ✨ Turn your living room into a connected escape game.<br>
+      🔦 Lights • Sounds • Smart objects.<br>
+      ⏳ Travel through time: 1850 → 2050.<br><br>
+      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Discover</a>
+      <div class="note">💡 Personal project – in progress</div>
+    </div>
+  </main>
+
   <footer>
     © 2025 Connect Me If U Can – Personal Project
   </footer>
 
-  <!-- Script -->
   <script>
     function setLang(lang) {
       document.querySelectorAll('.lang').forEach(el => el.style.display = 'none');
-      document.getElementById(lang).style.display = 'block';
+      var target = document.getElementById(lang);
+      if (target) target.style.display = 'block';
+      document.documentElement.lang = (lang === 'fr') ? 'fr' : 'en';
     }
-    // Détection auto : FR si navigateur en français, sinon EN
-    const userLang = navigator.language || navigator.userLanguage;
-    if (userLang && userLang.toLowerCase().startsWith('fr')) {
-      setLang('fr');
-    } else {
-      setLang('en');
-    }
+    (function() {
+      var userLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      setLang(userLang.startsWith('fr') ? 'fr' : 'en');
+    })();
   </script>
 </body>
 </html>
