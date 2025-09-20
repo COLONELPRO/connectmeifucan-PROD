@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect Me If U Can</title>
+  <link rel="icon" type="image/jpeg" href="connectmeifucan-logo.jpg"> <!-- favicon -->
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0d0d0d, #1c1c1c);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 0 20px;
+    }
+    img.logo {
+      max-width: 200px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 0.3em;
+    }
+    .lang {
+      display: none;
+      margin-bottom: 1.5em;
+      max-width: 500px;
+      line-height: 1.4;
+      font-size: 1.1em;
+    }
+    a {
+      display: inline-block;
+      padding: 12px 28px;
+      background: #ffcc00;
+      color: #000;
+      font-weight: bold;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+    a:hover {
+      background: #ffaa00;
+      transform: scale(1.05);
+    }
+    footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 0.8em;
+      color: #aaa;
+      text-align: center;
+      width: 100%;
+    }
+    .flags {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    .flags img {
+      width: 32px;
+      height: 22px;
+      cursor: pointer;
+      border: 1px solid #444;
+      border-radius: 4px;
+      transition: 0.2s;
+    }
+    .flags img:hover {
+      transform: scale(1.1);
+      border-color: #ffcc00;
+    }
+  </style>
+</head>
+<body>
+  <!-- Logo -->
+  <img src="connectmeifucan-logo.jpg" alt="Connect Me If U Can Logo" class="logo">
+
+  <!-- Sélecteur de langue -->
+  <div class="flags">
+    <img src="https://flagcdn.com/w20/fr.png" alt="FR" onclick="setLang('fr')">
+    <img src="https://flagcdn.com/w20/gb.png" alt="EN" onclick="setLang('en')">
+  </div>
+
+  <!-- Titre -->
+  <h1>🎮 Connect Me If U Can</h1>
+
+  <!-- Version FR -->
+  <div id="fr" class="lang">
+    ✨ Transforme ton salon en escape game connecté.<br>
+    🔦 Lumières • Sons • Objets connectés.<br>
+    ⏳ Voyage à travers le temps : 1850 → 2050.<br><br>
+    <a href="https://linktr.ee/connectmeifucan" target="_blank">Découvrir</a>
+  </div>
+
+  <!-- Version EN -->
+  <div id="en" class="lang">
+    ✨ Turn your living room into a connected escape game.<br>
+    🔦 Lights • Sounds • Smart objects.<br>
+    ⏳ Travel through time: 1850 → 2050.<br><br>
+    <a href="https://linktr.ee/connectmeifucan" target="_blank">Discover</a>
+  </div>
+  
+  <!-- Footer -->
+  <footer>
+    © 2025 Connect Me If U Can – Hobby Project
+  </footer>
+
+  <!-- Script -->
+  <script>
+    function setLang(lang) {
+      document.querySelectorAll('.lang').forEach(el => el.style.display = 'none');
+      document.getElementById(lang).style.display = 'block';
+    }
+    // Détection auto : FR si navigateur en français, sinon EN
+    const userLang = navigator.language || navigator.userLanguage;
+    if (userLang.startsWith('fr')) {
+      setLang('fr');
+    } else {
+      setLang('en');
+    }
+  </script>
+</body>
+</html>
