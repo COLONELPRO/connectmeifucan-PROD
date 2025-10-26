@@ -126,29 +126,36 @@
         browser_language: navigator.language || "unknown"
       };
 
-      try {
-        status.textContent = isFr ? "Envoi..." : "Sending...";
+     try {
+  status.textContent = isFr ? "Envoi..." : "Sending...";
 
-        // 🔧 Pas de CORS, envoi "simple" (form-urlencoded)
-        const form = new URLSearchParams();
-        form.set("payload", JSON.stringify(payload));
+  const form = new URLSearchParams();
+  form.set("payload", JSON.stringify({
+    timestamp: new Date().toISOString(),
+    language: isFr ? "fr" : "en",
+    product_name: isFr ? "SmartPlug – version réutilisable (WTP)" : "SmartPlug – reusable version (WTP)",
+    standard_price: 49,
+    wtp_price: Number(slider.value),
+    email: (document.getElementById('email').value || "").trim(),
+    browser_language: navigator.language || "unknown"
+  }));
 
-        const res = await fetch(ENDPOINT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-          body: form.toString()
-        });
+  await fetch(ENDPOINT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+    body: form.toString(),
+    mode: "no-cors"                  // ⬅️ évite le “Failed to fetch”
+  });
 
-        if (!res.ok) throw new Error("HTTP " + res.status);
+  // Réponse opaque = on ne peut pas vérifier res.ok => UX optimiste :
+  status.textContent = isFr ? "OK ✔" : "OK ✔";
+  status.className = "hint ok";
+  setTimeout(() => { window.location.href = "thank_you.html"; }, 250);
 
-        status.textContent = isFr ? "OK ✔" : "OK ✔";
-        status.className = "hint ok";
-        setTimeout(() => { window.location.href = "thank_you.html"; }, 250);
-
-      } catch(e) {
-        status.textContent = (isFr ? "Échec" : "Failed") + " (" + e.message + ")";
-        status.className = "hint err";
-      }
+} catch (e) {
+  status.textContent = (isFr ? "Échec" : "Failed") + " (" + e.message + ")";
+  status.className = "hint err";
+}
     });
   </script>
 </body>
