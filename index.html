@@ -165,25 +165,35 @@ document.addEventListener("DOMContentLoaded", function () {
       email: emailInput.value || "",
       browser_language: navigator.language || ""
     };
-
-    fetch("https://script.google.com/macros/s/AKfycbxQI1wTslIozYdqNPl3E6Rw7SpvKtCeNM9wCm-LYHqrbnqkZdpnoiJV-PUB9dlsVOwlow/exec", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        window.location.href = "https://connectmeifucan.com/thank_you";
-      } else {
-        alert("Erreur : " + data.message);
-      }
-    })
-    .catch(err => {
-      console.error("Erreur réseau :", err);
-      alert("Une erreur est survenue lors de l'envoi.");
-    });
+fetch("https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbxQI1wTslIozYdqNPl3E6Rw7SpvKtCeNM9wCm-LYHqrbnqkZdpnoiJV-PUB9dlsVOwlow/exec", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload)
+})
+.then(async response => {
+  const contentType = response.headers.get("content-type");
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Erreur serveur (${response.status}): ${errorText}`);
   }
+  if (contentType && contentType.includes("application/json")) {
+    return response.json();
+  } else {
+    throw new Error("Réponse non JSON reçue");
+  }
+})
+.then(data => {
+  if (data.success) {
+    window.location.href = "https://connectmeifucan.com/thank_you";
+  } else {
+    alert("Erreur côté serveur : " + data.message);
+  }
+})
+.catch(err => {
+  console.error("Erreur réseau ou parsing :", err);
+  alert("Une erreur est survenue : " + err.message);
+});
+
 
   // Ajoute un bouton d'envoi
   const submitBtn = document.createElement("button");
