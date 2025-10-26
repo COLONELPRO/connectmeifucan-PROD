@@ -66,7 +66,7 @@
             <button class="btn btn-primary" id="submit">Valider</button>
             <span id="status" class="hint"></span>
           </div>
-          <p class="hint">Soumission silencieuse via <code>fetch(..., {keepalive:true})</code> vers votre endpoint. Configurez l’URL juste ci-dessous.</p>
+          <p class="hint">Soumission silencieuse via <code>sendBeacon</code> (puis fallback <code>fetch</code>) vers votre endpoint Google Apps Script / Supabase. Configurez l’URL ci-dessous.</p>
         </div>
 
         <p class="hint" id="utmDebug"></p>
@@ -80,10 +80,10 @@
 
   <script>
     // === CONFIGURATION (à modifier) ===================
-    // 1) Collez ici votre URL d'endpoint (Formspree, Google Apps Script, Supabase, etc.)
-    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzuF7Q13xu4ANz_5yrW7xMwRco0UDCLd9tI_loHPnwpTqiAl0nV1QIhX4XBmCt6fzXwng/exec";
-    // 2) Si vous avez besoin d'une clé (ex. Supabase REST function) :
-    const ENDPOINT_KEY = ""; // facultatif
+    // Collez ici votre URL d'endpoint (Apps Script / REST). Exemple:
+    // const ENDPOINT_URL = "https://script.google.com/macros/s/XXXXX/exec";
+
+    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxLRHvVcOh2JZO4PZyJwsVPu9wJ6IzQc2JHpZkIxIZPWz1oW2xAu3Qe39BSFy1JCxroWQ/exec";
     // ==================================================
 
     // UTM capture (LinkedIn)
@@ -104,7 +104,7 @@
     const update = ()=> out.textContent = fmt(slider.value);
     slider.addEventListener('input', update); update();
 
-    // Silent submit
+    // Silent submit: sendBeacon-first then fetch fallback WITHOUT Content-Type header
     const status = document.getElementById('status');
     document.getElementById('submit').addEventListener('click', async function(){
       const price = Number(slider.value);
@@ -119,12 +119,22 @@
       };
       try{
         status.textContent = "Envoi…";
-        const headers = {"Content-Type":"application/json"};
-        if(ENDPOINT_KEY) headers["Authorization"] = "Bearer " + ENDPOINT_KEY;
-        const res = await fetch(ENDPOINT_URL, {method:"POST", headers, body: JSON.stringify(payload), keepalive:true, mode:"cors"});
-        if(!res.ok) throw new Error("HTTP " + res.status);
+        // 1) sendBeacon pour éviter le pré-flight CORS
+        const blob = new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" });
+        let sent = false;
+        try { sent = navigator.sendBeacon && navigator.sendBeacon(ENDPOINT_URL, blob); } catch(_) {}
+        if (!sent) {
+          // 2) Fallback fetch SANS Content-Type explicite (évite preflight)
+          const res = await fetch(ENDPOINT_URL, {
+            method: "POST",
+            body: JSON.stringify(payload),
+            keepalive: true,
+            mode: "cors"
+          });
+          if(!res.ok) throw new Error("HTTP " + res.status);
+        }
         status.textContent = "OK ✔"; status.className = "hint ok";
-        setTimeout(()=>{ window.location.href = "thank_you.html"; }, 300);
+        setTimeout(()=>{ window.location.href = "thank_you.html"; }, 250);
       }catch(e){
         status.textContent = "Échec ("+e.message+")"; status.className = "hint err";
       }
