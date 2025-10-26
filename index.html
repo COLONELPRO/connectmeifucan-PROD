@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>WTP Study – SmartPlug (GEM)</title>
   <style>
-    :root{--bg:#f7f7f7;--text:#111827;--muted:#6b7280;--brand:#009E4F;--card:#fff;--shadow:0 10px 30px rgba(0,0,0,.06);--radius:18px}
+    :root{
+      --bg:#f7f7f7;--text:#111827;--muted:#6b7280;--brand:#009E4F;
+      --card:#fff;--shadow:0 10px 30px rgba(0,0,0,.06);--radius:18px
+    }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;background:var(--bg);color:var(--text)}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
     header{background:#fff;box-shadow:var(--shadow);position:sticky;top:0;z-index:10}
     .head{max-width:1100px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:12px}
-    .gem{height:60px}
+    .gem{height:80px}
     .brand{margin-left:auto;display:flex;align-items:center;gap:10px;white-space:nowrap}
     .dot{width:10px;height:10px;background:var(--brand);border-radius:50%}
     .container{max-width:1100px;margin:28px auto;padding:0 20px}
@@ -39,7 +42,7 @@
   <header>
     <div class="head">
       <img class="gem" src="logo_GEM.png" alt="GEM – Grenoble École de Management" />
-      <div class="brand"><div class="dot"></div><strong id="brandTitle">WTP Study – SmartPlug</strong><span id="langNote" class="lang"></span></div>
+      <div class="brand"><div class="dot"></div><strong id="brandTitle">WTP Study – SmartPlug</strong></div>
     </div>
   </header>
 
@@ -50,34 +53,34 @@
           <h1 id="title">Étude rapide sur la disposition à payer (WTP)</h1>
           <p class="muted" id="intro">
             <strong>Produit affiché :</strong> 49 € TTC.<br/>
-            Dans le cadre d’une étude rapide sur la disposition à payer (WTP) et les comportements d’achat,
-            merci d’indiquer votre prix pour la <strong>version en <strong>plastique réutilisable à caractéristiques équivalentes</strong>.
+            Dans le cadre d'une étude rapide sur la disposition à payer (WTP) et les comportements d'achat,
+            merci d'indiquer votre prix pour la <strong>version en plastique réutilisable à caractéristiques équivalentes</strong>.
           </p>
 
           <div class="grid" style="grid-template-columns:1fr 1fr;gap:18px;margin-top:12px">
             <div class="section">
-              <h2 id="stdTitle">Produit standard</h2>
-              <p class="bullet" id="stdMat">Matériau : <strong>Plastique conventionnel</strong> (non recyclé)</p>
-              <p class="price" id="stdPrice">Prix affiché : <strong>49 € TTC</strong></p>
+              <h2>Produit standard</h2>
+              <p class="bullet">Matériau : <strong>Plastique conventionnel</strong> (non recyclé)</p>
+              <p class="price">Prix affiché : <strong>49 € TTC</strong></p>
             </div>
             <div class="section">
-              <h2 id="ecoTitle">Alternative durable</h2>
-              <p class="bullet" id="ecoMat">Matériau : <strong>Plastique réutilisable</strong> à caractéristiques équivalentes</p>
-              <p class="bullet" id="ecoFeat">Fonctionnalités : <strong>identiques</strong> au produit standard</p>
+              <h2>Alternative durable</h2>
+              <p class="bullet">Matériau : <strong>Plastique réutilisable</strong> à caractéristiques équivalentes</p>
+              <p class="bullet">Fonctionnalités : <strong>identiques</strong> au produit standard</p>
             </div>
           </div>
 
           <div class="section" style="margin-top:16px">
-            <h2 id="qTitle">🧠 Question</h2>
-            <p class="bullet" id="qText">Quel prix seriez-vous prêt(e) à payer pour la version en plastique réutilisable, tout en conservant les mêmes fonctionnalités ?</p>
+            <h2>🧠 Question</h2>
+            <p>Quel prix seriez-vous prêt(e) à payer pour la version en plastique réutilisable, tout en conservant les mêmes fonctionnalités ?</p>
             <div class="row" style="justify-content:space-between;margin-top:6px">
-              <span class="muted" id="lowLab">Plus bas</span><strong class="value" id="wtpValue">49 €</strong><span class="muted" id="highLab">Plus élevé</span>
+              <span class="muted">Plus bas</span><strong class="value" id="wtpValue">49 €</strong><span class="muted">Plus élevé</span>
             </div>
             <input type="range" min="29" max="69" step="1" value="49" id="wtp" />
-            <p class="hint" id="sliderHint">Curseur ±20 € autour de 49 € (29–69 €).</p>
+            <p class="hint">Curseur ± 20 € autour de 49 € (29–69 €).</p>
 
             <div class="row" style="margin-top:10px">
-              <label for="email" class="muted" id="emailLab">Email (facultatif) :</label>
+              <label for="email" class="muted">Email (facultatif) :</label>
               <input id="email" type="email" placeholder="prenom.nom@exemple.com" style="flex:1;min-width:240px;padding:12px;border:1px solid #d1d5db;border-radius:10px"/>
             </div>
 
@@ -92,134 +95,55 @@
           <div class="product">
             <img src="Prise connectee.jpg" alt="Prise connectée – visuel produit" loading="lazy"/>
           </div>
-          
         </aside>
       </div>
     </div>
   </div>
 
   <script>
-    // === CONFIGUREZ votre endpoint Apps Script ici ===================
-    // Exemple : const ENDPOINT_URL = "https://script.google.com/macros/s/XXXXX/exec";
+    // ================= CONFIG =====================
     const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbw22NylHzIQ31q2U1EKVJZ5mx_4UQwlJFI54E9cAzguz5jKMi4DTtlMtfIx2zSQ7eSBTg/exec";
-    // ================================================================
+    // ==============================================
 
-    // i18n texts
-    const texts = {
-      fr: {
-        brandTitle: "Étude WTP – SmartPlug",
-        langNote: "(langue détectée : français)",
-        title: "Étude rapide sur la disposition à payer (WTP)",
-        intro_html: "<strong>Produit affiché :</strong> 49 € TTC.<br/>Dans le cadre d’une étude rapide sur la disposition à payer (WTP) et les comportements d’achat, merci d’indiquer votre prix pour la <strong>version en <strong>plastique réutilisable à caractéristiques équivalentes</strong>.",
-        stdTitle: "Produit standard",
-        stdMat: "Matériau : <strong>Plastique conventionnel</strong> (non recyclé)",
-        stdPrice: "Prix affiché : <strong>49 € TTC</strong>",
-        ecoTitle: "Alternative durable",
-        ecoMat: "Matériau : <strong>Plastique réutilisable</strong> à caractéristiques équivalentes",
-        ecoFeat: "Fonctionnalités : <strong>identiques</strong> au produit standard",
-        qTitle: "🧠 Question",
-        qText: "Quel prix seriez-vous prêt(e) à payer pour la version en plastique réutilisable, tout en conservant les mêmes fonctionnalités ?",
-        lowLab: "Plus bas",
-        highLab: "Plus élevé",
-        sliderHint: "Curseur ±20 € autour de 49 € (29–69 €).",
-        emailLab: "Email (facultatif) :",
-        submit: "Valider",
-        currency: "EUR",
-        fmt: (v)=> new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(Number(v)),
-        caption: "Remplacez cette image par votre visuel produit (même nom de fichier).",
-        imgAlt: "Prise connectée – visuel produit"
-      },
-      en: {
-        brandTitle: "WTP Study – SmartPlug",
-        langNote: "(browser language detected: English)",
-        title: "Quick Willingness-To-Pay (WTP) Study",
-        intro_html: "<strong>Displayed product:</strong> €49 incl. VAT.<br/>For a quick WTP study on purchasing behavior, please indicate your price for the <strong>reusable plastic version</strong> with equivalent characteristics.",
-        stdTitle: "Standard product",
-        stdMat: "Material: <strong>Conventional plastic</strong> (non‑recycled)",
-        stdPrice: "Displayed price: <strong>€49 incl. VAT</strong>",
-        ecoTitle: "Sustainable alternative",
-        ecoMat: "Material: <strong>Reusable plastic</strong> with equivalent characteristics",
-        ecoFeat: "Features: <strong>identical</strong> to the standard product",
-        qTitle: "🧠 Question",
-        qText: "What price would you be willing to pay for the reusable‑plastic version while keeping the same features?",
-        lowLab: "Lower",
-        highLab: "Higher",
-        sliderHint: "Slider ±€20 around €49 (€29–€69).",
-        emailLab: "Email (optional):",
-        submit: "Submit",
-        currency: "EUR",
-        fmt: (v)=> new Intl.NumberFormat('en-GB',{style:'currency',currency:'EUR'}).format(Number(v)),
-        caption: "Replace this image with your product visual (same file name).",
-        imgAlt: "Smart plug – product visual"
-      }
-    };
+    // Détection langue
+    const isFr = (navigator.language || "en").toLowerCase().startsWith("fr");
 
-    const isFr = (navigator.language || navigator.userLanguage || "en").toLowerCase().startsWith("fr");
-    const t = isFr ? texts.fr : texts.en;
-    document.documentElement.lang = isFr ? "fr" : "en";
+    // Formatage dynamique du prix
+    const fmt = (v) => new Intl.NumberFormat(isFr ? "fr-FR" : "en-GB",
+                      {style:'currency',currency:'EUR'}).format(Number(v));
 
-    // Apply texts
-    const $ = (id)=>document.getElementById(id);
-    $("brandTitle").textContent = t.brandTitle;
-    document.querySelector(".brand .lang")?.remove?.(); // no explicit lang note to keep header clean
-    $("title").textContent = t.title;
-    $("intro").innerHTML = t.intro_html;
-    $("stdTitle").textContent = t.stdTitle;
-    $("stdMat").innerHTML = t.stdMat;
-    $("stdPrice").innerHTML = t.stdPrice;
-    $("ecoTitle").textContent = t.ecoTitle;
-    $("ecoMat").innerHTML = t.ecoMat;
-    $("ecoFeat").innerHTML = t.ecoFeat;
-    $("qTitle").textContent = t.qTitle;
-    $("qText").textContent = t.qText;
-    $("lowLab").textContent = t.lowLab;
-    $("highLab").textContent = t.highLab;
-    $("sliderHint").textContent = t.sliderHint;
-    $("emailLab").textContent = t.emailLab;
-    $("submit").textContent = t.submit;
-    document.querySelector('.product img').alt = t.imgAlt;
-    document.getElementById('caption').textContent = t.caption;
-
-    // Slider live value with locale currency
+    // Slider
     const slider = document.getElementById('wtp');
     const out = document.getElementById('wtpValue');
-    const update = ()=> out.textContent = t.fmt(slider.value);
-    slider.addEventListener('input', update); update();
+    slider.addEventListener('input', () => { out.textContent = fmt(slider.value); });
+    out.textContent = fmt(slider.value);
 
-    // Silent submit: sendBeacon-first then fetch fallback WITHOUT headers (no preflight)
+    // Soumission
     const status = document.getElementById('status');
-    document.getElementById('submit').addEventListener('click', async function(){
-      const price = Number(slider.value);
-      const email = (document.getElementById('email').value || "").trim() || null;
+    document.getElementById('submit').addEventListener('click', async () => {
       const payload = {
-        ts: new Date().toISOString(),
-        product: isFr ? "SmartPlug – version recyclée (WTP)" : "SmartPlug – recycled version (WTP)",
-        displayed_price_standard: 49,
-        user_wtp_recycled: price,
-        email_optional: email,
-        utm: {}
+        timestamp: new Date().toISOString(),
+        language: isFr ? "fr" : "en",
+        product_name: isFr ? "SmartPlug – version réutilisable (WTP)" : "SmartPlug – reusable version (WTP)",
+        standard_price: 49,
+        wtp_price: Number(slider.value),
+        email: (document.getElementById('email').value || "").trim(),
+        browser_language: navigator.language || "unknown"
       };
-      try{
-        status.textContent = isFr ? "Envoi…" : "Sending…";
-        // 1) sendBeacon (text/plain) pour éviter le préflight
-        const blob = new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" });
-        let sent = false;
-        try { sent = navigator.sendBeacon && navigator.sendBeacon(ENDPOINT_URL, blob); } catch(_) {}
-        if (!sent) {
-          // 2) fetch sans header Content-Type (évite preflight)
-          const res = await fetch(ENDPOINT_URL, {
-            method: "POST",
-            body: JSON.stringify(payload),
-            keepalive: true,
-            mode: "cors"
-          });
-          if(!res.ok) throw new Error("HTTP " + res.status);
-        }
+
+      try {
+        status.textContent = isFr ? "Envoi..." : "Sending...";
+        const res = await fetch(ENDPOINT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
         status.textContent = isFr ? "OK ✔" : "OK ✔";
         status.className = "hint ok";
-        setTimeout(()=>{ window.location.href = "thank_you.html"; }, 250);
-      }catch(e){
-        status.textContent = (isFr ? "Échec" : "Failed") + " ("+e.message+")";
+        setTimeout(() => { window.location.href = "thank_you.html"; }, 250);
+      } catch(e) {
+        status.textContent = (isFr ? "Échec" : "Failed") + " (" + e.message + ")";
         status.className = "hint err";
       }
     });
