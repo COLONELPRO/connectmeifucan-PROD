@@ -77,7 +77,7 @@
               <span class="muted">Plus bas</span><strong class="value" id="wtpValue">49 €</strong><span class="muted">Plus élevé</span>
             </div>
             <input type="range" min="29" max="69" step="1" value="49" id="wtp" />
-            <p class="hint">Curseur ± 20 € autour de 49 € (29–69 €).</p>
+            <p class="hint">Curseur ±20 € autour de 49 € (29–69 €).</p>
 
             <div class="row" style="margin-top:10px">
               <label for="email" class="muted">Email (facultatif) :</label>
@@ -105,20 +105,14 @@
     const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbw22NylHzIQ31q2U1EKVJZ5mx_4UQwlJFI54E9cAzguz5jKMi4DTtlMtfIx2zSQ7eSBTg/exec";
     // ==============================================
 
-    // Détection langue
     const isFr = (navigator.language || "en").toLowerCase().startsWith("fr");
+    const fmt = (v) => new Intl.NumberFormat(isFr ? "fr-FR" : "en-GB", {style:'currency',currency:'EUR'}).format(Number(v));
 
-    // Formatage dynamique du prix
-    const fmt = (v) => new Intl.NumberFormat(isFr ? "fr-FR" : "en-GB",
-                      {style:'currency',currency:'EUR'}).format(Number(v));
-
-    // Slider
     const slider = document.getElementById('wtp');
     const out = document.getElementById('wtpValue');
     slider.addEventListener('input', () => { out.textContent = fmt(slider.value); });
     out.textContent = fmt(slider.value);
 
-    // Soumission
     const status = document.getElementById('status');
     document.getElementById('submit').addEventListener('click', async () => {
       const payload = {
@@ -135,7 +129,7 @@
         status.textContent = isFr ? "Envoi..." : "Sending...";
         const res = await fetch(ENDPOINT_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain;charset=UTF-8" },
           body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error("HTTP " + res.status);
