@@ -105,7 +105,7 @@
     const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxQI1wTslIozYdqNPl3E6Rw7SpvKtCeNM9wCm-LYHqrbnqkZdpnoiJV-PUB9dlsVOwlow/exec";
     // ==============================================
 
-    const isFr = (navigator.language || "en").toLowerCase().startsWith("fr");
+    const isFr = (navigator.language || navigator.userLanguage || "en").toLowerCase().startsWith("fr");
     const fmt = (v) => new Intl.NumberFormat(isFr ? "fr-FR" : "en-GB", {style:'currency',currency:'EUR'}).format(Number(v));
 
     const slider = document.getElementById('wtp');
@@ -115,7 +115,6 @@
 
     const status = document.getElementById('status');
     document.getElementById('submit').addEventListener('click', async () => {
-
       const payload = {
         timestamp: new Date().toISOString(),
         language: isFr ? "fr" : "en",
@@ -123,39 +122,25 @@
         standard_price: 49,
         wtp_price: Number(slider.value),
         email: (document.getElementById('email').value || "").trim(),
-        browser_language: navigator.language || "unknown"
+        browser_language: navigator.language || navigator.userLanguage || "unknown"
       };
-
-     try {
-  status.textContent = isFr ? "Envoi..." : "Sending...";
-
-  const form = new URLSearchParams();
-  form.set("payload", JSON.stringify({
-    timestamp: new Date().toISOString(),
-    language: isFr ? "fr" : "en",
-    product_name: isFr ? "SmartPlug – version réutilisable (WTP)" : "SmartPlug – reusable version (WTP)",
-    standard_price: 49,
-    wtp_price: Number(slider.value),
-    email: (document.getElementById('email').value || "").trim(),
-    browser_language: navigator.language || "unknown"
-  }));
-
-  await fetch(ENDPOINT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-    body: form.toString(),
-    mode: "no-cors"                  // ⬅️ évite le “Failed to fetch”
-  });
-
-  // Réponse opaque = on ne peut pas vérifier res.ok => UX optimiste :
-  status.textContent = isFr ? "OK ✔" : "OK ✔";
-  status.className = "hint ok";
-  setTimeout(() => { window.location.href = "thank_you.html"; }, 250);
-
-} catch (e) {
-  status.textContent = (isFr ? "Échec" : "Failed") + " (" + e.message + ")";
-  status.className = "hint err";
-}
+      try {
+        status.textContent = isFr ? "Envoi..." : "Sending...";
+        const form = new URLSearchParams();
+        form.set("payload", JSON.stringify(payload));
+        await fetch(ENDPOINT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+          body: form.toString(),
+          mode: "no-cors"
+        });
+        status.textContent = isFr ? "OK ✔" : "OK ✔";
+        status.className = "hint ok";
+        setTimeout(() => { window.location.href = "thank_you.html"; }, 250);
+      } catch (e) {
+        status.textContent = (isFr ? "Échec" : "Failed") + " (" + e.message + ")";
+        status.className = "hint err";
+      }
     });
   </script>
 </body>
