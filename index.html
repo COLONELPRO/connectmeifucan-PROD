@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
       email: emailInput.value || "",
       browser_language: navigator.language || ""
     };
-fetch("https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbxQI1wTslIozYdqNPl3E6Rw7SpvKtCeNM9wCm-LYHqrbnqkZdpnoiJV-PUB9dlsVOwlow/exec", {
+fetch("https://script.google.com/macros/s/AKfycbxQI1wTslIozYdqNPl3E6Rw7SpvKtCeNM9wCm-LYHqrbnqkZdpnoiJV-PUB9dlsVOwlow/exec", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify(payload)
