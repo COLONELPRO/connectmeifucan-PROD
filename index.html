@@ -102,6 +102,7 @@
   <script>
     // === CONFIGUREZ votre endpoint Apps Script ici ===================
     // Exemple : const ENDPOINT_URL = "https://script.google.com/macros/s/XXXXX/exec";
+
     const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbw22NylHzIQ31q2U1EKVJZ5mx_4UQwlJFI54E9cAzguz5jKMi4DTtlMtfIx2zSQ7eSBTg/exec";
     // ================================================================
 
@@ -193,22 +194,24 @@
       const price = Number(slider.value);
       const email = (document.getElementById('email').value || "").trim() || null;
       const payload = {
-        ts: new Date().toISOString(),
-        product: isFr ? "SmartPlug – version recyclée (WTP)" : "SmartPlug – recycled version (WTP)",
-        displayed_price_standard: 49,
-        user_wtp_recycled: price,
-        email_optional: email,
-        utm: {}
+        timestamp: new Date().toISOString(),
+        language: isFr ? "fr" : "en",
+        product_name: isFr ? "SmartPlug – version recyclée (WTP)" : "SmartPlug – recycled version (WTP)",
+        standard_price: 49,
+        wtp_price: price,
+        email: email || "",
+        browser_language: navigator.language || navigator.userLanguage || "unknown"
       };
       try{
         status.textContent = isFr ? "Envoi…" : "Sending…";
+        console.log("Sending payload:", payload);
         // 1) sendBeacon (text/plain) pour éviter le préflight
         const blob = new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" });
         let sent = false;
         try { sent = navigator.sendBeacon && navigator.sendBeacon(ENDPOINT_URL, blob); } catch(_) {}
         if (!sent) {
           // 2) fetch sans header Content-Type (évite preflight)
-          const res = await fetch(ENDPOINT_URL, {
+          const res = await fetch(ENDPOINT_URL + "?v=" + new Date().getTime(), {
             method: "POST",
             body: JSON.stringify(payload),
             keepalive: true,
