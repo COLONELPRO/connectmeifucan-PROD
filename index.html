@@ -85,7 +85,7 @@
             </div>
 
             <div class="row" style="margin-top:12px">
-              <button class="btn btn-primary" id="submit">Valider</button>
+              <button class="btn btn-primary" id="submit" type="button">Valider</button>
               <span id="status" class="hint"></span>
             </div>
           </div>
@@ -103,43 +103,138 @@
   <script>
     // ================= CONFIG =====================
     const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxQI1wTslIozYdqNPl3E6Rw7SpvKtCeNM9wCm-LYHqrbnqkZdpnoiJV-PUB9dlsVOwlow/exec";
-    // ==============================================
 
+    // Formatage des prix
     const isFr = (navigator.language || navigator.userLanguage || "en").toLowerCase().startsWith("fr");
-    const fmt = (v) => new Intl.NumberFormat(isFr ? "fr-FR" : "en-GB", {style:'currency',currency:'EUR'}).format(Number(v));
+    const fmt = (v) => new Intl.NumberFormat(isFr ? "fr-FR" : "en-GB", {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(Number(v));
 
+    // Gestion du slider
     const slider = document.getElementById('wtp');
     const out = document.getElementById('wtpValue');
-    slider.addEventListener('input', () => { out.textContent = fmt(slider.value); });
-    out.textContent = fmt(slider.value);
+    const updateValue = () => out.textContent = fmt(slider.value);
+    slider.addEventListener('input', updateValue);
+    updateValue();
 
+    // Validation de l'email
+    function validateEmail(email) {
+      return email === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    // Fonction d'envoi des données
+    async function sendData(url, data) {
+      // Créer un FormData pour une meilleure compatibilité avec Google Apps Script
+      const formData = new FormData();
+      formData.append('payload', JSON.stringify(data));
+      
+      try {
+        // Utiliser fetch avec le mode CORS approprié
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+          mode: 'cors', // Permettre CORS pour recevoir la réponse
+          credentials: 'omit', // Ne pas envoyer de cookies
+          headers: {
+            'Accept': 'application/json' // S'attendre à une réponse JSON
+          }
+        });
+        
+        // Vérifier si la réponse est ok
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        try {
+          // Essayer de parser la réponse JSON
+          const result = await response.json();
+          return { success: true, data: result };
+        } catch (e) {
+          // Si ce n'est pas du JSON, considérer comme un succès simple
+          return { success: true };
+        }
+        
+      } catch (error) {
+        // En cas d'erreur CORS ou réseau, essayer sendBeacon comme fallback
+        if (navigator.sendBeacon) {
+          const blob = new Blob([formData], {
+            type: 'multipart/form-data'
+          });
+          if (navigator.sendBeacon(url, blob)) {
+            return { success: true, method: 'beacon' };
+          }
+        }
+        
+        return { 
+          success: false, 
+          error: error.message,
+          details: 'Both fetch and sendBeacon failed'
+        };
+      }
+    }
+
+    // Gestion du clic sur le bouton
     const status = document.getElementById('status');
-    document.getElementById('submit').addEventListener('click', async () => {
-      const payload = {
-        timestamp: new Date().toISOString(),
-        language: isFr ? "fr" : "en",
-        product_name: isFr ? "SmartPlug – version réutilisable (WTP)" : "SmartPlug – reusable version (WTP)",
-        standard_price: 49,
-        wtp_price: Number(slider.value),
-        email: (document.getElementById('email').value || "").trim(),
-        browser_language: navigator.language || navigator.userLanguage || "unknown"
-      };
+    const submitBtn = document.getElementById('submit');
+
+    submitBtn.addEventListener('click', async () => {
+      // Validation de l'email
+      const emailInput = document.getElementById('email');
+      const emailValue = emailInput.value.trim();
+      
+      if (!validateEmail(emailValue)) {
+        status.textContent = isFr ? "Email invalide" : "Invalid email";
+        status.className = "hint err";
+        emailInput.focus();
+        return;
+      }
+
+      // Désactiver le bouton pendant l'envoi
+      submitBtn.disabled = true;
+      status.className = "hint";
+      
       try {
         status.textContent = isFr ? "Envoi..." : "Sending...";
-        const form = new URLSearchParams();
-        form.set("payload", JSON.stringify(payload));
-        await fetch(ENDPOINT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-          body: form.toString(),
-          mode: "no-cors"
-        });
-        status.textContent = isFr ? "OK ✔" : "OK ✔";
-        status.className = "hint ok";
-        setTimeout(() => { window.location.href = "thank_you.html"; }, 250);
-      } catch (e) {
-        status.textContent = (isFr ? "Échec" : "Failed") + " (" + e.message + ")";
+        
+        const payload = {
+          timestamp: new Date().toISOString(),
+          language: isFr ? "fr" : "en",
+          product_name: isFr ? "SmartPlug – version réutilisable (WTP)" : "SmartPlug – reusable version (WTP)",
+          standard_price: 49,
+          wtp_price: Number(slider.value),
+          email: emailValue,
+          browser_language: navigator.language || navigator.userLanguage || "unknown",
+          user_agent: navigator.userAgent
+        };
+
+        console.log("Envoi des données:", payload);
+        
+        const result = await sendData(ENDPOINT_URL, payload);
+        
+        if (result.success) {
+          // Succès
+          status.textContent = isFr ? "OK ✔" : "OK ✔";
+          status.className = "hint ok";
+          
+          // Redirection
+          setTimeout(() => {
+            window.location.href = "thank_you.html";
+          }, 250);
+        } else {
+          throw new Error(result.error || "Unknown error");
+        }
+        
+      } catch (error) {
+        console.error("Erreur:", error);
+        status.textContent = (isFr ? "Échec" : "Failed") + " (" + error.message + ")";
         status.className = "hint err";
+        
+      } finally {
+        // Réactiver le bouton
+        submitBtn.disabled = false;
       }
     });
   </script>
