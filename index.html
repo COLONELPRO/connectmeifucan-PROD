@@ -115,6 +115,7 @@
 
     const status = document.getElementById('status');
     document.getElementById('submit').addEventListener('click', async () => {
+
       const payload = {
         timestamp: new Date().toISOString(),
         language: isFr ? "fr" : "en",
@@ -127,15 +128,23 @@
 
       try {
         status.textContent = isFr ? "Envoi..." : "Sending...";
+
+        // 🔧 Pas de CORS, envoi "simple" (form-urlencoded)
+        const form = new URLSearchParams();
+        form.set("payload", JSON.stringify(payload));
+
         const res = await fetch(ENDPOINT_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=UTF-8" },
-          body: JSON.stringify(payload)
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+          body: form.toString()
         });
+
         if (!res.ok) throw new Error("HTTP " + res.status);
+
         status.textContent = isFr ? "OK ✔" : "OK ✔";
         status.className = "hint ok";
         setTimeout(() => { window.location.href = "thank_you.html"; }, 250);
+
       } catch(e) {
         status.textContent = (isFr ? "Échec" : "Failed") + " (" + e.message + ")";
         status.className = "hint err";
