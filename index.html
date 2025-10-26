@@ -1,145 +1,134 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Connect Me If U Can</title>
-  <link rel="icon" type="image/jpeg" href="connectmeifucan-logo.jpg">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartPlug – WTP (soumission silencieuse)</title>
   <style>
-    :root {
-      --bg1:#0d0d0d; --bg2:#1c1c1c; --text:#fff; --muted:#aaa;
-      --accent:#ffcc00; --accent-hover:#ffaa00; --border:#444;
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      min-height: 100dvh;
-    }
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 24px 20px;
-      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
-      gap: 10px;
-    }
-    img.logo {
-      max-width: 200px;
-      height: auto;
-    }
-    h1 {
-      font-size: clamp(1.8rem, 2.2vw + 1rem, 2.2rem);
-      margin: 8px 0 4px 0;
-    }
-    .lang {
-      display: none;
-      margin-top: 6px;
-      max-width: 560px;
-      line-height: 1.5;
-      font-size: clamp(1rem, 0.8vw + 0.8rem, 1.08rem);
-    }
-    a.cta {
-      display: inline-block;
-      padding: 12px 28px;
-      background: var(--accent);
-      color: #000;
-      font-weight: 700;
-      text-decoration: none;
-      border-radius: 10px;
-      transition: transform .2s ease, background .2s ease;
-    }
-    a.cta:hover { background: var(--accent-hover); transform: translateY(-1px) scale(1.03); }
-    .note {
-      margin-top: 18px;
-      font-size: 0.95em;
-      color: var(--accent);
-      font-weight: bold;
-      text-align: center;
-      min-height: 1.2em;
-    }
-    footer {
-      margin-top: auto;
-      padding: 14px 16px;
-      font-size: 0.85em;
-      color: var(--muted);
-      text-align: center;
-      background: transparent;
-    }
-    .flags {
-      position: fixed;
-      top: env(safe-area-inset-top, 12px);
-      right: 12px;
-      display: flex;
-      gap: 8px;
-      z-index: 10;
-    }
-    .flags img {
-      width: 32px;
-      height: 22px;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: #222;
-      transition: transform .2s ease, border-color .2s ease;
-    }
-    .flags img:hover { transform: scale(1.08); border-color: var(--accent); }
-    @media (max-width: 360px) {
-      img.logo { max-width: 160px; }
-      .note { font-size: 0.9em; }
-    }
+    :root{--bg:#f7f7f7;--text:#111827;--muted:#6b7280;--brand:#009E4F;--card:#fff;--shadow:0 10px 30px rgba(0,0,0,.06);--radius:18px}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;background:var(--bg);color:var(--text)}
+    header{background:#fff;box-shadow:var(--shadow);position:sticky;top:0;z-index:10}
+    .head{max-width:980px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;gap:10px}
+    .dot{width:12px;height:12px;background:var(--brand);border-radius:50%}
+    .container{max-width:980px;margin:28px auto;padding:0 20px}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px}
+    h1{margin:.2em 0 .4em 0;font-size:clamp(24px,4vw,36px)}
+    .muted{color:var(--muted)}
+    .price{font-size:40px;font-weight:800;margin:.4em 0}
+    .pill{display:inline-flex;gap:8px;align-items:center;background:#f1f5f9;color:#111;border-radius:999px;padding:6px 10px;font-size:12px;margin-right:6px}
+    .product{background:linear-gradient(180deg,#fff,#f3f4f6);border-radius:16px;display:flex;align-items:center;justify-content:center;min-height:260px;padding:24px}
+    .plug{width:min(320px,90%);aspect-ratio:1/1;border-radius:18%;background:#fff;border:1px solid #e5e7eb;box-shadow:inset 0 0 0 6px #f3f4f6,0 12px 35px rgba(0,0,0,.08);position:relative;display:grid;place-items:center}
+    .plug::before,.plug::after{content:"";position:absolute;width:22%;height:22%;border-radius:50%;background:#cbd5e1}
+    .plug::before{left:26%;top:34%}.plug::after{right:26%;top:34%}
+    .earth{position:absolute;bottom:22%;left:50%;transform:translateX(-50%);width:14%;height:14%;border-radius:50%;background:#94a3b8}
+    .section{margin-top:16px;padding:18px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .value{font-variant-numeric:tabular-nums;font-weight:800}
+    input[type=range]{width:100%}
+    .btn{appearance:none;border:0;border-radius:12px;padding:13px 18px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
+    .btn-primary{background:var(--brand);color:#fff}
+    .hint{font-size:12px;color:#6b7280}
+    .ok{color:#059669}
+    .err{color:#b91c1c}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <div class="flags" aria-label="Language selector">
-    <img src="https://flagcdn.com/w20/fr.png" alt="FR" onclick="setLang('fr')">
-    <img src="https://flagcdn.com/w20/gb.png" alt="EN" onclick="setLang('en')">
+  <header><div class="head"><div class="dot"></div><strong>SmartPlug</strong><span class="muted"> – WTP recyclée (soumission silencieuse)</span></div></header>
+
+  <div class="container">
+    <div class="card grid">
+      <section>
+        <h1>SmartPlug – Prise connectée</h1>
+        <p class="muted">Produit affiché à <strong>49 € TTC</strong>. Indiquez votre prix pour la <strong>version en plastique recyclé</strong> (80 %).</p>
+
+        <div class="price">Prix affiché (standard) : 49 € TTC</div>
+        <div class="row">
+          <span class="pill">Fiabilité</span><span class="pill">Contrôle à distance</span><span class="pill">Garantie 3 ans</span>
+        </div>
+
+        <div class="section">
+          <label for="wtp">Votre prix pour la version <em>recyclée</em> :</label>
+          <div class="row" style="justify-content:space-between">
+            <span class="muted">Plus bas</span><strong class="value" id="wtpValue">49 €</strong><span class="muted">Plus élevé</span>
+          </div>
+          <input type="range" min="29" max="69" step="1" value="49" id="wtp" />
+          <div class="hint">Curseur ±20 € autour de 49 € (29–69 €).</div>
+
+          <div class="row" style="margin-top:10px">
+            <label for="email" class="muted">Email (facultatif) :</label>
+            <input id="email" type="email" placeholder="prenom.nom@exemple.com" style="flex:1;min-width:240px;padding:12px;border:1px solid #d1d5db;border-radius:10px"/>
+          </div>
+
+          <div class="row" style="margin-top:12px">
+            <button class="btn btn-primary" id="submit">Valider</button>
+            <span id="status" class="hint"></span>
+          </div>
+          <p class="hint">Soumission silencieuse via <code>fetch(..., {keepalive:true})</code> vers votre endpoint. Configurez l’URL juste ci-dessous.</p>
+        </div>
+
+        <p class="hint" id="utmDebug"></p>
+      </section>
+
+      <aside class="product">
+        <div class="plug"><div class="earth"></div></div>
+      </aside>
+    </div>
   </div>
 
-  <main>
-    <img src="connectmeifucan-logo.jpg" alt="Connect Me If U Can Logo" class="logo">
-    <h1>🎮 Connect Me If U Can</h1>
-
-    <div id="fr" class="lang">
-      ✨ Transforme ton salon en expérience immersive à domicile.<br>
-      🔦 Lumières • Sons • Objets connectés.<br>
-      ⏳ Voyage dans le temps entre 1850 et 2050.<br><br>
-      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Découvrir</a>
-      <div class="note">💡 Projet personnel – en cours de création</div>
-    </div>
-
-    <div id="en" class="lang">
-      ✨ Turn your living room into an immersive home experience.<br>
-      🔦 Lights • Sounds • Smart objects.<br>
-      ⏳ Time travel between 1850 and 2050.<br><br>
-      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Discover</a>
-      <div class="note">💡 Personal project – in progress</div>
-    </div>
-  </main>
-
-  <footer>
-    © 2025 Connect Me If U Can – Personal Project
-  </footer>
-
   <script>
-    function setLang(lang) {
-      document.querySelectorAll('.lang').forEach(el => el.style.display = 'none');
-      var target = document.getElementById(lang);
-      if (target) target.style.display = 'block';
-      document.documentElement.lang = (lang === 'fr') ? 'fr' : 'en';
-    }
-    (function() {
-      var userLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      setLang(userLang.startsWith('fr') ? 'fr' : 'en');
-    })();
+    // === CONFIGURATION (à modifier) ===================
+    // 1) Collez ici votre URL d'endpoint (Formspree, Google Apps Script, Supabase, etc.)
+    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzuF7Q13xu4ANz_5yrW7xMwRco0UDCLd9tI_loHPnwpTqiAl0nV1QIhX4XBmCt6fzXwng/exec";
+    // 2) Si vous avez besoin d'une clé (ex. Supabase REST function) :
+    const ENDPOINT_KEY = ""; // facultatif
+    // ==================================================
+
+    // UTM capture (LinkedIn)
+    function getQueryParams(){ return new URLSearchParams(window.location.search); }
+    const p = getQueryParams();
+    const utm = {
+      source: p.get('utm_source') || 'linkedin',
+      medium: p.get('utm_medium') || 'cpc',
+      campaign: p.get('utm_campaign') || 'ab-wtp',
+      content: p.get('utm_content') || 'wtp-slider-silent'
+    };
+    document.getElementById('utmDebug').textContent = "UTM → " + JSON.stringify(utm);
+
+    // Slider live value
+    const slider = document.getElementById('wtp');
+    const out = document.getElementById('wtpValue');
+    const fmt = (v)=> new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(Number(v));
+    const update = ()=> out.textContent = fmt(slider.value);
+    slider.addEventListener('input', update); update();
+
+    // Silent submit
+    const status = document.getElementById('status');
+    document.getElementById('submit').addEventListener('click', async function(){
+      const price = Number(slider.value);
+      const email = (document.getElementById('email').value || "").trim() || null;
+      const payload = {
+        ts: new Date().toISOString(),
+        product: "SmartPlug – version recyclée (WTP)",
+        displayed_price_standard: 49,
+        user_wtp_recycled: price,
+        email_optional: email,
+        utm
+      };
+      try{
+        status.textContent = "Envoi…";
+        const headers = {"Content-Type":"application/json"};
+        if(ENDPOINT_KEY) headers["Authorization"] = "Bearer " + ENDPOINT_KEY;
+        const res = await fetch(ENDPOINT_URL, {method:"POST", headers, body: JSON.stringify(payload), keepalive:true, mode:"cors"});
+        if(!res.ok) throw new Error("HTTP " + res.status);
+        status.textContent = "OK ✔"; status.className = "hint ok";
+        setTimeout(()=>{ window.location.href = "thank_you.html"; }, 300);
+      }catch(e){
+        status.textContent = "Échec ("+e.message+")"; status.className = "hint err";
+      }
+    });
   </script>
 </body>
 </html>
