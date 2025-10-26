@@ -143,5 +143,58 @@
       }
     });
   </script>
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const wtpInput = document.getElementById("wtp");
+  const wtpValue = document.getElementById("wtpValue");
+  const emailInput = document.getElementById("email");
+
+  // Met à jour l'affichage du prix
+  wtpInput.addEventListener("input", () => {
+    wtpValue.textContent = `${wtpInput.value} €`;
+  });
+
+  // Envoi des données
+  function sendData() {
+    const payload = {
+      timestamp: new Date().toISOString(),
+      language: "fr",
+      product_name: "SmartPlug – version réutilisable (WTP)",
+      standard_price: 49,
+      wtp_price: parseInt(wtpInput.value),
+      email: emailInput.value || "",
+      browser_language: navigator.language || ""
+    };
+
+    fetch("https://script.google.com/macros/s/AKfycbxQI1wTslIozYdqNPl3E6Rw7SpvKtCeNM9wCm-LYHqrbnqkZdpnoiJV-PUB9dlsVOwlow/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = "https://connectmeifucan.com/thank_you";
+      } else {
+        alert("Erreur : " + data.message);
+      }
+    })
+    .catch(err => {
+      console.error("Erreur réseau :", err);
+      alert("Une erreur est survenue lors de l'envoi.");
+    });
+  }
+
+  // Ajoute un bouton d'envoi
+  const submitBtn = document.createElement("button");
+  submitBtn.textContent = "Envoyer";
+  submitBtn.className = "btn btn-primary";
+  submitBtn.style.marginTop = "16px";
+  submitBtn.addEventListener("click", sendData);
+
+  document.querySelector(".section:last-of-type").appendChild(submitBtn);
+});
+</script>
+
 </body>
 </html>
