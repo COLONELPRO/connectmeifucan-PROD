@@ -1,281 +1,145 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WTP Study – SmartPlug (GEM)</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Connect Me If U Can</title>
+  <link rel="icon" type="image/jpeg" href="connectmeifucan-logo.jpg">
   <style>
-    :root{
-      --bg:#f7f7f7;--text:#111827;--muted:#6b7280;--brand:#009E4F;
-      --card:#fff;--shadow:0 10px 30px rgba(0,0,0,.06);--radius:18px
+    :root {
+      --bg1:#0d0d0d; --bg2:#1c1c1c; --text:#fff; --muted:#aaa;
+      --accent:#ffcc00; --accent-hover:#ffaa00; --border:#444;
     }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
-    /* Centrage générique des frames/iframes */
-    .centered-frame {
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    header{background:#fff;box-shadow:var(--shadow);position:sticky;top:0;z-index:10}
-    .head{max-width:1100px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:12px}
-    .gem{height:80px}
-    .brand{margin-left:auto;display:flex;align-items:center;gap:10px;white-space:nowrap}
-    .dot{width:10px;height:10px;background:var(--brand);border-radius:50%}
-    .container{max-width:1100px;margin:28px auto;padding:0 20px}
-    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
-    /* Centrage des formes principales */
-    .center-form {
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: var(--text);
       display: flex;
       flex-direction: column;
-      align-items: center;
+      min-height: 100dvh;
     }
-    .center-form > * {
-      max-width: 500px;
-      width: 100%;
-    }
-    h1{margin:.2em 0 .4em 0;font-size:clamp(22px,4vw,34px)}
-    h2{font-size:18px;margin:0 0 6px 0}
-    .muted{color:var(--muted)}
-    .grid {
-      display: grid;
-      grid-template-columns: 1.05fr .95fr;
-      gap: 32px;
-      align-items: start;
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
       justify-content: center;
-    }
-    @media (max-width: 900px) {
-      .grid {
-        grid-template-columns: 1fr;
-        gap: 18px;
-      }
-    }
-    .section {
+      align-items: center;
+      text-align: center;
       padding: 24px 20px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      margin: 0 auto 18px auto;
-      max-width: 480px;
-      width: 100%;
-      box-sizing: border-box;
+      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+      gap: 10px;
     }
-    .bullet{margin:.2em 0}
-    .price{font-size:22px;font-weight:800}
-    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-    .value{font-variant-numeric:tabular-nums;font-weight:800}
-    input[type=range]{width:100%}
-    .btn{appearance:none;border:0;border-radius:12px;padding:13px 18px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
-    .btn-primary{background:var(--brand);color:#fff}
-    .hint{font-size:12px;color:#6b7280}
-    .ok{color:#059669}.err{color:#b91c1c}
-    .product{background:linear-gradient(180deg,#fff,#f3f4f6);border-radius:16px;box-shadow:var(--shadow);padding:14px;display:flex;align-items:center;justify-content:center}
-    .product img{max-width:100%;height:auto;border-radius:12px;display:block;margin-bottom:12px}
-  /* Si vous avez des <iframe> ou <frame>, ajoutez la classe .centered-frame dans le HTML */
-    .cap{font-size:12px;color:#6b7280;text-align:center;margin-top:6px}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    img.logo {
+      max-width: 200px;
+      height: auto;
+    }
+    h1 {
+      font-size: clamp(1.8rem, 2.2vw + 1rem, 2.2rem);
+      margin: 8px 0 4px 0;
+    }
+    .lang {
+      display: none;
+      margin-top: 6px;
+      max-width: 560px;
+      line-height: 1.5;
+      font-size: clamp(1rem, 0.8vw + 0.8rem, 1.08rem);
+    }
+    a.cta {
+      display: inline-block;
+      padding: 12px 28px;
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 10px;
+      transition: transform .2s ease, background .2s ease;
+    }
+    a.cta:hover { background: var(--accent-hover); transform: translateY(-1px) scale(1.03); }
+    .note {
+      margin-top: 18px;
+      font-size: 0.95em;
+      color: var(--accent);
+      font-weight: bold;
+      text-align: center;
+      min-height: 1.2em;
+    }
+    footer {
+      margin-top: auto;
+      padding: 14px 16px;
+      font-size: 0.85em;
+      color: var(--muted);
+      text-align: center;
+      background: transparent;
+    }
+    .flags {
+      position: fixed;
+      top: env(safe-area-inset-top, 12px);
+      right: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    .flags img {
+      width: 32px;
+      height: 22px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #222;
+      transition: transform .2s ease, border-color .2s ease;
+    }
+    .flags img:hover { transform: scale(1.08); border-color: var(--accent); }
+    @media (max-width: 360px) {
+      img.logo { max-width: 160px; }
+      .note { font-size: 0.9em; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="head">
-      <img class="gem" src="logo_GEM.png" alt="GEM – Grenoble École de Management" />
-      <div class="brand"><div class="dot"></div><strong id="brandTitle">WTP Study – SmartPlug</strong></div>
-    </div>
-  </header>
-
-  <div class="container">
-    <div class="card">
-  <div class="grid center-form" style="width:100%;max-width:900px;margin:0 auto;">
-        <div>
-          <h1 id="title">Étude rapide sur la disposition à payer (WTP)</h1>
-          <p class="muted" id="intro">
-            <strong>Produit affiché :</strong> 49 € TTC.<br/>
-            Dans le cadre d'une étude rapide sur la disposition à payer (WTP) et les comportements d'achat,
-            merci d'indiquer votre prix pour la <strong>version en plastique réutilisable à caractéristiques équivalentes</strong>.
-          </p>
-
-          <div class="product-compare-row">
-            <div class="section">
-              <h2>Produit standard</h2>
-              <p class="bullet">Matériau : <strong>Plastique conventionnel</strong> (non recyclé)</p>
-              <p class="price">Prix affiché : <strong>49 € TTC</strong></p>
-            </div>
-            <div class="section">
-              <h2>Alternative durable</h2>
-              <p class="bullet">Matériau : <strong>Plastique réutilisable</strong> à caractéristiques équivalentes</p>
-              <p class="bullet">Fonctionnalités : <strong>identiques</strong> au produit standard</p>
-            </div>
-          </div>
-
-          <div class="section" style="margin-top:16px">
-            <h2>🧠 Question</h2>
-            <p>Quel prix seriez-vous prêt(e) à payer pour la version en plastique réutilisable, tout en conservant les mêmes fonctionnalités ?</p>
-            <div class="row" style="justify-content:space-between;margin-top:6px">
-              <span class="muted">Plus bas</span><strong class="value" id="wtpValue">49 €</strong><span class="muted">Plus élevé</span>
-            </div>
-            <input type="range" min="29" max="69" step="1" value="49" id="wtp" />
-            <p class="hint">Curseur ±20 € autour de 49 € (29–69 €).</p>
-
-            <div class="row" style="margin-top:10px">
-              <label for="email" class="muted">Email (facultatif) :</label>
-              <input id="email" type="email" placeholder="prenom.nom@exemple.com" style="flex:1;min-width:240px;padding:12px;border:1px solid #d1d5db;border-radius:10px"/>
-            </div>
-
-            <div class="row" style="margin-top:12px">
-              <button class="btn btn-primary" id="submit" type="button">Valider</button>
-              <span id="status" class="hint"></span>
-            </div>
-          </div>
-        </div>
-
-        <aside>
-          <div class="product">
-            <img src="Prise connectee.jpg" alt="Prise connectée – visuel produit" loading="lazy"/>
-          </div>
-        </aside>
-      </div>
-    </div>
+  <div class="flags" aria-label="Language selector">
+    <img src="https://flagcdn.com/w20/fr.png" alt="FR" onclick="setLang('fr')">
+    <img src="https://flagcdn.com/w20/gb.png" alt="EN" onclick="setLang('en')">
   </div>
 
+  <main>
+    <img src="connectmeifucan-logo.jpg" alt="Connect Me If U Can Logo" class="logo">
+    <h1>🎮 Connect Me If U Can</h1>
+
+    <div id="fr" class="lang">
+      ✨ Transforme ton salon en expérience immersive à domicile.<br>
+      🔦 Lumières • Sons • Objets connectés.<br>
+      ⏳ Voyage dans le temps entre 1850 et 2050.<br><br>
+      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Découvrir</a>
+      <div class="note">💡 Projet personnel – en cours de création</div>
+    </div>
+
+    <div id="en" class="lang">
+      ✨ Turn your living room into an immersive home experience.<br>
+      🔦 Lights • Sounds • Smart objects.<br>
+      ⏳ Time travel between 1850 and 2050.<br><br>
+      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Discover</a>
+      <div class="note">💡 Personal project – in progress</div>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 Connect Me If U Can – Personal Project
+  </footer>
+
   <script>
-    // ================= CONFIG =====================
-    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxQI1wTslIozYdqNPl3E6Rw7SpvKtCeNM9wCm-LYHqrbnqkZdpnoiJV-PUB9dlsVOwlow/exec";
-
-    // Formatage des prix
-    const isFr = (navigator.language || navigator.userLanguage || "en").toLowerCase().startsWith("fr");
-    const fmt = (v) => new Intl.NumberFormat(isFr ? "fr-FR" : "en-GB", {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(Number(v));
-
-    // Gestion du slider
-    const slider = document.getElementById('wtp');
-    const out = document.getElementById('wtpValue');
-    const updateValue = () => out.textContent = fmt(slider.value);
-    slider.addEventListener('input', updateValue);
-    updateValue();
-
-    // Validation de l'email
-    function validateEmail(email) {
-      return email === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    function setLang(lang) {
+      document.querySelectorAll('.lang').forEach(el => el.style.display = 'none');
+      var target = document.getElementById(lang);
+      if (target) target.style.display = 'block';
+      document.documentElement.lang = (lang === 'fr') ? 'fr' : 'en';
     }
-
-    // Fonction d'envoi des données
-    async function sendData(url, data) {
-      // Créer un FormData pour une meilleure compatibilité avec Google Apps Script
-      const formData = new FormData();
-      formData.append('payload', JSON.stringify(data));
-      
-      try {
-        // Utiliser fetch avec le mode CORS approprié
-        const response = await fetch(url, {
-          method: 'POST',
-          body: formData,
-          mode: 'cors', // Permettre CORS pour recevoir la réponse
-          credentials: 'omit', // Ne pas envoyer de cookies
-          headers: {
-            'Accept': 'application/json' // S'attendre à une réponse JSON
-          }
-        });
-        
-        // Vérifier si la réponse est ok
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        try {
-          // Essayer de parser la réponse JSON
-          const result = await response.json();
-          return { success: true, data: result };
-        } catch (e) {
-          // Si ce n'est pas du JSON, considérer comme un succès simple
-          return { success: true };
-        }
-        
-      } catch (error) {
-        // En cas d'erreur CORS ou réseau, essayer sendBeacon comme fallback
-        if (navigator.sendBeacon) {
-          const blob = new Blob([formData], {
-            type: 'multipart/form-data'
-          });
-          if (navigator.sendBeacon(url, blob)) {
-            return { success: true, method: 'beacon' };
-          }
-        }
-        
-        return { 
-          success: false, 
-          error: error.message,
-          details: 'Both fetch and sendBeacon failed'
-        };
-      }
-    }
-
-    // Gestion du clic sur le bouton
-    const status = document.getElementById('status');
-    const submitBtn = document.getElementById('submit');
-
-    submitBtn.addEventListener('click', async () => {
-      // Validation de l'email
-      const emailInput = document.getElementById('email');
-      const emailValue = emailInput.value.trim();
-      
-      if (!validateEmail(emailValue)) {
-        status.textContent = isFr ? "Email invalide" : "Invalid email";
-        status.className = "hint err";
-        emailInput.focus();
-        return;
-      }
-
-      // Désactiver le bouton pendant l'envoi
-      submitBtn.disabled = true;
-      status.className = "hint";
-      
-      try {
-        status.textContent = isFr ? "Envoi..." : "Sending...";
-        
-        const payload = {
-          timestamp: new Date().toISOString(),
-          language: isFr ? "fr" : "en",
-          product_name: isFr ? "SmartPlug – version réutilisable (WTP)" : "SmartPlug – reusable version (WTP)",
-          standard_price: 49,
-          wtp_price: Number(slider.value),
-          email: emailValue,
-          browser_language: navigator.language || navigator.userLanguage || "unknown",
-          user_agent: navigator.userAgent
-        };
-
-        console.log("Envoi des données:", payload);
-        
-        const result = await sendData(ENDPOINT_URL, payload);
-        
-        if (result.success) {
-          // Succès
-          status.textContent = isFr ? "OK ✔" : "OK ✔";
-          status.className = "hint ok";
-          
-          // Redirection
-          setTimeout(() => {
-            window.location.href = "thank_you.html";
-          }, 250);
-        } else {
-          throw new Error(result.error || "Unknown error");
-        }
-        
-      } catch (error) {
-        console.error("Erreur:", error);
-        status.textContent = (isFr ? "Échec" : "Failed") + " (" + error.message + ")";
-        status.className = "hint err";
-        
-      } finally {
-        // Réactiver le bouton
-        submitBtn.disabled = false;
-      }
-    });
+    (function() {
+      var userLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      setLang(userLang.startsWith('fr') ? 'fr' : 'en');
+    })();
   </script>
-
 </body>
 </html>
