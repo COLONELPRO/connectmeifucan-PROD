@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1220" />
-  <title>Location Batterie entre particuliers | Simple, rapide, sécurisé</title>
-  <meta name="description" content="Louez une batterie près de chez vous entre particuliers : réservation rapide, dépôt de garantie, état des lieux, assistance et assurance optionnelle." />
+  <title>Location Batterie (instrument) entre particuliers | Simple, rapide, sécurisé</title>
+  <meta name="description" content="Louez une batterie (instrument de musique) près de chez vous entre particuliers : réservation rapide, dépôt de garantie, état des lieux, assistance et assurance optionnelle." />
   <meta name="robots" content="index,follow" />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="Location Batterie entre particuliers" />
+  <meta property="og:title" content="Location Batterie (instrument) entre particuliers" />
   <meta property="og:description" content="Trouvez une batterie près de chez vous, réservez, récupérez, restituez. Simple et sécurisé." />
   <meta property="og:type" content="website" />
 
@@ -304,6 +304,11 @@
     }
     .stat b{ font-size: 16px; letter-spacing: -0.2px; }
     .stat span{ font-size: 13px; color: var(--muted); }
+    .stat .mark{
+      font-weight: 800;
+      color: rgba(255,255,255,0.78);
+      letter-spacing: -0.2px;
+    }
 
     .steps{
       counter-reset: step;
@@ -419,11 +424,11 @@
       <div class="container">
         <div class="hero-grid">
           <div>
-            <div class="kicker"><span class="dot" aria-hidden="true"></span><span>Location entre particuliers • près de chez vous</span></div>
+            <div class="kicker"><span class="dot" aria-hidden="true"></span><span>Location entre particuliers • répétitions & concerts</span></div>
 
-            <h1>Louez une batterie en quelques minutes, sans achat inutile.</h1>
+            <h1>Louez une batterie (instrument) en quelques minutes, sans achat inutile.</h1>
             <p class="lead">
-              Besoin d’une batterie (auto, moto, camping, outillage, onduleur…) pour une panne, un test, ou un week-end ?
+              Besoin d’une <b>batterie acoustique</b> ou <b>électronique</b> pour une répétition, un concert, un enregistrement ou un remplacement ponctuel ?
               Réservez auprès d’un particulier, récupérez localement, puis restituez après usage.
             </p>
 
@@ -435,7 +440,7 @@
             <div class="chips" aria-label="Points clés">
               <span class="chip">Dépôt de garantie</span>
               <span class="chip">État des lieux</span>
-              <span class="chip">Messagerie</span>
+              <span class="chip">Housses & accessoires</span>
               <span class="chip">Assurance optionnelle</span>
               <span class="chip">Paiement sécurisé (à intégrer)</span>
             </div>
@@ -445,7 +450,7 @@
             <div class="panel">
               <div class="p">
                 <h3 id="recherche">Recherche rapide</h3>
-                <p>Simulez une demande. (Cette page est une maquette : aucun paiement n’est réalisé.)</p>
+                <p>Simulez une demande. (Cette page est une maquette : aucune réservation n’est finalisée.)</p>
 
                 <form class="form" id="searchForm" novalidate>
                   <div class="row">
@@ -453,11 +458,13 @@
                       <label for="type">Type de batterie</label>
                       <select id="type" name="type" required>
                         <option value="" selected>Choisir…</option>
-                        <option>Auto 12V</option>
-                        <option>Moto 12V</option>
-                        <option>Vélo / e-bike</option>
-                        <option>Power station / portable</option>
-                        <option>Outillage (Li-ion)</option>
+                        <option>Acoustique – kit complet</option>
+                        <option>Acoustique – kit compact</option>
+                        <option>Électronique – kit (pads + module)</option>
+                        <option>Électronique – kit compact</option>
+                        <option>Caisse claire (seule)</option>
+                        <option>Cymbales (set)</option>
+                        <option>Hardware (pieds, pédale, siège)</option>
                         <option>Autre</option>
                       </select>
                     </div>
@@ -493,6 +500,18 @@
                   </div>
 
                   <div>
+                    <label for="options">Options (conseillées)</label>
+                    <select id="options" name="options">
+                      <option value="" selected>Aucune</option>
+                      <option>Housses / flight-cases</option>
+                      <option>Tapis + protection sol</option>
+                      <option>Micros / support micro (selon dispo)</option>
+                      <option>Livraison locale (à définir)</option>
+                    </select>
+                    <div class="helper">Objectif : réduire la casse et les oublis (pédale, clé d’accordage, supports…).</div>
+                  </div>
+
+                  <div>
                     <label for="email">Email (optionnel)</label>
                     <input id="email" name="email" type="email" placeholder="vous@exemple.com" autocomplete="email" />
                     <div class="helper">Pour recevoir des offres proches / être prévenu au lancement.</div>
@@ -516,27 +535,31 @@
             <div class="panel">
               <div class="p">
                 <h3>Pourquoi ça marche</h3>
+
                 <div class="stat" style="margin-top:10px;">
                   <div>
                     <b>Économique</b><br>
                     <span>Vous payez l’usage, pas la propriété.</span>
                   </div>
-                  <span>€</span>
+                  <div class="mark">€</div>
                 </div>
+
                 <div class="stat" style="margin-top:10px;">
                   <div>
                     <b>Local</b><br>
                     <span>Retrait et retour à proximité.</span>
                   </div>
-                  <span>📍</span>
+                  <div class="mark">PROX</div>
                 </div>
+
                 <div class="stat" style="margin-top:10px;">
                   <div>
                     <b>Responsable</b><br>
                     <span>Moins d’achats, plus de réemploi.</span>
                   </div>
-                  <span>♻</span>
+                  <div class="mark">REUSE</div>
                 </div>
+
               </div>
             </div>
           </aside>
@@ -549,7 +572,7 @@
         <div class="section-title">
           <div>
             <h2>Comment ça marche</h2>
-            <p class="sub">Un parcours simple, conçu pour réduire les frictions et sécuriser la transaction.</p>
+            <p class="sub">Un parcours simple, conçu pour réduire les frictions et sécuriser la location d’un instrument.</p>
           </div>
         </div>
 
@@ -559,7 +582,7 @@
               <div class="badge" aria-hidden="true"></div>
               <div>
                 <h3>Rechercher et comparer</h3>
-                <p>Choisissez le type (12V, Li-ion…), la durée, et un rayon. Comparez prix, état, compatibilités, et avis.</p>
+                <p>Choisissez le type (acoustique/électronique, kit/éléments), la durée et le rayon. Comparez état, accessoires inclus et avis.</p>
               </div>
             </div>
             <div class="step">
@@ -573,7 +596,7 @@
               <div class="badge" aria-hidden="true"></div>
               <div>
                 <h3>Retrait + état des lieux</h3>
-                <p>Check visuel, niveau de charge, accessoires, photo horodatée. Signature d’un état des lieux simplifié.</p>
+                <p>Checklist (fûts, peaux, cymbales, hardware), photos horodatées, accessoires (clé d’accordage, feutrines, housses).</p>
               </div>
             </div>
             <div class="step">
@@ -588,30 +611,30 @@
           <div class="panel">
             <div class="p">
               <h3>Cas d’usage typiques</h3>
-              <p>Quelques scénarios que la plateforme vise à couvrir dès le MVP.</p>
+              <p>Exemples de besoins ciblés par le service dès le MVP.</p>
               <div class="grid-3" style="margin-top:12px;">
                 <div class="panel" style="box-shadow:none;">
                   <div class="p">
-                    <h3 style="margin-bottom:6px;">Panne</h3>
-                    <p>Dépannage rapide (batterie 12V), le temps de remplacer/diagnostiquer.</p>
+                    <h3 style="margin-bottom:6px;">Répétition</h3>
+                    <p>Kit complet pour un créneau en studio ou salle de musique.</p>
                   </div>
                 </div>
                 <div class="panel" style="box-shadow:none;">
                   <div class="p">
-                    <h3 style="margin-bottom:6px;">Week-end</h3>
-                    <p>Énergie mobile pour camping, van, événement, bricolage.</p>
+                    <h3 style="margin-bottom:6px;">Concert</h3>
+                    <p>Solution ponctuelle, avec housses/flight-cases selon besoin.</p>
                   </div>
                 </div>
                 <div class="panel" style="box-shadow:none;">
                   <div class="p">
-                    <h3 style="margin-bottom:6px;">Test</h3>
-                    <p>Vérifier une compatibilité ou un besoin avant achat.</p>
+                    <h3 style="margin-bottom:6px;">Remplacement</h3>
+                    <p>Une caisse claire, des cymbales ou une pédale en dépannage.</p>
                   </div>
                 </div>
               </div>
 
               <div class="notice" style="margin-top:12px; background: rgba(110,231,255,0.10); border-color: rgba(110,231,255,0.18);">
-                Conseil MVP : commencer sur 1 ou 2 catégories (ex: “Auto 12V” et “Power station”) pour maîtriser état, logistique et pricing.
+                Conseil MVP : commencer par “kits acoustiques complets” + “kits électroniques”, puis élargir aux éléments (cymbales/hardware) avec une checklist standardisée.
               </div>
             </div>
           </div>
@@ -624,7 +647,7 @@
         <div class="section-title">
           <div>
             <h2>Sécurité et confiance</h2>
-            <p class="sub">Mécanismes recommandés pour réduire les risques (casse, vol, usage inadapté, litiges).</p>
+            <p class="sub">Mécanismes recommandés pour réduire les risques (casse, usure, retours incomplets, litiges).</p>
           </div>
         </div>
 
@@ -644,20 +667,20 @@
           <div class="panel">
             <div class="p">
               <h3>État des lieux</h3>
-              <p>Checklist standard + photos avant/après (bornes, boîtier, charge, accessoires).</p>
+              <p>Checklist standard + photos avant/après (peaux, cerclages, cymbales, pieds, pédale, siège).</p>
             </div>
           </div>
 
           <div class="panel">
             <div class="p">
-              <h3>Compatibilité</h3>
-              <p>Fiches techniques (Ah, V, dimensions, connectique) + avertissements (polarisations, BMS, etc.).</p>
+              <h3>Transport</h3>
+              <p>Housses/flight-cases recommandés, règles de manutention, consignes de stockage (humidité, chocs).</p>
             </div>
           </div>
           <div class="panel">
             <div class="p">
               <h3>Assurance optionnelle</h3>
-              <p>Couverture dommages/vol, selon un modèle économique compatible avec le panier moyen.</p>
+              <p>Couverture dommages/vol, adaptée à la valeur du kit et au panier moyen.</p>
             </div>
           </div>
           <div class="panel">
@@ -675,37 +698,37 @@
         <div class="section-title">
           <div>
             <h2>FAQ</h2>
-            <p class="sub">Réponses aux questions attendues sur un service de location de batteries entre particuliers.</p>
+            <p class="sub">Questions fréquentes sur la location de batteries (instrument) entre particuliers.</p>
           </div>
         </div>
 
         <div class="grid-2">
           <details>
-            <summary>Quels types de batteries sont concernés ?</summary>
+            <summary>Qu’est-ce qui est inclus dans un “kit complet” ?</summary>
             <p>
-              Le modèle fonctionne bien avec des catégories standardisables : auto/moto 12V, power stations, batteries d’outillage (selon marques),
-              e-bike (selon systèmes), etc. L’important est d’avoir une fiche technique claire et un état des lieux robuste.
+              Typiquement : grosse caisse, toms, caisse claire, cymbales (hi-hat/ride/crash), hardware (pieds), pédale, siège.
+              L’annonce doit préciser précisément la liste, avec photos.
             </p>
           </details>
           <details>
-            <summary>Comment éviter les usages risqués (court-circuit, mauvaise charge…) ?</summary>
+            <summary>Comment gérer l’usure (peaux, baguettes, feutrines) ?</summary>
             <p>
-              Par des règles d’usage (chargeurs autorisés), des avertissements dans l’annonce, et une checklist au retrait.
-              Pour certaines catégories, imposer des accessoires spécifiques (chargeur fourni) est pertinent.
+              Définir une règle simple : consommables non inclus (baguettes) et tolérance d’usure normale.
+              Tout dommage anormal (peau percée, cymbale fissurée) relève du dépôt / assurance selon preuves.
             </p>
           </details>
           <details>
-            <summary>Quel est le modèle de revenus le plus simple au départ ?</summary>
+            <summary>Le paiement est-il réellement sécurisé sur cette page ?</summary>
             <p>
-              Commission sur transaction + frais de service côté locataire, avec options (assurance, livraison locale, urgence).
-              Un MVP peut démarrer avec une commission fixe pour valider l’appétence.
+              Non. Cette page est un <b>index.html</b> de présentation (maquette). En production, intégrer un PSP (Stripe/Adyen…)
+              avec pré-autorisation de dépôt et gestion de remboursements.
             </p>
           </details>
           <details>
-            <summary>Le paiement est-il réellement “sécurisé” sur cette page ?</summary>
+            <summary>Est-ce adapté aux batteries électroniques ?</summary>
             <p>
-              Non. Cette page est un <b>index.html</b> de présentation (maquette). Pour une production,
-              intégrer un PSP (Stripe, Adyen…) avec pré-autorisation de dépôt et gestion de remboursement.
+              Oui, à condition d’ajouter des champs spécifiques (marque/modèle, module, câbles, pédales, alimentation),
+              et un état des lieux orienté connectique/pads.
             </p>
           </details>
         </div>
@@ -719,7 +742,7 @@
             <div class="section-title" style="margin-bottom:10px;">
               <div>
                 <h2 style="margin:0;">Contact</h2>
-                <p class="sub" style="margin-top:6px;">Laissez un message pour rejoindre la liste de lancement ou proposer un partenariat.</p>
+                <p class="sub" style="margin-top:6px;">Laissez un message pour rejoindre la liste de lancement ou proposer une batterie à louer.</p>
               </div>
             </div>
 
@@ -743,7 +766,7 @@
                     <option value="" selected>Choisir…</option>
                     <option>Locataire (je cherche)</option>
                     <option>Propriétaire (je propose)</option>
-                    <option>Partenaire (pro/assurance/garage)</option>
+                    <option>Partenaire (studio / asso / magasin)</option>
                     <option>Autre</option>
                   </select>
                 </div>
@@ -755,7 +778,7 @@
 
               <div>
                 <label for="cmsg">Message</label>
-                <textarea id="cmsg" name="message" rows="4" placeholder="Votre besoin, votre ville, le type de batterie…" required></textarea>
+                <textarea id="cmsg" name="message" rows="4" placeholder="Votre besoin, votre ville, le type de batterie, la date…" required></textarea>
               </div>
 
               <div class="helper">
@@ -781,7 +804,7 @@
           <span class="logo" aria-hidden="true" style="width:28px;height:28px;border-radius:10px;"></span>
           <div>
             <div style="font-weight:700; color: rgba(255,255,255,0.86);">Location Batterie</div>
-            <small>Plateforme de location de batteries entre particuliers</small>
+            <small>Plateforme de location de batteries (instrument) entre particuliers</small>
           </div>
         </div>
 
