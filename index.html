@@ -1,878 +1,145 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0b1220" />
-  <title>Location Batterie (instrument) entre particuliers | Simple, rapide, sécurisé</title>
-  <meta name="description" content="Louez une batterie (instrument de musique) près de chez vous entre particuliers : réservation rapide, dépôt de garantie, état des lieux, assistance et assurance optionnelle." />
-  <meta name="robots" content="index,follow" />
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="Location Batterie (instrument) entre particuliers" />
-  <meta property="og:description" content="Trouvez une batterie près de chez vous, réservez, récupérez, restituez. Simple et sécurisé." />
-  <meta property="og:type" content="website" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Connect Me If U Can</title>
+  <link rel="icon" type="image/jpeg" href="connectmeifucan-logo.jpg">
   <style>
-    :root{
-      --bg: #0b1220;
-      --panel: rgba(255,255,255,0.06);
-      --panel-2: rgba(255,255,255,0.10);
-      --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.70);
-      --muted-2: rgba(255,255,255,0.58);
-      --border: rgba(255,255,255,0.14);
-      --shadow: 0 12px 40px rgba(0,0,0,0.45);
-      --radius: 18px;
-
-      --brand: #6ee7ff;
-      --brand-2: #a78bfa;
-      --ok: #34d399;
-      --warn: #fbbf24;
-      --danger: #fb7185;
-
-      --max: 1120px;
-      --pad: 22px;
+    :root {
+      --bg1:#0d0d0d; --bg2:#1c1c1c; --text:#fff; --muted:#aaa;
+      --accent:#ffcc00; --accent-hover:#ffaa00; --border:#444;
     }
-
     * { box-sizing: border-box; }
     html, body { height: 100%; }
-    body{
+    body {
       margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
       color: var(--text);
-      background:
-        radial-gradient(1000px 600px at 15% 10%, rgba(110,231,255,0.18), transparent 55%),
-        radial-gradient(900px 650px at 85% 15%, rgba(167,139,250,0.18), transparent 55%),
-        radial-gradient(800px 600px at 40% 95%, rgba(52,211,153,0.10), transparent 60%),
-        linear-gradient(180deg, #071022 0%, #070b15 35%, #050711 100%);
-      overflow-x: hidden;
-    }
-
-    a{ color: inherit; text-decoration: none; }
-    .container{ width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 var(--pad); }
-
-    /* Topbar */
-    .topbar{
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(14px);
-      background: rgba(5,7,17,0.55);
-      border-bottom: 1px solid var(--border);
-    }
-    .topbar .inner{
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      padding: 14px 0;
+      flex-direction: column;
+      min-height: 100dvh;
     }
-    .brand{
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-    }
-    .logo{
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(110,231,255,0.95), rgba(167,139,250,0.95));
-      box-shadow: 0 10px 24px rgba(110,231,255,0.14), 0 10px 24px rgba(167,139,250,0.10);
-      position: relative;
-      overflow: hidden;
-    }
-    .logo:before{
-      content:"";
-      position:absolute;
-      inset:-18px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.55), transparent 45%);
-      transform: rotate(20deg);
-    }
-    .nav{
+    main {
+      flex: 1;
       display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-    .nav a{
-      font-size: 14px;
-      color: var(--muted);
-      padding: 8px 10px;
-      border-radius: 12px;
-      transition: background .2s ease, color .2s ease;
-    }
-    .nav a:hover{ background: rgba(255,255,255,0.06); color: var(--text); }
-
-    .cta{
-      display: inline-flex;
-      align-items: center;
+      flex-direction: column;
       justify-content: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: linear-gradient(135deg, rgba(110,231,255,0.18), rgba(167,139,250,0.16));
-      color: var(--text);
-      font-weight: 650;
-      transition: transform .15s ease, background .2s ease, border-color .2s ease;
-      white-space: nowrap;
-    }
-    .cta:hover{
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,0.28);
-      background: linear-gradient(135deg, rgba(110,231,255,0.23), rgba(167,139,250,0.20));
-    }
-    .cta.secondary{
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.16);
-      color: var(--muted);
-      font-weight: 600;
-    }
-    .cta.secondary:hover{ color: var(--text); background: rgba(255,255,255,0.08); }
-
-    /* Hero */
-    .hero{
-      padding: 54px 0 26px;
-      position: relative;
-    }
-    .hero-grid{
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 18px;
-      align-items: stretch;
-    }
-    .kicker{
-      display: inline-flex;
-      gap: 10px;
       align-items: center;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: var(--muted);
-      font-size: 13px;
-      margin-bottom: 14px;
-    }
-    .dot{
-      width: 8px; height: 8px; border-radius: 999px;
-      background: var(--ok);
-      box-shadow: 0 0 0 4px rgba(52,211,153,0.15);
-    }
-    h1{
-      margin: 0 0 12px;
-      font-size: clamp(28px, 3.6vw, 46px);
-      line-height: 1.08;
-      letter-spacing: -0.6px;
-    }
-    .lead{
-      margin: 0 0 18px;
-      color: var(--muted);
-      font-size: 16px;
-      line-height: 1.55;
-      max-width: 62ch;
-    }
-    .hero-actions{
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin: 16px 0 10px;
-    }
-    .chips{
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 14px;
-    }
-    .chip{
-      font-size: 13px;
-      color: var(--muted);
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.10);
-    }
-
-    /* Cards */
-    .panel{
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    .panel .p{ padding: 18px; }
-    .panel h3{
-      margin: 0 0 8px;
-      font-size: 16px;
-      letter-spacing: -0.2px;
-    }
-    .panel p{ margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
-    .side-stack{
-      display: grid;
-      gap: 12px;
-      align-content: start;
-    }
-
-    /* Form */
-    .form{
-      display: grid;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    .row{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      text-align: center;
+      padding: 24px 20px;
+      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
       gap: 10px;
     }
-    label{ font-size: 13px; color: var(--muted); display: block; margin: 0 0 6px; }
-    input, select, textarea{
-      width: 100%;
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(0,0,0,0.18);
-      color: var(--text);
-      outline: none;
-      transition: border-color .2s ease, background .2s ease;
-      font-size: 14px;
+    img.logo {
+      max-width: 200px;
+      height: auto;
     }
-    input::placeholder, textarea::placeholder{ color: rgba(255,255,255,0.38); }
-    input:focus, select:focus, textarea:focus{ border-color: rgba(110,231,255,0.55); background: rgba(0,0,0,0.22); }
-    .helper{
-      font-size: 12px;
-      color: var(--muted-2);
-      margin-top: -2px;
+    h1 {
+      font-size: clamp(1.8rem, 2.2vw + 1rem, 2.2rem);
+      margin: 8px 0 4px 0;
     }
-    .notice{
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(52,211,153,0.10);
-      border: 1px solid rgba(52,211,153,0.20);
-      color: rgba(255,255,255,0.82);
-      font-size: 13px;
-      line-height: 1.4;
-    }
-    .error{
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(251,113,133,0.10);
-      border: 1px solid rgba(251,113,133,0.22);
-      color: rgba(255,255,255,0.85);
-      font-size: 13px;
+    .lang {
       display: none;
+      margin-top: 6px;
+      max-width: 560px;
+      line-height: 1.5;
+      font-size: clamp(1rem, 0.8vw + 0.8rem, 1.08rem);
     }
-
-    /* Sections */
-    section{ padding: 26px 0; }
-    .section-title{
-      display:flex; justify-content: space-between; align-items: flex-end; gap: 14px;
-      margin-bottom: 14px;
+    a.cta {
+      display: inline-block;
+      padding: 12px 28px;
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 10px;
+      transition: transform .2s ease, background .2s ease;
     }
-    .section-title h2{
-      margin: 0;
-      font-size: 20px;
-      letter-spacing: -0.3px;
-    }
-    .section-title .sub{
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      max-width: 70ch;
-    }
-
-    .grid-3{
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-    .grid-2{
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-    .stat{
-      display:flex; align-items: center; justify-content: space-between;
-      padding: 14px 16px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      gap: 10px;
-    }
-    .stat b{ font-size: 16px; letter-spacing: -0.2px; }
-    .stat span{ font-size: 13px; color: var(--muted); }
-    .stat .mark{
-      font-weight: 800;
-      color: rgba(255,255,255,0.78);
-      letter-spacing: -0.2px;
-    }
-
-    .steps{
-      counter-reset: step;
-      display: grid;
-      gap: 12px;
-    }
-    .step{
-      display: grid;
-      grid-template-columns: 56px 1fr;
-      gap: 12px;
-      align-items: start;
-      padding: 16px;
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-    }
-    .badge{
-      width: 56px; height: 56px;
-      border-radius: 18px;
-      display:flex; align-items:center; justify-content:center;
-      background: linear-gradient(135deg, rgba(110,231,255,0.20), rgba(167,139,250,0.18));
-      border: 1px solid rgba(255,255,255,0.14);
-      position: relative;
-      overflow: hidden;
-    }
-    .badge:before{
-      counter-increment: step;
-      content: counter(step);
-      font-weight: 800;
-      font-size: 18px;
-      letter-spacing: -0.2px;
-    }
-    .step h3{ margin: 2px 0 6px; font-size: 16px; }
-    .step p{ margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
-
-    /* FAQ */
-    details{
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      border-radius: 16px;
-      padding: 14px 14px;
-    }
-    details summary{
-      cursor: pointer;
-      list-style: none;
-      font-weight: 650;
-      letter-spacing: -0.2px;
-    }
-    details summary::-webkit-details-marker{ display:none; }
-    details p{
-      margin: 10px 0 0;
-      color: var(--muted);
-      line-height: 1.55;
-      font-size: 14px;
-    }
-
-    /* Footer */
-    footer{
-      padding: 28px 0 40px;
-      border-top: 1px solid rgba(255,255,255,0.10);
+    a.cta:hover { background: var(--accent-hover); transform: translateY(-1px) scale(1.03); }
+    .note {
       margin-top: 18px;
+      font-size: 0.95em;
+      color: var(--accent);
+      font-weight: bold;
+      text-align: center;
+      min-height: 1.2em;
+    }
+    footer {
+      margin-top: auto;
+      padding: 14px 16px;
+      font-size: 0.85em;
       color: var(--muted);
+      text-align: center;
+      background: transparent;
     }
-    .foot{
-      display:flex;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: center;
+    .flags {
+      position: fixed;
+      top: env(safe-area-inset-top, 12px);
+      right: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 10;
     }
-    .foot small{ color: var(--muted-2); }
-
-    /* Responsive */
-    @media (max-width: 980px){
-      .hero-grid{ grid-template-columns: 1fr; }
+    .flags img {
+      width: 32px;
+      height: 22px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #222;
+      transition: transform .2s ease, border-color .2s ease;
     }
-    @media (max-width: 720px){
-      .grid-3{ grid-template-columns: 1fr; }
-      .grid-2{ grid-template-columns: 1fr; }
-      .row{ grid-template-columns: 1fr; }
-      .nav{ display:none; }
-      .topbar .inner{ padding: 12px 0; }
+    .flags img:hover { transform: scale(1.08); border-color: var(--accent); }
+    @media (max-width: 360px) {
+      img.logo { max-width: 160px; }
+      .note { font-size: 0.9em; }
     }
   </style>
 </head>
-
 <body>
-  <header class="topbar">
-    <div class="container">
-      <div class="inner">
-        <a class="brand" href="#top" aria-label="Accueil">
-          <span class="logo" aria-hidden="true"></span>
-          <span>Location Batterie</span>
-        </a>
+  <div class="flags" aria-label="Language selector">
+    <img src="https://flagcdn.com/w20/fr.png" alt="FR" onclick="setLang('fr')">
+    <img src="https://flagcdn.com/w20/gb.png" alt="EN" onclick="setLang('en')">
+  </div>
 
-        <nav class="nav" aria-label="Navigation principale">
-          <a href="#comment">Comment ça marche</a>
-          <a href="#securite">Sécurité</a>
-          <a href="#faq">FAQ</a>
-          <a href="#contact">Contact</a>
-        </nav>
+  <main>
+    <img src="connectmeifucan-logo.jpg" alt="Connect Me If U Can Logo" class="logo">
+    <h1>🎮 Connect Me If U Can</h1>
 
-        <div style="display:flex; gap:10px; align-items:center;">
-          <a class="cta secondary" href="#contact">Être prévenu au lancement</a>
-          <a class="cta" href="#recherche">Trouver une batterie</a>
-        </div>
-      </div>
+    <div id="fr" class="lang">
+      ✨ Transforme ton salon en expérience immersive à domicile.<br>
+      🔦 Lumières • Sons • Objets connectés.<br>
+      ⏳ Voyage dans le temps entre 1850 et 2050.<br><br>
+      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Découvrir</a>
+      <div class="note">💡 Projet personnel – en cours de création</div>
     </div>
-  </header>
 
-  <main id="top">
-    <section class="hero">
-      <div class="container">
-        <div class="hero-grid">
-          <div>
-            <div class="kicker"><span class="dot" aria-hidden="true"></span><span>Location entre particuliers • répétitions & concerts</span></div>
-
-            <h1>Louez une batterie (instrument) en quelques minutes, sans achat inutile.</h1>
-            <p class="lead">
-              Besoin d’une <b>batterie acoustique</b> ou <b>électronique</b> pour une répétition, un concert, un enregistrement ou un remplacement ponctuel ?
-              Réservez auprès d’un particulier, récupérez localement, puis restituez après usage.
-            </p>
-
-            <div class="hero-actions">
-              <a class="cta" href="#recherche">Démarrer une recherche</a>
-              <a class="cta secondary" href="#comment">Voir le fonctionnement</a>
-            </div>
-
-            <div class="chips" aria-label="Points clés">
-              <span class="chip">Dépôt de garantie</span>
-              <span class="chip">État des lieux</span>
-              <span class="chip">Housses & accessoires</span>
-              <span class="chip">Assurance optionnelle</span>
-              <span class="chip">Paiement sécurisé (à intégrer)</span>
-            </div>
-          </div>
-
-          <aside class="side-stack">
-            <div class="panel">
-              <div class="p">
-                <h3 id="recherche">Recherche rapide</h3>
-                <p>Simulez une demande. (Cette page est une maquette : aucune réservation n’est finalisée.)</p>
-
-                <form class="form" id="searchForm" novalidate>
-                  <div class="row">
-                    <div>
-                      <label for="type">Type de batterie</label>
-                      <select id="type" name="type" required>
-                        <option value="" selected>Choisir…</option>
-                        <option>Acoustique – kit complet</option>
-                        <option>Acoustique – kit compact</option>
-                        <option>Électronique – kit (pads + module)</option>
-                        <option>Électronique – kit compact</option>
-                        <option>Caisse claire (seule)</option>
-                        <option>Cymbales (set)</option>
-                        <option>Hardware (pieds, pédale, siège)</option>
-                        <option>Autre</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label for="duree">Durée</label>
-                      <select id="duree" name="duree" required>
-                        <option value="" selected>Choisir…</option>
-                        <option>1 jour</option>
-                        <option>Week-end</option>
-                        <option>1 semaine</option>
-                        <option>2 semaines</option>
-                        <option>1 mois</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="row">
-                    <div>
-                      <label for="ville">Ville</label>
-                      <input id="ville" name="ville" type="text" placeholder="Ex: Lyon" autocomplete="address-level2" required />
-                      <div class="helper">Pour un MVP : code postal/ville + rayon.</div>
-                    </div>
-                    <div>
-                      <label for="rayon">Rayon</label>
-                      <select id="rayon" name="rayon" required>
-                        <option value="" selected>Choisir…</option>
-                        <option>2 km</option>
-                        <option>5 km</option>
-                        <option>10 km</option>
-                        <option>25 km</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label for="options">Options (conseillées)</label>
-                    <select id="options" name="options">
-                      <option value="" selected>Aucune</option>
-                      <option>Housses / flight-cases</option>
-                      <option>Tapis + protection sol</option>
-                      <option>Micros / support micro (selon dispo)</option>
-                      <option>Livraison locale (à définir)</option>
-                    </select>
-                    <div class="helper">Objectif : réduire la casse et les oublis (pédale, clé d’accordage, supports…).</div>
-                  </div>
-
-                  <div>
-                    <label for="email">Email (optionnel)</label>
-                    <input id="email" name="email" type="email" placeholder="vous@exemple.com" autocomplete="email" />
-                    <div class="helper">Pour recevoir des offres proches / être prévenu au lancement.</div>
-                  </div>
-
-                  <div class="error" id="formError" role="alert"></div>
-
-                  <button class="cta" type="submit" style="width:100%;">
-                    Voir les disponibilités
-                    <span aria-hidden="true">→</span>
-                  </button>
-
-                  <div class="notice" id="mockResult" style="display:none;">
-                    Résultat maquette : 6 offres potentielles trouvées dans un rayon de <b id="rRayon">—</b> autour de <b id="rVille">—</b>.
-                    Prochaine étape : liste d’annonces + réservation + dépôt.
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            <div class="panel">
-              <div class="p">
-                <h3>Pourquoi ça marche</h3>
-
-                <div class="stat" style="margin-top:10px;">
-                  <div>
-                    <b>Économique</b><br>
-                    <span>Vous payez l’usage, pas la propriété.</span>
-                  </div>
-                  <div class="mark">€</div>
-                </div>
-
-                <div class="stat" style="margin-top:10px;">
-                  <div>
-                    <b>Local</b><br>
-                    <span>Retrait et retour à proximité.</span>
-                  </div>
-                  <div class="mark">PROX</div>
-                </div>
-
-                <div class="stat" style="margin-top:10px;">
-                  <div>
-                    <b>Responsable</b><br>
-                    <span>Moins d’achats, plus de réemploi.</span>
-                  </div>
-                  <div class="mark">REUSE</div>
-                </div>
-
-              </div>
-            </div>
-          </aside>
-        </div>
-      </div>
-    </section>
-
-    <section id="comment">
-      <div class="container">
-        <div class="section-title">
-          <div>
-            <h2>Comment ça marche</h2>
-            <p class="sub">Un parcours simple, conçu pour réduire les frictions et sécuriser la location d’un instrument.</p>
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div class="steps">
-            <div class="step">
-              <div class="badge" aria-hidden="true"></div>
-              <div>
-                <h3>Rechercher et comparer</h3>
-                <p>Choisissez le type (acoustique/électronique, kit/éléments), la durée et le rayon. Comparez état, accessoires inclus et avis.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="badge" aria-hidden="true"></div>
-              <div>
-                <h3>Réserver et sécuriser</h3>
-                <p>Réservation avec dépôt de garantie. Paiement “hold” (à intégrer) et conditions claires avant retrait.</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="badge" aria-hidden="true"></div>
-              <div>
-                <h3>Retrait + état des lieux</h3>
-                <p>Checklist (fûts, peaux, cymbales, hardware), photos horodatées, accessoires (clé d’accordage, feutrines, housses).</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="badge" aria-hidden="true"></div>
-              <div>
-                <h3>Restitution + clôture</h3>
-                <p>Retour à la date prévue, re-contrôle, libération du dépôt. Notation réciproque pour la confiance.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="p">
-              <h3>Cas d’usage typiques</h3>
-              <p>Exemples de besoins ciblés par le service dès le MVP.</p>
-              <div class="grid-3" style="margin-top:12px;">
-                <div class="panel" style="box-shadow:none;">
-                  <div class="p">
-                    <h3 style="margin-bottom:6px;">Répétition</h3>
-                    <p>Kit complet pour un créneau en studio ou salle de musique.</p>
-                  </div>
-                </div>
-                <div class="panel" style="box-shadow:none;">
-                  <div class="p">
-                    <h3 style="margin-bottom:6px;">Concert</h3>
-                    <p>Solution ponctuelle, avec housses/flight-cases selon besoin.</p>
-                  </div>
-                </div>
-                <div class="panel" style="box-shadow:none;">
-                  <div class="p">
-                    <h3 style="margin-bottom:6px;">Remplacement</h3>
-                    <p>Une caisse claire, des cymbales ou une pédale en dépannage.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="notice" style="margin-top:12px; background: rgba(110,231,255,0.10); border-color: rgba(110,231,255,0.18);">
-                Conseil MVP : commencer par “kits acoustiques complets” + “kits électroniques”, puis élargir aux éléments (cymbales/hardware) avec une checklist standardisée.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="securite">
-      <div class="container">
-        <div class="section-title">
-          <div>
-            <h2>Sécurité et confiance</h2>
-            <p class="sub">Mécanismes recommandés pour réduire les risques (casse, usure, retours incomplets, litiges).</p>
-          </div>
-        </div>
-
-        <div class="grid-3">
-          <div class="panel">
-            <div class="p">
-              <h3>Identité & réputation</h3>
-              <p>Vérification email/téléphone, option KYC, avis et historique de locations.</p>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="p">
-              <h3>Dépôt de garantie</h3>
-              <p>Pré-autorisation (hold) et libération après restitution conforme, selon règles transparentes.</p>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="p">
-              <h3>État des lieux</h3>
-              <p>Checklist standard + photos avant/après (peaux, cerclages, cymbales, pieds, pédale, siège).</p>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="p">
-              <h3>Transport</h3>
-              <p>Housses/flight-cases recommandés, règles de manutention, consignes de stockage (humidité, chocs).</p>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="p">
-              <h3>Assurance optionnelle</h3>
-              <p>Couverture dommages/vol, adaptée à la valeur du kit et au panier moyen.</p>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="p">
-              <h3>Support & litiges</h3>
-              <p>Messagerie in-app, médiation, règles de preuve, délais de contestation et arbitrage.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="faq">
-      <div class="container">
-        <div class="section-title">
-          <div>
-            <h2>FAQ</h2>
-            <p class="sub">Questions fréquentes sur la location de batteries (instrument) entre particuliers.</p>
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <details>
-            <summary>Qu’est-ce qui est inclus dans un “kit complet” ?</summary>
-            <p>
-              Typiquement : grosse caisse, toms, caisse claire, cymbales (hi-hat/ride/crash), hardware (pieds), pédale, siège.
-              L’annonce doit préciser précisément la liste, avec photos.
-            </p>
-          </details>
-          <details>
-            <summary>Comment gérer l’usure (peaux, baguettes, feutrines) ?</summary>
-            <p>
-              Définir une règle simple : consommables non inclus (baguettes) et tolérance d’usure normale.
-              Tout dommage anormal (peau percée, cymbale fissurée) relève du dépôt / assurance selon preuves.
-            </p>
-          </details>
-          <details>
-            <summary>Le paiement est-il réellement sécurisé sur cette page ?</summary>
-            <p>
-              Non. Cette page est un <b>index.html</b> de présentation (maquette). En production, intégrer un PSP (Stripe/Adyen…)
-              avec pré-autorisation de dépôt et gestion de remboursements.
-            </p>
-          </details>
-          <details>
-            <summary>Est-ce adapté aux batteries électroniques ?</summary>
-            <p>
-              Oui, à condition d’ajouter des champs spécifiques (marque/modèle, module, câbles, pédales, alimentation),
-              et un état des lieux orienté connectique/pads.
-            </p>
-          </details>
-        </div>
-      </div>
-    </section>
-
-    <section id="contact">
-      <div class="container">
-        <div class="panel">
-          <div class="p">
-            <div class="section-title" style="margin-bottom:10px;">
-              <div>
-                <h2 style="margin:0;">Contact</h2>
-                <p class="sub" style="margin-top:6px;">Laissez un message pour rejoindre la liste de lancement ou proposer une batterie à louer.</p>
-              </div>
-            </div>
-
-            <!-- Remplacez action="#" par votre endpoint (Formspree, Google Apps Script, API, etc.) -->
-            <form class="form" id="contactForm" action="#" method="post">
-              <div class="row">
-                <div>
-                  <label for="cname">Nom</label>
-                  <input id="cname" name="name" type="text" placeholder="Votre nom" required />
-                </div>
-                <div>
-                  <label for="cemail">Email</label>
-                  <input id="cemail" name="email" type="email" placeholder="vous@exemple.com" required />
-                </div>
-              </div>
-
-              <div class="row">
-                <div>
-                  <label for="crole">Vous êtes</label>
-                  <select id="crole" name="role" required>
-                    <option value="" selected>Choisir…</option>
-                    <option>Locataire (je cherche)</option>
-                    <option>Propriétaire (je propose)</option>
-                    <option>Partenaire (studio / asso / magasin)</option>
-                    <option>Autre</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="cphone">Téléphone (optionnel)</label>
-                  <input id="cphone" name="phone" type="tel" placeholder="06…" autocomplete="tel" />
-                </div>
-              </div>
-
-              <div>
-                <label for="cmsg">Message</label>
-                <textarea id="cmsg" name="message" rows="4" placeholder="Votre besoin, votre ville, le type de batterie, la date…" required></textarea>
-              </div>
-
-              <div class="helper">
-                En production : ajouter consentement RGPD, politique de confidentialité et stockage sécurisé.
-              </div>
-
-              <button class="cta" type="submit" style="width: 100%;">Envoyer</button>
-
-              <div class="notice" id="contactOk" style="display:none; margin-top:10px;">
-                Message enregistré (maquette). Pour activer l’envoi réel, connectez ce formulaire à un endpoint.
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </section>
+    <div id="en" class="lang">
+      ✨ Turn your living room into an immersive home experience.<br>
+      🔦 Lights • Sounds • Smart objects.<br>
+      ⏳ Time travel between 1850 and 2050.<br><br>
+      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Discover</a>
+      <div class="note">💡 Personal project – in progress</div>
+    </div>
   </main>
 
   <footer>
-    <div class="container">
-      <div class="foot">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <span class="logo" aria-hidden="true" style="width:28px;height:28px;border-radius:10px;"></span>
-          <div>
-            <div style="font-weight:700; color: rgba(255,255,255,0.86);">Location Batterie</div>
-            <small>Plateforme de location de batteries (instrument) entre particuliers</small>
-          </div>
-        </div>
-
-        <small>
-          © <span id="year"></span> • <a href="#top" style="color: var(--muted); text-decoration: underline; text-decoration-color: rgba(255,255,255,0.22);">Retour en haut</a>
-        </small>
-      </div>
-    </div>
+    © 2025 Connect Me If U Can – Personal Project
   </footer>
 
   <script>
-    // Helpers
-    const $ = (id) => document.getElementById(id);
-
-    // Smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', (e) => {
-        const href = a.getAttribute('href');
-        if (!href || href === '#') return;
-        const target = document.querySelector(href);
-        if (!target) return;
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        history.replaceState(null, '', href);
-      });
-    });
-
-    // Year
-    $('year').textContent = new Date().getFullYear();
-
-    // Search form mock
-    $('searchForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const err = $('formError');
-      err.style.display = 'none';
-      err.textContent = '';
-
-      const type = $('type').value.trim();
-      const duree = $('duree').value.trim();
-      const ville = $('ville').value.trim();
-      const rayon = $('rayon').value.trim();
-      const email = $('email').value.trim();
-
-      if (!type || !duree || !ville || !rayon) {
-        err.textContent = 'Veuillez compléter Type de batterie, Durée, Ville et Rayon.';
-        err.style.display = 'block';
-        return;
-      }
-
-      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        err.textContent = 'Veuillez saisir un email valide, ou laisser le champ vide.';
-        err.style.display = 'block';
-        return;
-      }
-
-      $('rVille').textContent = ville;
-      $('rRayon').textContent = rayon;
-      $('mockResult').style.display = 'block';
-      $('mockResult').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-
-    // Contact form mock
-    $('contactForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      // In production: POST to backend endpoint.
-      $('contactOk').style.display = 'block';
-      $('contactOk').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
+    function setLang(lang) {
+      document.querySelectorAll('.lang').forEach(el => el.style.display = 'none');
+      var target = document.getElementById(lang);
+      if (target) target.style.display = 'block';
+      document.documentElement.lang = (lang === 'fr') ? 'fr' : 'en';
+    }
+    (function() {
+      var userLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      setLang(userLang.startsWith('fr') ? 'fr' : 'en');
+    })();
   </script>
 </body>
 </html>
