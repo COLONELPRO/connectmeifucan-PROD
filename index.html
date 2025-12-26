@@ -69,7 +69,7 @@ body {
   font-weight: bold;
   border-radius: 6px;
   cursor: pointer;
-  border: 1px solid var(--border);
+  border: none ;/* 1px solid var(--border);*/
   transition: transform .2s ease, background .2s ease;
 }
 .lang-btn:hover {
@@ -226,10 +226,19 @@ body {
 <!-- SPLASH SCREEN             -->
 <!-- ========================= -->
 <div id="splash">
-  <h1>Bienvenue</h1>
-  <p>Chargement...</p>
-  <button id="enterBtn" class="menu-btn">Entrer</button>
+  <h1 id="splash-title">Bienvenue</h1>
+  <p id="splash-subtitle">Chargement...</p>
+
+  <button id="enterBtn" class="menu-btn">
+    <span id="splash-btn">Entrer</span>
+  </button>
 </div>
+
+
+
+
+
+
 
 <!-- ========================= -->
 <!-- ECRAN INTERMEDIAIRE       -->
@@ -358,6 +367,14 @@ const menuTitle = document.getElementById("menu-title");
 const menuSubtitle = document.getElementById("menu-subtitle");
 
 function setFR() {
+
+	// Splash screen FR
+	document.getElementById("splash-title").textContent = "Bienvenue";
+	document.getElementById("splash-subtitle").textContent = "Chargement...";
+	document.getElementById("splash-btn").textContent = "Entrer";
+
+
+
   menuTitle.textContent = "Choisissez une catégorie";
   menuSubtitle.textContent = "Select a category";
 
@@ -381,6 +398,12 @@ function setFR() {
 }
 
 function setEN() {
+
+	// Splash screen EN
+	document.getElementById("splash-title").textContent = "Welcome";
+	document.getElementById("splash-subtitle").textContent = "Loading...";
+	document.getElementById("splash-btn").textContent = "Enter";
+
   menuTitle.textContent = "Choose a category";
   menuSubtitle.textContent = "Sélectionnez une catégorie";
 
