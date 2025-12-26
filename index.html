@@ -71,28 +71,7 @@
       text-align: center;
       background: transparent;
     }
-    .flags {
-      position: fixed;
-      top: env(safe-area-inset-top, 12px);
-      right: 12px;
-      display: flex;
-      gap: 8px;
-      z-index: 10;
-    }
-    .flags img {
-      width: 333px;
-      height: 174px;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: #222;
-      transition: transform .2s ease, border-color .2s ease;
-    }
-    .flags img:hover { transform: scale(1.08); border-color: var(--accent); }
-    @media (max-width: 360px) {
-      img.logo { max-width: 160px; }
-      .note { font-size: 0.9em; }
-    }
+.flags { position: fixed; top: env(safe-area-inset-top, 12px); right: 12px; display: flex; gap: 8px; z-index: 10; } .flags img { width: 32px; height: 22px; cursor: pointer; border: none; border-radius: 0; background: none; transition: none; } @media (max-width: 360px) { img.logo { max-width: 160px; } .note { font-size: 0.9em; } }
   </style>
 </head>
 <body>
