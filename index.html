@@ -127,11 +127,17 @@ body {
 /* ========================= */
 .page {
   display: none;
-  flex: 1;
+  opacity: 0;
+  transition: opacity .25s ease;
+  pointer-events: none;
   padding: 24px;
   text-align: center;
 }
-.page.active { display: block; }
+.page.active {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
 
 .page h2 {
   font-size: 2rem;
@@ -140,6 +146,25 @@ body {
 .page p {
   font-size: 1.1rem;
   color: var(--muted);
+}
+
+/* ========================= */
+/* BOUTON RETOUR AU MENU     */
+/* ========================= */
+.back-btn {
+  margin-top: 20px;
+  padding: 10px 24px;
+  background: var(--accent);
+  color: #000;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: transform .2s ease, background .2s ease;
+}
+.back-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px) scale(1.05);
 }
 </style>
 </head>
@@ -170,33 +195,76 @@ body {
   <div class="menu-title" id="menu-title">Choose a category</div>
   <div class="menu-subtitle" id="menu-subtitle">Sélectionnez une catégorie</div>
 
-  <button class="menu-btn" data-target="page1">Category 1</button>
-  <button class="menu-btn" data-target="page2">Category 2</button>
-  <button class="menu-btn" data-target="page3">Category 3</button>
+  <button class="menu-btn" data-target="page1">🌿 Comfort & Well‑Being at Home</button>
+  <button class="menu-btn" data-target="page2">👨‍👩‍👧‍👦 Connect Me to My Circle</button>
+  <button class="menu-btn" data-target="page3">🌌 Connect Me to New Realities</button>
 </div>
 
 <!-- ========================= -->
-<!-- PAGE 1                    -->
+<!-- PAGE 1 (TON ANCIEN MAIN)  -->
 <!-- ========================= -->
 <div id="page1" class="page">
-  <h2>Category 1</h2>
-  <p>Contenu de la catégorie 1 (à personnaliser).</p>
+  <h2>🌿 Comfort & Well‑Being at Home</h2>
+
+  <!-- 🔥 INSÈRE ICI TON ANCIEN MAIN COMPLET 🔥 -->
+  <!-- Exemple : -->
+  
+  
+  
+  
+  
+  <main>
+    <img src="connectmeifucan-logo-Noel.jpg" alt="Connect Me If U Can Logo" class="logo">
+
+    <h3>🎮 Connect Me If U Can (under construction)</h3>
+
+    <div id="fr" class="lang">
+      ✨ 1. Déplace-toi sereinement la nuit, en toute simplicité.<br>
+      ✨ 2. Transforme ton salon en expérience immersive à domicile :<br>
+      🔦 Lumières • Sons • Objets connectés.<br>
+      ⏳ Voyage dans le temps entre 1850 et 2050.<br><br>
+
+      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Découvrir</a>
+      <div class="note">💡 Projects personnels en cours de développement</div>
+    </div>
+
+    <div id="en" class="lang">
+      ✨ 1. Move around at night with ease and peace of mind<br>
+      ✨ 2. Turn your living room into an immersive home experience.<br>
+      🔦 Lights • Sounds • Smart objects.<br>
+      ⏳ Time travel between 1850 and 2050.<br><br>
+
+      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Discover</a>
+      <div class="note">💡 Personal projects under development</div>
+    </div>
+  </main>
+
+
+
+
+
+
+  </main>
+
+  <button class="back-btn" data-back>⬅ Retour au menu</button>
 </div>
 
 <!-- ========================= -->
 <!-- PAGE 2                    -->
 <!-- ========================= -->
 <div id="page2" class="page">
-  <h2>Category 2</h2>
-  <p>Contenu de la catégorie 2 (à personnaliser).</p>
+  <h2>👨‍👩‍👧‍👦 Connect Me to My Circle</h2>
+  <p>Contenu à venir…</p>
+  <button class="back-btn" data-back>⬅ Retour au menu</button>
 </div>
 
 <!-- ========================= -->
 <!-- PAGE 3                    -->
 <!-- ========================= -->
 <div id="page3" class="page">
-  <h2>Category 3</h2>
-  <p>Contenu de la catégorie 3 (à personnaliser).</p>
+  <h2>🌌 Connect Me to New Realities</h2>
+  <p>Contenu à venir…</p>
+  <button class="back-btn" data-back>⬅ Retour au menu</button>
 </div>
 
 <!-- ========================= -->
@@ -224,7 +292,21 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
     menu.classList.remove("active");
 
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    document.getElementById(target).classList.add("active");
+
+    setTimeout(() => {
+      document.getElementById(target).classList.add("active");
+    }, 20);
+  });
+});
+
+/* BOUTON RETOUR AU MENU */
+document.querySelectorAll("[data-back]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+
+    setTimeout(() => {
+      menu.classList.add("active");
+    }, 20);
   });
 });
 
@@ -238,11 +320,39 @@ const menuSubtitle = document.getElementById("menu-subtitle");
 function setFR() {
   menuTitle.textContent = "Choisissez une catégorie";
   menuSubtitle.textContent = "Select a category";
+
+  document.querySelector('[data-target="page1"]').textContent =
+    "🌿 Confort & Bien‑Être at Home";
+  document.querySelector('[data-target="page2"]').textContent =
+    "👨‍👩‍👧‍👦 Connecte‑Moi à Mon Cercle";
+  document.querySelector('[data-target="page3"]').textContent =
+    "🌌 Connecte‑Moi aux Nouvelles Réalités";
+
+  document.querySelector("#page1 h2").textContent =
+    "🌿 Confort & Bien‑Être at Home";
+  document.querySelector("#page2 h2").textContent =
+    "👨‍👩‍👧‍👦 Connecte‑Moi à Mon Cercle";
+  document.querySelector("#page3 h2").textContent =
+    "🌌 Connecte‑Moi aux Nouvelles Réalités";
 }
 
 function setEN() {
   menuTitle.textContent = "Choose a category";
   menuSubtitle.textContent = "Sélectionnez une catégorie";
+
+  document.querySelector('[data-target="page1"]').textContent =
+    "🌿 Comfort & Well‑Being at Home";
+  document.querySelector('[data-target="page2"]').textContent =
+    "👨‍👩‍👧‍👦 Connect Me to My Circle";
+  document.querySelector('[data-target="page3"]').textContent =
+    "🌌 Connect Me to New Realities";
+
+  document.querySelector("#page1 h2").textContent =
+    "🌿 Comfort & Well‑Being at Home";
+  document.querySelector("#page2 h2").textContent =
+    "👨‍👩‍👧‍👦 Connect Me to My Circle";
+  document.querySelector("#page3 h2").textContent =
+    "🌌 Connect Me to New Realities";
 }
 
 btnFR.addEventListener("click", setFR);
