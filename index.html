@@ -108,7 +108,8 @@ body {
 /* BOUTONS CATEGORIES        */
 /* ========================= */
 .menu-btn {
-  width: 260px;
+  width: 260px; /* largeur uniforme */ 
+  text-align: center; /* centre le texte */
   padding: 14px 32px;
   background: var(--accent);
   color: #000;
@@ -117,31 +118,10 @@ body {
   text-decoration: none;
   cursor: pointer;
   transition: transform .2s ease, background .2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
 }
 .menu-btn:hover {
   background: var(--accent-hover);
   transform: translateY(-2px) scale(1.05);
-}
-
-/* Icônes PNG */
-.icon-btn {
-  width: 28px;
-  height: 28px;
-  transition: transform .2s ease;
-}
-
-/* Hover icône */
-.menu-btn:hover .icon-btn {
-  transform: scale(1.15);
-}
-
-/* Si PNG manquant → icône supprimée → pas d’espace vide */
-.menu-btn img[style*="display: none"] {
-  margin-right: 0;
 }
 
 /* ========================= */
@@ -188,27 +168,6 @@ body {
   background: var(--accent-hover);
   transform: translateY(-2px) scale(1.05);
 }
-
-/* ========================= */
-/* MOBILE                    */
-/* ========================= */
-@media (max-width: 420px) {
-  .menu-btn {
-    width: 90%;
-    padding: 12px 20px;
-    font-size: 0.95rem;
-  }
-  .icon-btn {
-    width: 22px;
-    height: 22px;
-  }
-  .menu-title {
-    font-size: 1.6rem;
-  }
-  .menu-subtitle {
-    font-size: 1rem;
-  }
-}
 </style>
 </head>
 
@@ -238,28 +197,24 @@ body {
   <div class="menu-title" id="menu-title">Choose a category</div>
   <div class="menu-subtitle" id="menu-subtitle">Sélectionnez une catégorie</div>
 
-  <button class="menu-btn" data-target="page1">
-    <img src="icons/cat1.png" class="icon-btn" alt="" onerror="this.remove()">
-    <span class="btn-text">Comfort & Well‑Being at Home</span>
-  </button>
-
-  <button class="menu-btn" data-target="page2">
-    <img src="icons/cat2.png" class="icon-btn" alt="" onerror="this.remove()">
-    <span class="btn-text">Connect Me to My Circle</span>
-  </button>
-
-  <button class="menu-btn" data-target="page3">
-    <img src="icons/cat3.png" class="icon-btn" alt="" onerror="this.remove()">
-    <span class="btn-text">Connect Me to New Realities</span>
-  </button>
+  <button class="menu-btn" data-target="page1">🌿 Comfort & Well‑Being at Home</button>
+  <button class="menu-btn" data-target="page2">👨‍👩‍👧‍👦 Connect Me to My Circle</button>
+  <button class="menu-btn" data-target="page3">🌌 Connect Me to New Realities</button>
 </div>
 
 <!-- ========================= -->
-<!-- PAGE 1                    -->
+<!-- PAGE 1 (TON ANCIEN MAIN)  -->
 <!-- ========================= -->
 <div id="page1" class="page">
-  <h2>Comfort & Well‑Being at Home</h2>
+  <h2>🌿 Comfort & Well‑Being at Home</h2>
 
+  <!-- 🔥 INSÈRE ICI TON ANCIEN MAIN COMPLET 🔥 -->
+  <!-- Exemple : -->
+  
+  
+  
+  
+  
   <main>
     <img src="connectmeifucan-logo-Noel.jpg" alt="Connect Me If U Can Logo" class="logo">
 
@@ -286,6 +241,13 @@ body {
     </div>
   </main>
 
+
+
+
+
+
+  </main>
+
   <button class="back-btn" data-back>⬅ Retour au menu</button>
 </div>
 
@@ -293,7 +255,7 @@ body {
 <!-- PAGE 2                    -->
 <!-- ========================= -->
 <div id="page2" class="page">
-  <h2>Connect Me to My Circle</h2>
+  <h2>👨‍👩‍👧‍👦 Connect Me to My Circle</h2>
   <p>Contenu à venir…</p>
   <button class="back-btn" data-back>⬅ Retour au menu</button>
 </div>
@@ -302,7 +264,7 @@ body {
 <!-- PAGE 3                    -->
 <!-- ========================= -->
 <div id="page3" class="page">
-  <h2>Connect Me to New Realities</h2>
+  <h2>🌌 Connect Me to New Realities</h2>
   <p>Contenu à venir…</p>
   <button class="back-btn" data-back>⬅ Retour au menu</button>
 </div>
@@ -361,46 +323,40 @@ function setFR() {
   menuTitle.textContent = "Choisissez une catégorie";
   menuSubtitle.textContent = "Select a category";
 
-  document.querySelector('[data-target="page1"] .btn-text').textContent =
-    "Confort & Bien‑Être at Home";
-  document.querySelector('[data-target="page2"] .btn-text').textContent =
-    "Connecte‑Moi à Mon Cercle";
-  document.querySelector('[data-target="page3"] .btn-text').textContent =
-    "Connecte‑Moi aux Nouvelles Réalités";
+  document.querySelector('[data-target="page1"]').textContent =
+    "🌿 Confort & Bien‑Être at Home";
+  document.querySelector('[data-target="page2"]').textContent =
+    "👨‍👩‍👧‍👦 Connecte‑Moi à Mon Cercle";
+  document.querySelector('[data-target="page3"]').textContent =
+    "🌌 Connecte‑Moi aux Nouvelles Réalités";
 
   document.querySelector("#page1 h2").textContent =
-    "Confort & Bien‑Être at Home";
+    "🌿 Confort & Bien‑Être at Home";
   document.querySelector("#page2 h2").textContent =
-    "Connecte‑Moi à Mon Cercle";
+    "👨‍👩‍👧‍👦 Connecte‑Moi à Mon Cercle";
   document.querySelector("#page3 h2").textContent =
-    "Connecte‑Moi aux Nouvelles Réalités";
-
-  document.querySelectorAll("[data-back]").forEach(btn => {
-    btn.textContent = "⬅ Retour au menu";
-  });
+    "🌌 Connecte‑Moi aux Nouvelles Réalités";
+  document.querySelectorAll("[data-back]").forEach(btn => { btn.textContent = "⬅ Retour au menu"; });
 }
 
 function setEN() {
   menuTitle.textContent = "Choose a category";
   menuSubtitle.textContent = "Sélectionnez une catégorie";
 
-  document.querySelector('[data-target="page1"] .btn-text').textContent =
+  document.querySelector('[data-target="page1"]').textContent =
     "Comfort & Well‑Being at Home";
-  document.querySelector('[data-target="page2"] .btn-text').textContent =
-    "Connect Me to My Circle";
-  document.querySelector('[data-target="page3"] .btn-text').textContent =
-    "Connect Me to New Realities";
+  document.querySelector('[data-target="page2"]').textContent =
+    "👨‍👩‍👧‍👦 Connect Me to My Circle";
+  document.querySelector('[data-target="page3"]').textContent =
+    "🌌 Connect Me to New Realities";
 
   document.querySelector("#page1 h2").textContent =
-    "Comfort & Well‑Being at Home";
+    "🌿 Comfort & Well‑Being at Home";
   document.querySelector("#page2 h2").textContent =
-    "Connect Me to My Circle";
+    "👨‍👩‍👧‍👦 Connect Me to My Circle";
   document.querySelector("#page3 h2").textContent =
-    "Connect Me to New Realities";
-
-  document.querySelectorAll("[data-back]").forEach(btn => {
-    btn.textContent = "⬅ Back to menu";
-  });
+    "🌌 Connect Me to New Realities";
+  document.querySelectorAll("[data-back]").forEach(btn => { btn.textContent = "⬅ Back to menu"; });
 }
 
 btnFR.addEventListener("click", setFR);
