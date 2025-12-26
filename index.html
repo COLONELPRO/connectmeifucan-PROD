@@ -108,6 +108,8 @@ body {
 /* BOUTONS CATEGORIES        */
 /* ========================= */
 .menu-btn {
+  width: 260px; /* largeur uniforme */ 
+  text-align: center; /* centre le texte */
   padding: 14px 32px;
   background: var(--accent);
   color: #000;
@@ -334,6 +336,7 @@ function setFR() {
     "👨‍👩‍👧‍👦 Connecte‑Moi à Mon Cercle";
   document.querySelector("#page3 h2").textContent =
     "🌌 Connecte‑Moi aux Nouvelles Réalités";
+  document.querySelectorAll("[data-back]").forEach(btn => { btn.textContent = "⬅ Retour au menu"; });
 }
 
 function setEN() {
@@ -353,6 +356,7 @@ function setEN() {
     "👨‍👩‍👧‍👦 Connect Me to My Circle";
   document.querySelector("#page3 h2").textContent =
     "🌌 Connect Me to New Realities";
+  document.querySelectorAll("[data-back]").forEach(btn => { btn.textContent = "⬅ Back to menu"; });
 }
 
 btnFR.addEventListener("click", setFR);
