@@ -84,58 +84,49 @@ body {
 /* ========================= */
 /* ECRAN INTERMEDIAIRE       */
 /* ========================= */
-/* Mobile */
-@media (max-width: var(--mobile)) {
+
+/* 📱 Mobile : 0 → 767px */
+@media (max-width: calc(var(--mobile) - 1px)) {
     #menu {
         display: flex;
         flex-direction: column;
-	    justify-content: center;
-	    align-items: center;
-	    gap: 18px;
-	    text-align: center;
-	    z-index: 9000; 
+        justify-content: center;
+        align-items: center;   /* centré */
+        gap: 18px;
+        text-align: center;
+        z-index: 9000;
     }
 }
 
-/* Tablette */
-@media (min-width: var(--mobile)) and (max-width: var(--tablet)) {
+/* 📲 Tablette : 768px → 1023px */
+@media (min-width: var(--mobile)) and (max-width: calc(var(--tablet) - 1px)) {
     #menu {
-            flex-direction: column;
-		justify-content: center;
-	    align-items: center;
-	    gap: 18px;
-	    text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;   /* centré */
+        gap: 18px;
+        text-align: center;
     }
 }
 
-/* Desktop */
+/* 💻 Desktop : 1024px → ∞ */
 @media (min-width: var(--tablet)) {
     #menu {
-         flex-direction: column;
-	    justify-content: center;
-	    align-items: left;
-	    gap: 18px;
-	    text-align: center;
-	    z-index: 9000; 
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;   /* aligné à gauche */
+        gap: 18px;
+        text-align: left;
+        z-index: 9000;
         position: static;
+        padding-left: 40px; /* optionnel : marge à gauche */
     }
 }
-
-
-
-  
-<!--   inset: 0;
-  background: linear-gradient(135deg, var(--bg1), var(--bg2));
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 18px;
-  text-align: center;
-  z-index: 9000; 
-}-->
+/*
 #menu.active { display: flex; }
-
+*/
 .menu-title {
   font-size: 2rem;
   font-weight: bold;
