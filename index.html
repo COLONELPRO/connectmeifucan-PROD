@@ -73,8 +73,7 @@
     }
 	
 	.flags { position: fixed; top: env(safe-area-inset-top, 12px); right: 12px; display: flex; gap: 8px; z-index: 10; }
-	.flags img { width: auto; height: auto; object-fit: none;cursor: pointer; border: none; border-radius: 0; background: none; transition: none; }
-
+.flags img { width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; object-fit: none; flex: 0 0 auto; }
   
   </style>
 </head>
