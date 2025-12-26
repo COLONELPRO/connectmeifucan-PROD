@@ -60,14 +60,6 @@
     }
 
     /* ========================= */
-    /* 📝 TITRE                  */
-    /* ========================= */
-    h1 {
-      font-size: clamp(1.8rem, 2.2vw + 1rem, 2.2rem);
-      margin: 8px 0 4px 0;
-    }
-
-    /* ========================= */
     /* 🌍 TEXTES MULTILINGUES    */
     /* ========================= */
     .lang {
@@ -136,12 +128,6 @@
     .flags img {
       width: 32px !important;
       height: 22px !important;
-      min-width: 32px !important;
-      max-width: 32px !important;
-      min-height: 22px !important;
-      max-height: 22px !important;
-      flex: 0 0 32px !important;
-      object-fit: fill;
       cursor: pointer;
       border: 1px solid var(--border);
       border-radius: 4px;
@@ -149,7 +135,6 @@
     }
 
     .flags img:hover {
-      transform: scale(1);
       border-color: var(--accent);
     }
 
@@ -200,6 +185,23 @@
       font-weight: bold;
       cursor: pointer;
     }
+
+    /* ========================= */
+    /* 🔄 LOADER ANIMÉ           */
+    /* ========================= */
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 5px solid rgba(0,0,0,0.2);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 
@@ -209,76 +211,9 @@
   <div id="splash">
     <h1>Bienvenue</h1>
     <p>Chargement de la présentation...</p>
+    <div class="loader"></div>
     <button id="enterBtn">Entrer</button>
   </div>
 
   <!-- Sélecteur de langue -->
   <div class="flags" aria-label="Language selector">
-    <img src="Site/Picto/Picto_FR.png" alt="FR" onclick="setLang('fr')">
-    <img src="Site/Picto/Picto_EN.png" alt="EN" onclick="setLang('en')">
-  </div>
-
-  <main>
-    <img src="connectmeifucan-logo-Noel.jpg" alt="Connect Me If U Can Logo" class="logo">
-
-    <h2>🎮 Connect Me If U Can (under construction)</h2>
-
-    <div id="fr" class="lang">
-      ✨ 1. Déplace-toi sereinement la nuit, en toute simplicité.<br>
-      ✨ 2. Transforme ton salon en expérience immersive à domicile :<br>
-      🔦 Lumières • Sons • Objets connectés.<br>
-      ⏳ Voyage dans le temps entre 1850 et 2050.<br><br>
-
-      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Découvrir</a>
-      <div class="note">💡 Projects personnels en cours de développement</div>
-    </div>
-
-    <div id="en" class="lang">
-      ✨ 1. Move around at night with ease and peace of mind<br>
-      ✨ 2. Turn your living room into an immersive home experience.<br>
-      🔦 Lights • Sounds • Smart objects.<br>
-      ⏳ Time travel between 1850 and 2050.<br><br>
-
-      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Discover</a>
-      <div class="note">💡 Personal projects under development</div>
-    </div>
-  </main>
-
-  <footer>
-    © 2025 Connect Me If U Can - Projet personnel en cours de développement visant à tester et à confirmer l’expérience utilisateur avant un lancement réel si viabilité du projet
-  </footer>
-
-  <!-- Scripts -->
-  <script>
-    const splash = document.getElementById('splash');
-    const enterBtn = document.getElementById('enterBtn');
-
-    if (enterBtn && splash) {
-      enterBtn.addEventListener('click', () => {
-        splash.classList.add('hidden');
-        setTimeout(() => splash.remove(), 600);
-      });
-
-      setTimeout(() => {
-        if (document.body.contains(splash)) {
-          splash.classList.add('hidden');
-          setTimeout(() => splash.remove(), 600);
-        }
-      }, 3000);
-    }
-
-    function setLang(lang) {
-      document.querySelectorAll('.lang').forEach(el => el.style.display = 'none');
-      const target = document.getElementById(lang);
-      if (target) target.style.display = 'block';
-      document.documentElement.lang = lang;
-    }
-
-    (function () {
-      const userLang = (navigator.language || 'en').toLowerCase();
-      setLang(userLang.startsWith('fr') ? 'fr' : 'en');
-    })();
-  </script>
-
-</body>
-</html>
