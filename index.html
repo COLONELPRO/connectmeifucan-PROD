@@ -73,16 +73,15 @@
     }
 	
 	.flags { position: fixed; top: env(safe-area-inset-top, 12px); right: 12px; display: flex; gap: 8px; z-index: 10; }
-	.flags img { cursor: pointer; border: none; border-radius: 0; background: none; transition: none; }
-
+	.flags img { width: auto; height: auto; object-fit: none;cursor: pointer; border: none; border-radius: 0; background: none; transition: none; }
 
   
   </style>
 </head>
 <body>
 <div class="flags" aria-label="Language selector">
-    <img src="Site/Picto/Picto_FR.jpg" alt="FR" onclick="setLang('fr')">
-    <img src="Site/Picto/Picto_EN.jpg" alt="EN" onclick="setLang('en')">
+    <img src="Site/Picto/Picto_FR.png" alt="FR" onclick="setLang('fr')">
+    <img src="Site/Picto/Picto_EN.png" alt="EN" onclick="setLang('en')">
 </div>
 
 
