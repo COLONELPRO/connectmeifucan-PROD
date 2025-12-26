@@ -1,284 +1,253 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Connect Me If U Can</title>
-  <link rel="icon" type="image/jpeg" href="connectmeifucan-logo-Noel.jpg">
+<meta charset="UTF-8">
+<title>Site avec Splash + Menu + Pages</title>
 
-  <style>
-    /* ========================= */
-    /* 🎨 VARIABLES GLOBALES     */
-    /* ========================= */
-    :root {
-      --bg1:#0d0d0d;
-      --bg2:#1c1c1c;
-      --text:#fff;
-      --muted:#aaa;
-      --accent:#ffcc00;
-      --accent-hover:#ffaa00;
-      --border:#444;
-    }
+<style>
+/* ========================= */
+/* VARIABLES GLOBALES        */
+/* ========================= */
+:root {
+  --bg1:#0d0d0d;
+  --bg2:#1c1c1c;
+  --text:#fff;
+  --muted:#aaa;
+  --accent:#ffcc00;
+  --accent-hover:#ffaa00;
+  --border:#444;
+}
 
-    /* ========================= */
-    /* 🔧 RESET & BASE           */
-    /* ========================= */
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
+/* ========================= */
+/* RESET                     */
+/* ========================= */
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
 
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      min-height: 100dvh;
-    }
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
 
-    /* ========================= */
-    /* 📌 MAIN CONTENT           */
-    /* ========================= */
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 24px 20px;
-      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
-      gap: 10px;
-    }
+/* ========================= */
+/* SPLASH SCREEN             */
+/* ========================= */
+#splash {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, var(--accent), var(--bg1));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #000;
+  z-index: 9999;
+  transition: opacity .6s ease;
+}
+#splash.hidden { opacity: 0; pointer-events: none; }
 
-    /* ========================= */
-    /* 🖼️ LOGO                   */
-    /* ========================= */
-    img.logo {
-      max-width: 200px;
-      height: auto;
-    }
+/* ========================= */
+/* BOUTONS LANGUE            */
+/* ========================= */
+.lang-switch {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 10000;
+}
 
-    /* ========================= */
-    /* 📝 TITRE                  */
-    /* ========================= */
-    h1 {
-      font-size: clamp(1.8rem, 2.2vw + 1rem, 2.2rem);
-      margin: 8px 0 4px 0;
-    }
+.lang-btn {
+  padding: 6px 12px;
+  background: var(--accent);
+  color: #000;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: transform .2s ease, background .2s ease;
+}
+.lang-btn:hover {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
 
-    /* ========================= */
-    /* 🌍 TEXTES MULTILINGUES    */
-    /* ========================= */
-    .lang {
-      display: none;
-      margin-top: 6px;
-      max-width: 560px;
-      line-height: 1.5;
-      font-size: clamp(1rem, 0.8vw + 0.8rem, 1.08rem);
-    }
+/* ========================= */
+/* ECRAN INTERMEDIAIRE       */
+/* ========================= */
+#menu {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+  z-index: 9000;
+}
+#menu.active { display: flex; }
 
-    /* ========================= */
-    /* 🔘 BOUTON CTA             */
-    /* ========================= */
-    a.cta {
-      display: inline-block;
-      padding: 12px 28px;
-      background: var(--accent);
-      color: #000;
-      font-weight: 700;
-      text-decoration: none;
-      border-radius: 10px;
-      transition: transform .2s ease, background .2s ease;
-    }
+.menu-title {
+  font-size: 2rem;
+  font-weight: bold;
+}
+.menu-subtitle {
+  font-size: 1.1rem;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
 
-    a.cta:hover {
-      background: var(--accent-hover);
-      transform: translateY(-1px) scale(1.03);
-    }
+/* ========================= */
+/* BOUTONS CATEGORIES        */
+/* ========================= */
+.menu-btn {
+  padding: 14px 32px;
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease;
+}
+.menu-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px) scale(1.05);
+}
 
-    /* ========================= */
-    /* 📝 NOTE                   */
-    /* ========================= */
-    .note {
-      margin-top: 18px;
-      font-size: 0.95em;
-      color: var(--accent);
-      font-weight: bold;
-      text-align: center;
-      min-height: 1.2em;
-    }
+/* ========================= */
+/* PAGES PRINCIPALES         */
+/* ========================= */
+.page {
+  display: none;
+  flex: 1;
+  padding: 24px;
+  text-align: center;
+}
+.page.active { display: block; }
 
-    /* ========================= */
-    /* 📌 FOOTER                 */
-    /* ========================= */
-    footer {
-      margin-top: auto;
-      padding: 14px 16px;
-      font-size: 0.85em;
-      color: var(--muted);
-      text-align: center;
-      background: transparent;
-    }
-
-    /* ========================= */
-    /* 🇫🇷 DRAPEAUX LANGUES      */
-    /* ========================= */
-    .flags {
-      position: fixed;
-      top: env(safe-area-inset-top, 12px);
-      right: 12px;
-      display: flex;
-      gap: 8px;
-      z-index: 10;
-    }
-
-    .flags img {
-      width: 32px !important;
-      height: 22px !important;
-      min-width: 32px !important;
-      max-width: 32px !important;
-      min-height: 22px !important;
-      max-height: 22px !important;
-      flex: 0 0 32px !important;
-      object-fit: fill;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      transition: transform .2s ease, border-color .2s ease;
-    }
-
-    .flags img:hover {
-      transform: scale(1);
-      border-color: var(--accent);
-    }
-
-    /* ========================= */
-    /* 📱 MOBILE                 */
-    /* ========================= */
-    @media (max-width: 360px) {
-      img.logo { max-width: 160px; }
-      .note { font-size: 0.9em; }
-    }
-
-    /* ========================= */
-    /* 📱 Splash Screen          */
-    /* ========================= */
-    #splash {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at top, #ffcc00, #0d0d0d);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #000;
-      z-index: 9999;
-      transition: opacity 0.6s ease;
-    }
-
-    #splash.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    #splash h1 {
-      font-size: 2rem;
-      margin-bottom: 10px;
-    }
-
-    #splash p {
-      margin-bottom: 20px;
-    }
-
-    #splash button {
-      padding: 10px 24px;
-      border-radius: 8px;
-      border: none;
-      background: #000;
-      color: #ffcc00;
-      font-weight: bold;
-      cursor: pointer;
-    }
-  </style>
+.page h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+.page p {
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+</style>
 </head>
 
 <body>
 
-  <!-- ÉCRAN D’INTRO -->
-  <div id="splash">
-    <h1>Bienvenue</h1>
-    <p>Chargement...</p>
-    <button id="enterBtn">Entrer</button>
-  </div>
+<!-- ========================= -->
+<!-- BOUTONS LANGUE            -->
+<!-- ========================= -->
+<div class="lang-switch">
+  <button class="lang-btn" id="btn-fr">FR</button>
+  <button class="lang-btn" id="btn-en">EN</button>
+</div>
 
-  <!-- Sélecteur de langue -->
-  <div class="flags" aria-label="Language selector">
-    <img src="Site/Picto/Picto_FR.png" alt="FR" onclick="setLang('fr')">
-    <img src="Site/Picto/Picto_EN.png" alt="EN" onclick="setLang('en')">
-  </div>
+<!-- ========================= -->
+<!-- SPLASH SCREEN             -->
+<!-- ========================= -->
+<div id="splash">
+  <h1>Bienvenue</h1>
+  <p>Chargement...</p>
+  <button id="enterBtn" class="menu-btn">Entrer</button>
+</div>
 
-  <main>
-    <img src="connectmeifucan-logo-Noel.jpg" alt="Connect Me If U Can Logo" class="logo">
+<!-- ========================= -->
+<!-- ECRAN INTERMEDIAIRE       -->
+<!-- ========================= -->
+<div id="menu">
+  <div class="menu-title" id="menu-title">Choose a category</div>
+  <div class="menu-subtitle" id="menu-subtitle">Sélectionnez une catégorie</div>
 
-    <h2>🎮 Connect Me If U Can (under construction)</h2>
+  <button class="menu-btn" data-target="page1">Category 1</button>
+  <button class="menu-btn" data-target="page2">Category 2</button>
+  <button class="menu-btn" data-target="page3">Category 3</button>
+</div>
 
-    <div id="fr" class="lang">
-      ✨ 1. Déplace-toi sereinement la nuit, en toute simplicité.<br>
-      ✨ 2. Transforme ton salon en expérience immersive à domicile :<br>
-      🔦 Lumières • Sons • Objets connectés.<br>
-      ⏳ Voyage dans le temps entre 1850 et 2050.<br><br>
+<!-- ========================= -->
+<!-- PAGE 1                    -->
+<!-- ========================= -->
+<div id="page1" class="page">
+  <h2>Category 1</h2>
+  <p>Contenu de la catégorie 1 (à personnaliser).</p>
+</div>
 
-      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Découvrir</a>
-      <div class="note">💡 Projects personnels en cours de développement</div>
-    </div>
+<!-- ========================= -->
+<!-- PAGE 2                    -->
+<!-- ========================= -->
+<div id="page2" class="page">
+  <h2>Category 2</h2>
+  <p>Contenu de la catégorie 2 (à personnaliser).</p>
+</div>
 
-    <div id="en" class="lang">
-      ✨ 1. Move around at night with ease and peace of mind<br>
-      ✨ 2. Turn your living room into an immersive home experience.<br>
-      🔦 Lights • Sounds • Smart objects.<br>
-      ⏳ Time travel between 1850 and 2050.<br><br>
+<!-- ========================= -->
+<!-- PAGE 3                    -->
+<!-- ========================= -->
+<div id="page3" class="page">
+  <h2>Category 3</h2>
+  <p>Contenu de la catégorie 3 (à personnaliser).</p>
+</div>
 
-      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Discover</a>
-      <div class="note">💡 Personal projects under development</div>
-    </div>
-  </main>
+<!-- ========================= -->
+<!-- SCRIPT GLOBAL             -->
+<!-- ========================= -->
+<script>
+/* SPLASH → MENU */
+const splash = document.getElementById("splash");
+const enterBtn = document.getElementById("enterBtn");
+const menu = document.getElementById("menu");
 
-  <footer>
-    © 2025 Connect Me If U Can - Projet personnel en cours de développement visant à tester et à confirmer l’expérience utilisateur avant un lancement réel si viabilité du projet
-  </footer>
+enterBtn.addEventListener("click", () => {
+  splash.classList.add("hidden");
+  setTimeout(() => {
+    splash.remove();
+    menu.classList.add("active");
+  }, 600);
+});
 
-  <!-- Scripts -->
-  <script>
-    const splash = document.getElementById('splash');
-    const enterBtn = document.getElementById('enterBtn');
+/* CATEGORIES → PAGES */
+document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.target;
 
-    if (enterBtn && splash) {
-      enterBtn.addEventListener('click', () => {
-        splash.classList.add('hidden');
-        setTimeout(() => splash.remove(), 600);
-      });
+    menu.classList.remove("active");
 
-      setTimeout(() => {
-        if (document.body.contains(splash)) {
-          splash.classList.add('hidden');
-          setTimeout(() => splash.remove(), 600);
-        }
-      }, 3000);
-    }
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(target).classList.add("active");
+  });
+});
 
-    function setLang(lang) {
-      document.querySelectorAll('.lang').forEach(el => el.style.display = 'none');
-      const target = document.getElementById(lang);
-      if (target) target.style.display = 'block';
-      document.documentElement.lang = lang;
-    }
+/* LANGUE FR / EN */
+const btnFR = document.getElementById("btn-fr");
+const btnEN = document.getElementById("btn-en");
 
-    (function () {
-      const userLang = (navigator.language || 'en').toLowerCase();
-      setLang(userLang.startsWith('fr') ? 'fr' : 'en');
-    })();
-  </script>
+const menuTitle = document.getElementById("menu-title");
+const menuSubtitle = document.getElementById("menu-subtitle");
+
+function setFR() {
+  menuTitle.textContent = "Choisissez une catégorie";
+  menuSubtitle.textContent = "Select a category";
+}
+
+function setEN() {
+  menuTitle.textContent = "Choose a category";
+  menuSubtitle.textContent = "Sélectionnez une catégorie";
+}
+
+btnFR.addEventListener("click", setFR);
+btnEN.addEventListener("click", setEN);
+</script>
 
 </body>
 </html>
