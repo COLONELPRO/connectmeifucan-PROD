@@ -17,6 +17,9 @@
   --accent:#ffcc00;
   --accent-hover:#ffaa00;
   --border:#444;
+  --mobile: 768px; 
+  --tablet: 1024px; 
+  --desktop: 1440px;
 }
 
 /* ========================= */
@@ -81,9 +84,34 @@ body {
 /* ========================= */
 /* ECRAN INTERMEDIAIRE       */
 /* ========================= */
-#menu {
-  position: fixed;
-  inset: 0;
+/* Mobile */
+@media (max-width: var(--mobile)) {
+    #menu {
+        display: flex;
+        flex-direction: column;
+		
+    }
+}
+
+/* Tablette */
+@media (min-width: var(--mobile)) and (max-width: var(--tablet)) {
+    #menu {
+        flex-direction: row;
+    }
+}
+
+/* Desktop */
+@media (min-width: var(--tablet)) {
+    #menu {
+        display: block;
+        position: static;
+    }
+}
+
+
+
+  
+<!--   inset: 0;
   background: linear-gradient(135deg, var(--bg1), var(--bg2));
   display: none;
   flex-direction: column;
@@ -91,8 +119,8 @@ body {
   align-items: center;
   gap: 18px;
   text-align: center;
-  z-index: 9000;
-}
+  z-index: 9000; 
+}-->
 #menu.active { display: flex; }
 
 .menu-title {
