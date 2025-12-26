@@ -220,6 +220,45 @@ footer {
 </style>
 
 </head>
+
+
+<script>
+  const splash = document.getElementById('splash');
+  const enterBtn = document.getElementById('enterBtn');
+
+  // Vérifier que le bouton existe
+  if (enterBtn && splash) {
+
+    // 1) Fermeture manuelle en cliquant sur le bouton
+    enterBtn.addEventListener('click', () => {
+      splash.classList.add('hidden');
+      setTimeout(() => {
+        if (document.body.contains(splash)) {
+          splash.remove();
+        }
+      }, 600); // retire le DOM après la transition
+    });
+
+    // 2) Fermeture automatique après X secondes (optionnel)
+    setTimeout(() => {
+      if (document.body.contains(splash)) {
+        splash.classList.add('hidden');
+        setTimeout(() => {
+          if (document.body.contains(splash)) {
+            splash.remove();
+          }
+        }, 600);
+      }
+    }, 3000); // 3000 ms = 3 secondes
+  } else {
+    console.warn('Impossible de trouver #splash ou #enterBtn dans le DOM.');
+  }
+</script>
+
+
+
+
+
 <body>
 
 
@@ -287,18 +326,7 @@ footer {
 
   <script>
   
-  
-const splash = document.getElementById('splash');
- const enterBtn = document.getElementById('enterBtn'); 
- 
- // 1) Fermeture manuelle en cliquant sur le bouton
- enterBtn.addEventListener('click', () => { splash.classList.add('hidden'); setTimeout(() => splash.remove(), 600); // retire le DOM après la transition }); 
- 
- // 2) (Optionnel) Fermeture automatique après X secondes 
- setTimeout(() => { if (document.body.contains(splash)) { splash.classList.add('hidden'); setTimeout(() => splash.remove(), 600); } }, 3000); // 3000 ms = 3 secondes
-
-
-  
+   
     function setLang(lang) {
       document.querySelectorAll('.lang').forEach(el => el.style.display = 'none');
       var target = document.getElementById(lang);
