@@ -163,19 +163,99 @@ footer {
   img.logo { max-width: 160px; }
   .note { font-size: 0.9em; }
 }
+
+/* ========================= */
+/* 📱 Splash (écran temporaire */
+/* ========================= */
+    #splash {
+      position: fixed;
+      inset: 0; /* top:0; right:0; bottom:0; left:0; */
+      background: radial-gradient(circle at top, #ffcc00, #0d0d0d);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #000;
+      z-index: 9999;
+      transition: opacity 0.6s ease;
+    }
+
+    #splash h1 {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    #splash p {
+      font-family: Arial, Helvetica, sans-serif;
+      margin-bottom: 20px;
+    }
+
+    #splash button {
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: none;
+      background: #000;
+      color: #ffcc00;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Quand on ajoute la classe .hidden, on fait disparaître le splash */
+    #splash.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 24px 20px;
+    }
+
 </style>
 
 </head>
 <body>
+
+
+
+
+
+
+<!-- ÉCRAN D’INTRO -->
+<div id="splash">
+	<h1>Bienvenue</h1>
+	<p>Chargement de la présentation...</p>
+	<button id="enterBtn">Entrer</button>
+</div>
+
+
+
+
+
 <div class="flags" aria-label="Language selector">
     <img src="Site/Picto/Picto_FR.png" alt="FR" onclick="setLang('fr')">
     <img src="Site/Picto/Picto_EN.png" alt="EN" onclick="setLang('en')">
 </div>
 
 
+
+
+
+
+
   <main>
+  
+  
+  
+  
     <img src="connectmeifucan-logo-Noel.jpg" alt="Connect Me If U Can Logo" class="logo">
-    <h1>🎮 Connect Me If U Can (under construction)</h1>
+    <h2>🎮 Connect Me If U Can (under construction)</h1>
 
     <div id="fr" class="lang">
 	  ✨ 1. Déplace-toi sereinement la nuit, en toute simplicité.
@@ -194,6 +274,11 @@ footer {
        <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Discover</a>
       <div class="note">💡 Personal projects under development </div>
     </div>
+	
+	
+	
+	
+	
   </main>
 
   <footer>
@@ -201,6 +286,19 @@ footer {
   </footer>
 
   <script>
+  
+  
+const splash = document.getElementById('splash');
+ const enterBtn = document.getElementById('enterBtn'); 
+ 
+ // 1) Fermeture manuelle en cliquant sur le bouton
+ enterBtn.addEventListener('click', () => { splash.classList.add('hidden'); setTimeout(() => splash.remove(), 600); // retire le DOM après la transition }); 
+ 
+ // 2) (Optionnel) Fermeture automatique après X secondes 
+ setTimeout(() => { if (document.body.contains(splash)) { splash.classList.add('hidden'); setTimeout(() => splash.remove(), 600); } }, 3000); // 3000 ms = 3 secondes
+
+
+  
     function setLang(lang) {
       document.querySelectorAll('.lang').forEach(el => el.style.display = 'none');
       var target = document.getElementById(lang);
