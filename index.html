@@ -224,12 +224,12 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
         display: flex;
         flex-direction: column;
         justify-content: center;
-        align-items: center;   /* aligné à gauche */
+        align-items: center;   /* centered like mobile */
         gap: 18px;
-        text-align: left;
+        text-align: center;
         z-index: 9000;
         position: static;
-        padding-left: 40px; /* optionnel : marge à gauche */
+        padding-left: 0; /* remove left offset so buttons are centered */
     }
 }
 /*
@@ -271,15 +271,43 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 .page {
   display: none;
   opacity: 0;
-  transition: opacity .25s ease;
+  transition: transform .7s ease, opacity .4s ease;
+  transform: scale(.98);
   pointer-events: none;
   padding: 24px;
   text-align: center;
 }
+
+/* page frame: subtle radial highlight + box to mimic splash background */
+.page.frame {
+  background: radial-gradient(circle at top, rgba(255,204,0,0.06), rgba(0,0,0,0.02) 40%);
+  border-radius: 12px;
+  width: calc(100% - 48px);
+  max-width: 1200px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.45);
+}
+
 .page.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100dvh - 0px);
   opacity: 1;
   pointer-events: auto;
+  transform: scale(1);
+}
+
+.page.scale-in {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.page.zooming {
+  transform: scale(1.12);
+  opacity: 0;
+  transition: transform .7s ease, opacity .7s ease;
+  pointer-events: none;
 }
 
 .page h2 {
@@ -295,7 +323,8 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 /* BOUTON RETOUR AU MENU     */
 /* ========================= */
 .back-btn {
-  margin-top: 20px;
+  margin: 20px auto 0; /* center horizontally */
+  display: block;
   padding: 10px 24px;
   background: var(--accent);
   color: #000;
@@ -672,22 +701,13 @@ function confirmMenuSelection() {
       console.warn('confirmMenuSelection: btn.click() threw', err);
     }
 
-    // Fallback: if click didn't navigate (no page became active), manually perform navigation
+    // Fallback: if click didn't navigate (no page became active), use navigateToPage
     const pageActive = !!document.querySelector('.page.active');
     const target = btn.dataset.target;
     if (!pageActive && target) {
       console.debug('confirmMenuSelection fallback navigation to', target);
-      menu.classList.remove('active');
-      document.querySelectorAll('#menu .menu-btn').forEach(b => b.classList.remove('selected'));
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      setTimeout(() => {
-        const page = document.getElementById(target);
-        if (page) {
-          page.classList.add('active');
-          menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
-          updateGlobalVisibility();
-        }
-      }, 20);
+      navigateToPage(target);
+      menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
     }
   }
 }
@@ -790,13 +810,25 @@ function updateGlobalVisibility() {
 }
 
 function goBackToMenu() {
-  // simulate data-back behavior: hide pages and show menu
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  setTimeout(() => {
-    menu.classList.add('active');
-    menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
-    updateGlobalVisibility();
-  }, 20);
+  const activePage = document.querySelector('.page.active');
+  if (activePage) {
+    // animate page out with a subtle zoom & fade
+    activePage.classList.add('zooming');
+    setTimeout(() => {
+      activePage.classList.remove('active','scale-in','frame','zooming');
+      menu.classList.add('active');
+      menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
+      updateGlobalVisibility();
+    }, 700);
+  } else {
+    // fallback immediate show menu
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active','scale-in','frame','zooming'));
+    setTimeout(() => {
+      menu.classList.add('active');
+      menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
+      updateGlobalVisibility();
+    }, 20);
+  }
 }
 
 if (globalBack) {
@@ -804,23 +836,30 @@ if (globalBack) {
 }
 
 // Ensure visibility is updated when navigating to a page
-// Add visibility update in categories click handler
+function navigateToPage(target) {
+  const page = document.getElementById(target);
+  if (!page) return;
+  // hide menu and clear selection
+  menu.classList.remove('active');
+  document.querySelectorAll('#menu .menu-btn').forEach(b => b.classList.remove('selected'));
+  // remove classes from other pages
+  document.querySelectorAll('.page').forEach(p => { if (p !== page) { p.classList.remove('active','scale-in','frame','zooming'); } });
+  // prepare and show page
+  page.classList.add('frame');
+  page.classList.add('active');
+  setTimeout(() => {
+    page.classList.add('scale-in');
+    // update back control visibility when on page
+    updateGlobalVisibility();
+  }, 20);
+}
+
+// Attach handlers that use navigateToPage
 document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
   btn.addEventListener("click", () => {
     const target = btn.dataset.target;
     console.debug('menu button clicked', { id: btn.id, target });
-
-    menu.classList.remove("active");
-    // clear selection highlight when navigating
-    document.querySelectorAll('#menu .menu-btn').forEach(b => b.classList.remove('selected'));
-
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-
-    setTimeout(() => {
-      document.getElementById(target).classList.add("active");
-      // update back control visibility when on page
-      updateGlobalVisibility();
-    }, 20);
+    navigateToPage(target);
   });
 });
 
@@ -847,16 +886,7 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
   btn.addEventListener("click", () => {
     const target = btn.dataset.target;
     console.debug('menu button clicked (categories)', { id: btn.id, target });
-
-    menu.classList.remove("active");
-    // clear selection highlight when navigating
-    document.querySelectorAll('#menu .menu-btn').forEach(b => b.classList.remove('selected'));
-
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-
-    setTimeout(() => {
-      document.getElementById(target).classList.add("active");
-    }, 20);
+    navigateToPage(target);
   });
 });
 
@@ -918,6 +948,10 @@ function setFR() {
   document.querySelector("#page3 h2").textContent =
     "🌌 Connecte‑Moi aux Nouvelles Réalités";
   document.querySelectorAll("[data-back]").forEach(btn => { btn.textContent = "⬅ Retour au menu"; });
+  // update global control/back labels and visibility
+  updateGlobalLabel();
+  updateGlobalBackLabel();
+  updateGlobalVisibility();
 }
 
 function setEN() {
@@ -955,6 +989,10 @@ function setEN() {
   document.querySelector("#page3 h2").textContent =
     "🌌 Connect Me to New Realities";
   document.querySelectorAll("[data-back]").forEach(btn => { btn.textContent = "⬅ Back to menu"; });
+  // update global control/back labels and visibility
+  updateGlobalLabel();
+  updateGlobalBackLabel();
+  updateGlobalVisibility();
 }
 
 btnFR.addEventListener("click", setFR);
