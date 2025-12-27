@@ -341,7 +341,8 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 .catalogue-selector li .meta .muted { font-size:0.86rem; color:var(--muted); }
 .catalogue-selector li .meta .desc { font-size:0.86rem; color:var(--muted); margin-top:4px; }
 .catalogue-selector li.selected { background: rgba(255,204,0,0.08); border:1px solid rgba(255,204,0,0.18); }
-.catalogue-selector .hide-selector { display:block; margin-bottom:8px; padding:6px 8px; border-radius:6px; background:transparent; border:1px solid var(--border); cursor:pointer; }
+.catalogue-selector .hide-selector { display:block; margin-bottom:8px; padding:6px 8px; border-radius:6px; background:var(--accent); color:#000; border:1px solid rgba(0,0,0,0.08); cursor:pointer; font-weight:700; }
+.catalogue-selector .hide-selector:hover { background:var(--accent-hover); }
 
 /* when selector hidden, use single column for main content */
 .catalogue-wrap.selector-hidden { grid-template-columns: 0 1fr; }
@@ -627,7 +628,7 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
       <div class="catalogue-controls">
         <div class="left">
           <strong id="catalogue-count">0 produits</strong>
-          <button class="update-prices" id="btn-refresh-prices">Mettre à jour les prix</button>
+          <small style="margin-left:8px;color:var(--muted);">Prix depuis fichiers .txt</small>
         </div>
         <div class="right">
           <button id="btn-toggle-selector" class="toggle-selector" aria-pressed="false" title="Afficher / Masquer la sélection">☰</button>
@@ -1395,8 +1396,8 @@ document.querySelectorAll("[data-back]").forEach(btn => {
 
   async function refreshPrices() { await Promise.all(catalogueProducts.map(p=>fetchPrice(p))); renderCatalogue(); }
 
-  // bind update button
-  const bindRefresh = ()=>{ const b = document.getElementById('btn-refresh-prices'); if (b) { b.addEventListener('click', async ()=>{ b.disabled=true; b.textContent='Mise à jour...'; await refreshPrices(); b.textContent='Mettre à jour les prix'; b.disabled=false; }); } };
+  // bind update button (removed manual refresh — prices update via .txt files)
+  const bindRefresh = ()=>{ /* no-op: manual price button removed */ };
 
   // Selector toggle / hide bindings
   const bindSelectorUI = ()=>{
