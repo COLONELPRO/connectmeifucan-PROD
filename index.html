@@ -329,7 +329,11 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 }
 .catalogue .catalogue-controls .left { display:flex; gap:8px; align-items:center; }
 .catalogue .catalogue-controls .right { display:flex; gap:8px; align-items:center; }
-.catalogue .toggle-selector { padding:6px 8px; background: rgba(255,255,255,0.03); border-radius:6px; border:1px solid var(--border); cursor:pointer; }
+.catalogue .toggle-selector { padding:6px 10px; background: rgba(255,255,255,0.03); border-radius:6px; border:1px solid var(--border); cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+.catalogue .selector-filter .filter-input { padding:8px 10px; height:36px; }
+.catalogue .selector-filter .btn-clear-filter { height:36px; padding:0 8px; }
+.selector-actions button { height:36px; padding:6px 12px; }
+.catalogue .product-card .card-actions button { min-width: 110px; }
 
 /* wrapper: sidebar + main grid */
 .catalogue-wrap { display: grid; grid-template-columns: 220px 1fr; gap: 16px; align-items:start; }
@@ -639,20 +643,7 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
         </div>
       </div>
 
-      <div class="catalogue-wrap" id="catalogue-wrap">
-        <aside class="catalogue-selector" id="catalogue-selector" aria-label="Sélecteur de produits">
-          <button id="btn-hide-selector" class="hide-selector">Masquer</button>
-          <div class="selector-filter">
-            <input id="catalogue-filter" class="filter-input" placeholder="Filtrer par mot‑clé" aria-label="Filtrer les produits">
-            <button id="btn-clear-filter" class="btn-clear-filter" title="Effacer">✕</button>
-          </div>
-+          <div class="selector-actions" style="display:flex;gap:8px;margin-bottom:8px;">
-+            <button id="btn-validate" class="btn-validate" disabled>Valider</button>
-+            <button id="btn-add-selection" class="btn-add-to-cart" disabled>Ajouter sélection</button>
-+          </div>
-          <ul id="catalogue-list" role="listbox" aria-label="Liste des produits"></ul>
-        </aside>
-      </div>
+
 
       <div class="catalogue-wrap" id="catalogue-wrap">
         <aside class="catalogue-selector" id="catalogue-selector" aria-label="Sélecteur de produits">
@@ -660,6 +651,10 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
           <div class="selector-filter">
             <input id="catalogue-filter" class="filter-input" placeholder="Filtrer par mot‑clé" aria-label="Filtrer les produits">
             <button id="btn-clear-filter" class="btn-clear-filter" title="Effacer">✕</button>
+          </div>
+          <div class="selector-actions">
+            <button id="btn-validate" class="btn-validate" disabled>Valider</button>
+            <button id="btn-add-selection" class="btn-add-to-cart" disabled>Ajouter sélection</button>
           </div>
           <ul id="catalogue-list" role="listbox" aria-label="Liste des produits"></ul>
         </aside> 
