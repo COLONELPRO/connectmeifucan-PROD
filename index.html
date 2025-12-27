@@ -329,14 +329,41 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 }
 .catalogue .catalogue-controls .left { display:flex; gap:8px; align-items:center; }
 .catalogue .catalogue-controls .right { display:flex; gap:8px; align-items:center; }
-.catalogue .catalogue-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:12px; }
-.catalogue .product-card { background: rgba(255,255,255,0.03); border-radius:8px; padding:10px; text-align:center; box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
-.catalogue .product-card img { max-width:100%; height:120px; object-fit:contain; margin-bottom:8px; border-radius:6px; background: rgba(255,255,255,0.02); }
+.catalogue .toggle-selector { padding:6px 8px; background: rgba(255,255,255,0.03); border-radius:6px; border:1px solid var(--border); cursor:pointer; }
+
+/* wrapper: sidebar + main grid */
+.catalogue-wrap { display: grid; grid-template-columns: 220px 1fr; gap: 16px; align-items:start; }
+.catalogue-selector { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.03); padding: 8px; border-radius:8px; max-height:60vh; overflow:auto; }
+.catalogue-selector ul { list-style:none; margin:0; padding:0; }
+.catalogue-selector li { padding:8px; border-radius:6px; cursor:pointer; display:flex; gap:8px; align-items:center; }
+.catalogue-selector li img { width:46px; height:46px; object-fit:cover; border-radius:6px; background: rgba(255,255,255,0.02); }
+.catalogue-selector li .meta { display:flex; flex-direction:column; text-align:left; }
+.catalogue-selector li .meta .muted { font-size:0.86rem; color:var(--muted); }
+.catalogue-selector li .meta .desc { font-size:0.86rem; color:var(--muted); margin-top:4px; }
+.catalogue-selector li.selected { background: rgba(255,204,0,0.08); border:1px solid rgba(255,204,0,0.18); }
+.catalogue-selector .hide-selector { display:block; margin-bottom:8px; padding:6px 8px; border-radius:6px; background:transparent; border:1px solid var(--border); cursor:pointer; }
+
+/* when selector hidden, use single column for main content */
+.catalogue-wrap.selector-hidden { grid-template-columns: 0 1fr; }
+.catalogue-wrap.selector-hidden .catalogue-selector { display:none; }
+
+.catalogue .catalogue-main { min-width: 0; }
+.catalogue .catalogue-grid { display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:12px; }
+.catalogue .product-card { background: rgba(255,255,255,0.03); border-radius:8px; padding:10px; text-align:center; box-shadow: 0 6px 18px rgba(0,0,0,0.3); width:100%; }
+.catalogue .product-card img { width:100%; height:auto; max-height:200px; object-fit:contain; margin-bottom:8px; border-radius:6px; background: rgba(255,255,255,0.02); }
 .catalogue .product-card h4 { margin:6px 0 4px; font-size:1rem; }
 .catalogue .product-card .price { font-weight:800; color:var(--accent); margin-bottom:8px; }
 .catalogue .product-card button { padding:8px 10px; background:var(--accent); border-radius:8px; border:1px solid var(--border); color:#000; cursor:pointer; }
+.catalogue .product-card.selected { box-shadow: 0 12px 28px rgba(255,204,0,0.08); border:1px solid rgba(255,204,0,0.14); }
 .catalogue .pagination { display:flex; gap:8px; justify-content:center; margin-top:12px; }
 .catalogue .pagination button { padding:6px 10px; background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--text); border-radius:6px; cursor:pointer; }
+
+/* responsive: on small screens hide selector by default and stack */
+@media (max-width: calc(var(--mobile) - 1px)) {
+  .catalogue-wrap { grid-template-columns: 0 1fr; }
+  .catalogue-wrap .catalogue-selector { display:none; }
+  .catalogue .catalogue-grid { grid-template-columns: repeat(2, 1fr); }
+}
 
 /* simple modal for order form */
 .catalogue-modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:10010; }
@@ -603,11 +630,21 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
           <button class="update-prices" id="btn-refresh-prices">Mettre à jour les prix</button>
         </div>
         <div class="right">
+          <button id="btn-toggle-selector" class="toggle-selector" aria-pressed="false" title="Afficher / Masquer la sélection">☰</button>
           <span id="catalogue-pages">Page 1</span>
         </div>
       </div>
-      <div class="catalogue-grid" id="catalogue-grid" aria-live="polite"></div>
-      <div class="pagination" id="catalogue-pagination"></div>
+
+      <div class="catalogue-wrap" id="catalogue-wrap">
+        <aside class="catalogue-selector" id="catalogue-selector" aria-label="Sélecteur de produits">
+          <button id="btn-hide-selector" class="hide-selector">Masquer</button>
+          <ul id="catalogue-list" role="listbox" aria-label="Liste des produits"></ul>
+        </aside>
+        <div class="catalogue-main">
+          <div class="catalogue-grid" id="catalogue-grid" aria-live="polite"></div>
+          <div class="pagination" id="catalogue-pagination"></div>
+        </div>
+      </div>
     </section>
   </main>
   
@@ -1186,8 +1223,9 @@ document.querySelectorAll("[data-back]").forEach(btn => {
 (function(){
   const CATALOG_DIR = 'Catalogue produits';
   let catalogueProducts = [];
-  const PAGE_SIZE = 6;
+  const PAGE_SIZE = 8; // changed to 8 items per page
   let currentPage = 0;
+  let selectedProductId = null; // current selected product from selector
 
   function imageExists(url) {
     return new Promise(resolve => {
@@ -1225,6 +1263,41 @@ document.querySelectorAll("[data-back]").forEach(btn => {
     return items;
   }
 
+  function renderSelector() {
+    const list = document.getElementById('catalogue-list');
+    if (!list) return;
+    list.innerHTML = '';
+    catalogueProducts.forEach((p, idx) => {
+      const li = document.createElement('li'); li.dataset.id = p.id; li.role = 'option';
+      const lang = document.body.dataset.lang || document.documentElement.lang || 'fr';
+      const localizedDesc = (lang === 'fr') ? (p.descFr || p.descEn || '') : (p.descEn || p.descFr || '');
+      li.innerHTML = `<img src="${encodeURI(p.image)}" alt=""> <div class="meta"><strong>${(p.nameFr||p.nameEn)||''}</strong><div class="muted">${p.price}</div><div class="desc">${localizedDesc}</div></div>`;
+      if (String(p.id) === String(selectedProductId)) li.classList.add('selected');
+      li.addEventListener('click', () => {
+        selectedProductId = p.id;
+        // show the page where this product is located
+        const index = catalogueProducts.findIndex(x=>String(x.id)===String(p.id));
+        if (index >= 0) { currentPage = Math.floor(index / PAGE_SIZE); renderCatalogue(); }
+        // update selector highlight
+        renderSelector();
+        // ensure the selected card is visible
+        setTimeout(()=>{
+          const card = document.querySelector(`.product-card[data-id="${p.id}"]`);
+          card && card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 50);
+      });
+      list.appendChild(li);
+    });
+  }
+
+  function toggleSelector(hidden) {
+    const wrap = document.getElementById('catalogue-wrap');
+    const btn = document.getElementById('btn-toggle-selector');
+    if (!wrap || !btn) return;
+    if (hidden === undefined) hidden = wrap.classList.contains('selector-hidden');
+    if (hidden) { wrap.classList.remove('selector-hidden'); btn.setAttribute('aria-pressed','false'); } else { wrap.classList.add('selector-hidden'); btn.setAttribute('aria-pressed','true'); }
+  }
+
   async function loadCatalogue() {
     catalogueProducts = [];
     const manifest = await loadFromManifest();
@@ -1235,6 +1308,8 @@ document.querySelectorAll("[data-back]").forEach(btn => {
           image: it.image ? `${CATALOG_DIR}/${it.image}` : (it.imageAbsolute || ''),
           nameFr: it.nameFr || it.name || `Produit ${it.id || ''}`,
           nameEn: it.nameEn || it.name || `Product ${it.id || ''}`,
+          descFr: it.shortDescFr || it.descFr || it.shortDesc || it.description || '',
+          descEn: it.shortDescEn || it.descEn || it.shortDesc || it.description || '',
           priceFile: it.priceFile ? `${CATALOG_DIR}/${it.priceFile}` : (it.priceFileAbsolute || `${CATALOG_DIR}/product-${it.id}.txt`),
           price: '—'
         };
@@ -1248,6 +1323,7 @@ document.querySelectorAll("[data-back]").forEach(btn => {
     // fetch prices in parallel
     await Promise.all(catalogueProducts.map(p => fetchPrice(p)));
     currentPage = 0;
+    renderSelector();
     renderCatalogue();
   }
 
@@ -1269,9 +1345,17 @@ document.querySelectorAll("[data-back]").forEach(btn => {
     const slice = catalogueProducts.slice(currentPage*PAGE_SIZE, currentPage*PAGE_SIZE + PAGE_SIZE);
     grid.innerHTML = '';
     for (const p of slice) {
-      const card = document.createElement('article'); card.className = 'product-card'; card.dataset.id = p.id;
+      const card = document.createElement('article'); card.className = 'product-card'; card.dataset.id = p.id; card.setAttribute('tabindex','0'); card.setAttribute('role','article');
       card.innerHTML = `<img src="${encodeURI(p.image)}" alt="${(p.nameFr||p.nameEn)||''}"><h4>${localizedName(p)}</h4><div class="price">${p.price}</div><button class="btn-order">${document.body.dataset.lang === 'fr' ? 'Commander' : 'Order'}</button>`;
+      if (String(p.id) === String(selectedProductId)) card.classList.add('selected');
       grid.appendChild(card);
+    }
+    // if a selected product is on the current page, ensure it is visible
+    if (selectedProductId) {
+      setTimeout(()=>{
+        const sel = document.querySelector(`.product-card[data-id="${selectedProductId}"]`);
+        if (sel) sel.scrollIntoView({behavior:'smooth', block:'center'});
+      }, 10);
     }
 
     pagination.innerHTML = '';
@@ -1314,14 +1398,27 @@ document.querySelectorAll("[data-back]").forEach(btn => {
   // bind update button
   const bindRefresh = ()=>{ const b = document.getElementById('btn-refresh-prices'); if (b) { b.addEventListener('click', async ()=>{ b.disabled=true; b.textContent='Mise à jour...'; await refreshPrices(); b.textContent='Mettre à jour les prix'; b.disabled=false; }); } };
 
+  // Selector toggle / hide bindings
+  const bindSelectorUI = ()=>{
+    const toggle = document.getElementById('btn-toggle-selector');
+    const hide = document.getElementById('btn-hide-selector');
+    const wrap = document.getElementById('catalogue-wrap');
+    if (toggle && wrap) {
+      toggle.addEventListener('click', ()=>{ const was = wrap.classList.toggle('selector-hidden'); toggle.setAttribute('aria-pressed', was ? 'true' : 'false'); });
+    }
+    if (hide && wrap) {
+      hide.addEventListener('click', ()=>{ wrap.classList.add('selector-hidden'); const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed','true'); });
+    }
+  };
+
   // detect when page1 becomes active and init
   const page1 = document.getElementById('page1'); if (page1) {
-    const obs = new MutationObserver(() => { if (page1.classList.contains('active') && !window._catalogueInit) { window._catalogueInit = true; loadCatalogue().then(()=>bindRefresh()); } });
+    const obs = new MutationObserver(() => { if (page1.classList.contains('active') && !window._catalogueInit) { window._catalogueInit = true; loadCatalogue().then(()=>{ bindRefresh(); bindSelectorUI(); }); } });
     obs.observe(page1,{attributes:true,attributeFilter:['class']});
   }
 
   // expose minor helpers for language switching
-  window._refreshCatalogueAfterLang = ()=>{ try{ renderCatalogue(); }catch(e){} };
+  window._refreshCatalogueAfterLang = ()=>{ try{ renderCatalogue(); renderSelector(); }catch(e){} };
 })();
 
 /* LANGUE FR / EN */
