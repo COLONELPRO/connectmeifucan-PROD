@@ -62,9 +62,8 @@ body {
   left: 0;
   right: 0;
   bottom: 28%;
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
+  /* keep as a positioning container for absolute buttons */
+  display: block;
   padding: 0 24px;
   width: 100%;
   max-width: 1200px;
@@ -74,6 +73,10 @@ body {
   pointer-events: auto;
 }
 .enter-side {
+  position: absolute; /* place each button explicitly */
+  top: 50%;
+  left: auto;
+  right: auto;
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -85,10 +88,19 @@ body {
   color: #000;
   border: 3px solid rgba(0,0,0,0.12);
   cursor: pointer;
+  /* vertically center while preserving any manual snap via --enter-ty */
+  transform: translateY(calc(-50% + var(--enter-ty, 0)));
   transition: transform .12s ease, box-shadow .12s ease;
   user-select: none;
   touch-action: none; /* avoid double-tap/context issues on touch */
 }
+/* fixed horizontal offsets for symmetry */
+#enter-left { left: 24px; }
+#enter-right { right: 24px; }
+/* keep pressing transform while preserving translate */
+.enter-side.pressing { transform: translateY(calc(-50% + var(--enter-ty, 0))) scale(.94); box-shadow: 0 10px 28px rgba(0,0,0,.35); }
+.enter-side.pressing { transform: translateY(var(--enter-ty, 0)) scale(.94); box-shadow: 0 10px 28px rgba(0,0,0,.35); }
+
 .enter-side .enter-label {
   display: inline-block;
   font-size: 0.72rem;
@@ -134,6 +146,21 @@ body {
 #splash.zooming { transform: scale(1.12); opacity: 0; transition: transform .7s ease, opacity .7s ease; pointer-events: none; }
 #menu { transform: scale(.98); transition: transform .7s ease, opacity .4s ease; opacity: 0; }
 #menu.active.scale-in { transform: scale(1); opacity: 1; }
+
+/* GLOBAL CONTROL (persistent) */
+.global { position: fixed !important; bottom: 18%; z-index: 10001; display: none; align-items: center; justify-content: center; width:64px; height:64px; transform: none !important; pointer-events: auto; }
+.global.show { display: inline-flex; }
+body.hand-left .global { left: 18px; right: auto; }
+body.hand-right .global { right: 18px; left: auto; }
+/* Back control positions - opposite side of the chosen hand */
+body.hand-left .global.back { right: 18px; left: auto; }
+body.hand-right .global.back { left: 18px; right: auto; }
+/* Hide the other splash disc if a hand is selected */
+body.hand-left #enter-right, body.hand-right #enter-left { display: none !important; }
+
+/* menu selection style */
+.menu-btn.selected { box-shadow: 0 8px 24px rgba(0,0,0,0.35); transform: translateY(-2px) scale(1.02); border: 2px solid rgba(255,204,0,0.95); }
+.menu-btn:focus { outline: none; }
 
 /* ========================= */
 /* BOUTONS LANGUE            */
@@ -325,6 +352,9 @@ body {
   <button class="menu-btn" data-target="page3">🌌 Connect Me to New Realities</button>
 </div>
 
+<button id="global-control" class="enter-side global" aria-hidden="true"><span class="enter-label">Appuyer pour entrer</span></button>
+<button id="global-back" class="enter-side global back" aria-hidden="true"><span class="enter-label">Retour</span></button>
+
 <!-- ========================= -->
 <!-- PAGE 1 (TON ANCIEN MAIN)  -->
 <!-- ========================= -->
@@ -397,6 +427,8 @@ body {
 <!-- ========================= -->
 <script>
 /* SPLASH → MENU (long-press left/right with progress + auto-enter fallback) */
+console.debug('Splash script loaded');
+window.addEventListener('error', (e) => { console.error('Global error:', e.error || e.message); });
 const splash = document.getElementById("splash");
 const menu = document.getElementById("menu");
 
@@ -429,6 +461,7 @@ function updateProgressUI(percent) {
 } 
 
 function resetProgress() {
+  console.debug('resetProgress');
   if (pressRaf) { cancelAnimationFrame(pressRaf); pressRaf = null; }
   if (progressBar) progressBar.classList.remove('visible');
   updateProgressUI(0);
@@ -446,8 +479,9 @@ function startPress(hand) {
     const elapsed = t - pressStart;
     const p = Math.min(1, elapsed / PRESS_MS);
     updateProgressUI(p * 100);
-    if (p >= 1) {
-      pressRaf = null;
+    // Use rounded percent to ensure displayed "100%" triggers the action
+    if (Math.round(p * 100) >= 100) {
+      if (pressRaf) { cancelAnimationFrame(pressRaf); pressRaf = null; }
       // Completed: record hand and start zoom transition
       doComplete(hand);
     } else {
@@ -459,11 +493,12 @@ function startPress(hand) {
 }
 
 function doComplete(hand) {
+  console.debug('doComplete', hand);
   // clear fallback timer
   clearTimeout(autoEnterTimer);
 
-  // Store detected hand
-  if (hand && hand !== 'auto') document.body.dataset.hand = hand;
+  // Store detected hand and show global control
+  if (hand && hand !== 'auto') showGlobalControl(hand);
 
   // start zoom-out on splash
   if (splash) splash.classList.add('zooming');
@@ -471,40 +506,339 @@ function doComplete(hand) {
   // after transition, remove splash and show menu with scale-in
   setTimeout(() => {
     if (splash && splash.parentNode) splash.remove();
-    if (menu) menu.classList.add('active', 'scale-in');
+    if (menu) {
+      menu.classList.add('active', 'scale-in');
+      // initialize menu selection
+      menuSelectedIndex = 0;
+      highlightMenuSelection(menuSelectedIndex);
+      // menu is active: update global control label to long-press text
+      updateGlobalLabel();
+    }
+
+    // If a stored hand was deferred during splash, apply it now to show the persistent control
+    if (window._deferredHand && !(document.body.classList.contains('hand-left') || document.body.classList.contains('hand-right'))) {
+      console.debug('Applying deferred stored hand after splash:', window._deferredHand);
+      showGlobalControl(window._deferredHand);
+      delete window._deferredHand;
+    }
+
     resetProgress();
   }, 700);
-}
+} 
 
 // attach pointer handlers to left/right buttons (works for mouse & touch)
 [btnLeft, btnRight].forEach(btn => {
   if (!btn) return;
   const hand = btn.id === 'enter-left' ? 'left' : 'right';
 
-  btn.addEventListener('pointerdown', e => {
-    e.preventDefault();
+  // per-button RAF and timers to avoid interference between buttons
+  btn._pressRaf = null;
+  btn._pressStart = 0;
+
+  function localStartPress() {
+    console.debug('localStartPress', hand);
     clearTimeout(autoEnterTimer);
-    try { btn.setPointerCapture && btn.setPointerCapture(e.pointerId); } catch (err) {}
+    if (!progressBar || !progressFill) { console.warn('Progress elements missing', {progressBar, progressFill}); return; }
+    currentHand = hand;
+    progressBar.classList.add('visible');
+    btn._pressStart = performance.now();
+
+    function step(t) {
+      const elapsed = t - btn._pressStart;
+      const p = Math.min(1, elapsed / PRESS_MS);
+      updateProgressUI(p * 100);
+      if (Math.round(p * 100) >= 100) {
+        if (btn._pressRaf) { cancelAnimationFrame(btn._pressRaf); btn._pressRaf = null; }
+        // Completed: record hand and start zoom transition
+        console.debug('localStartPress completed', hand);
+        doComplete(hand);
+      } else {
+        btn._pressRaf = requestAnimationFrame(step);
+      }
+    }
+
+    btn._pressRaf = requestAnimationFrame(step);
+  }
+
+  function localReset() {
+    if (btn._pressRaf) { cancelAnimationFrame(btn._pressRaf); btn._pressRaf = null; }
+    progressBar.classList.remove('visible');
+    updateProgressUI(0);
+    currentHand = null;
+  }
+
+  btn.addEventListener('pointerdown', e => {
+    console.debug('pointerdown', btn.id, e.pointerId);
+    e.preventDefault();
+    try { btn.setPointerCapture && btn.setPointerCapture(e.pointerId); } catch (err) { console.warn('setPointerCapture failed', err); }
     btn.classList.add('pressing');
-    startPress(hand);
+    localStartPress();
   });
 
   btn.addEventListener('pointerup', e => {
-    try { btn.releasePointerCapture && btn.releasePointerCapture(e.pointerId); } catch (err) {}
+    console.debug('pointerup', btn.id, e.pointerId);
+    try { btn.releasePointerCapture && btn.releasePointerCapture(e.pointerId); } catch (err) { console.warn('releasePointerCapture failed', err); }
     btn.classList.remove('pressing');
     // if not completed yet, cancel
-    if (pressRaf) resetProgress();
+    if (btn._pressRaf) localReset();
   });
 
-  btn.addEventListener('pointercancel', e => { btn.classList.remove('pressing'); resetProgress(); });
-  btn.addEventListener('pointerleave', e => { if (pressRaf) resetProgress(); btn.classList.remove('pressing'); });
+  btn.addEventListener('pointercancel', e => { console.debug('pointercancel', btn.id); btn.classList.remove('pressing'); localReset(); });
+  btn.addEventListener('pointerleave', e => { if (btn._pressRaf) localReset(); btn.classList.remove('pressing'); });
 
   // keyboard support
   btn.addEventListener('keydown', e => {
-    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); btn.classList.add('pressing'); startPress(hand); }
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); btn.classList.add('pressing'); localStartPress(); }
   });
   btn.addEventListener('keyup', e => {
-    if (e.key === ' ' || e.key === 'Enter') { btn.classList.remove('pressing'); if (pressRaf) resetProgress(); }
+    if (e.key === ' ' || e.key === 'Enter') { btn.classList.remove('pressing'); if (btn._pressRaf) localReset(); }
+  });
+});
+
+// -------------------------
+// GLOBAL CONTROL & MENU NAV
+// -------------------------
+const globalControl = document.getElementById('global-control');
+let globalPressRaf = null;
+let globalPressStart = 0;
+const TAP_THRESHOLD = 300; // ms for tap vs long-press
+let menuButtons = Array.from(document.querySelectorAll('#menu .menu-btn[data-target]'));
+let menuSelectedIndex = 0;
+
+function updateGlobalLabel() {
+  if (!globalControl) return;
+  const lang = document.body.dataset.lang || document.documentElement.lang || 'fr';
+  // on menu -> long-press message; otherwise short press hint
+  const isMenu = menu && menu.classList.contains('active');
+  const label = (lang === 'fr')
+    ? (isMenu ? 'Appui long pour entrer' : 'Appuyer pour entrer')
+    : (isMenu ? 'Long press to enter' : 'Press to enter');
+  const lbl = globalControl.querySelector('.enter-label'); if (lbl) lbl.textContent = label;
+}
+
+function showGlobalControl(hand) {
+  if (!globalControl) return;
+  document.body.dataset.hand = hand;
+  localStorage.setItem('cmuc_hand', hand);
+  document.body.classList.remove('hand-left','hand-right');
+  document.body.classList.add('hand-' + hand);
+  globalControl.style.display = 'inline-flex';
+  globalControl.classList.add('show');
+  globalControl.setAttribute('aria-hidden', 'false');
+  // set correct label for current state
+  updateGlobalLabel();
+}
+
+function initGlobalFromStorage() {
+  const hand = localStorage.getItem('cmuc_hand');
+  if (hand === 'left' || hand === 'right') {
+    // If the splash is still present, don't hide the opposite enter button yet.
+    // Defer showing the persistent global control until after the splash transition.
+    if (splash && !splash.classList.contains('zooming')) {
+      console.debug('initGlobalFromStorage: deferring stored hand until after splash', hand);
+      window._deferredHand = hand;
+    } else {
+      showGlobalControl(hand);
+    }
+  }
+}
+
+function highlightMenuSelection(i) {
+  menuButtons = Array.from(document.querySelectorAll('#menu .menu-btn[data-target]'));
+  if (!menuButtons.length) return;
+  menuButtons.forEach((b, idx) => b.classList.toggle('selected', idx === i));
+  // ensure it is in view
+  try { menuButtons[i].scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+}
+
+function advanceMenuSelection() {
+  if (!menu.classList.contains('active')) return;
+  menuButtons = Array.from(document.querySelectorAll('#menu .menu-btn[data-target]'));
+  if (!menuButtons.length) return;
+  menuSelectedIndex = (menuSelectedIndex + 1) % menuButtons.length;
+  highlightMenuSelection(menuSelectedIndex);
+}
+
+function confirmMenuSelection() {
+  if (!menu || !menu.classList.contains('active')) { console.debug('confirmMenuSelection: menu not active or missing'); return; }
+  menuButtons = Array.from(document.querySelectorAll('#menu .menu-btn[data-target]'));
+  if (!menuButtons.length) { console.debug('confirmMenuSelection: no menu buttons found'); return; }
+  const btn = menuButtons[menuSelectedIndex];
+  console.debug('confirmMenuSelection', { menuSelectedIndex, btnId: btn && btn.id, target: btn && btn.dataset && btn.dataset.target });
+  if (btn) {
+    try {
+      btn.click();
+    } catch (err) {
+      console.warn('confirmMenuSelection: btn.click() threw', err);
+    }
+
+    // Fallback: if click didn't navigate (no page became active), manually perform navigation
+    const pageActive = !!document.querySelector('.page.active');
+    const target = btn.dataset.target;
+    if (!pageActive && target) {
+      console.debug('confirmMenuSelection fallback navigation to', target);
+      menu.classList.remove('active');
+      document.querySelectorAll('#menu .menu-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      setTimeout(() => {
+        const page = document.getElementById(target);
+        if (page) {
+          page.classList.add('active');
+          menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
+          updateGlobalVisibility();
+        }
+      }, 20);
+    }
+  }
+}
+
+function startGlobalPress() {
+  console.debug('startGlobalPress');
+  if (!progressBar) { console.warn('startGlobalPress: missing progressBar'); return; }
+  globalPressStart = performance.now();
+  progressBar.classList.add('visible');
+
+  function step(t) {
+    const elapsed = t - globalPressStart;
+    const p = Math.min(1, elapsed / PRESS_MS);
+    updateProgressUI(p * 100);
+    // Use rounded percent so visible 100% reliably confirms selection
+    if (Math.round(p * 100) >= 100) {
+      if (globalPressRaf) { cancelAnimationFrame(globalPressRaf); globalPressRaf = null; }
+      console.debug('startGlobalPress completed');
+      confirmMenuSelection();
+      resetGlobalProgress();
+    } else {
+      globalPressRaf = requestAnimationFrame(step);
+    }
+  }
+
+  globalPressRaf = requestAnimationFrame(step);
+}
+
+function resetGlobalProgress() {
+  if (globalPressRaf) { cancelAnimationFrame(globalPressRaf); globalPressRaf = null; }
+  if (progressBar) progressBar.classList.remove('visible');
+  updateProgressUI(0);
+}
+
+if (globalControl) {
+  globalControl.addEventListener('pointerdown', e => {
+    console.debug('global pointerdown');
+    e.preventDefault();
+    try { globalControl.setPointerCapture && globalControl.setPointerCapture(e.pointerId); } catch (err) { console.warn('global setPointerCapture failed', err); }
+    globalControl.classList.add('pressing');
+    startGlobalPress();
+  });
+
+  globalControl.addEventListener('pointerup', e => {
+    console.debug('global pointerup');
+    try { globalControl.releasePointerCapture && globalControl.releasePointerCapture(e.pointerId); } catch (err) { console.warn('global releasePointerCapture failed', err); }
+    globalControl.classList.remove('pressing');
+    const elapsed = performance.now() - globalPressStart;
+    if (globalPressRaf) {
+      // not completed: determine tap vs short press
+      if (elapsed < TAP_THRESHOLD) {
+        resetGlobalProgress();
+        advanceMenuSelection();
+      } else {
+        resetGlobalProgress();
+      }
+    }
+  });
+
+  globalControl.addEventListener('pointercancel', e => { console.debug('global pointercancel'); globalControl.classList.remove('pressing'); resetGlobalProgress(); });
+  globalControl.addEventListener('pointerleave', e => { if (globalPressRaf) resetGlobalProgress(); globalControl.classList.remove('pressing'); });
+
+  globalControl.addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); globalControl.classList.add('pressing'); startGlobalPress(); }
+  });
+  globalControl.addEventListener('keyup', e => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      globalControl.classList.remove('pressing');
+      if (globalPressRaf) {
+        const elapsed = performance.now() - globalPressStart;
+        if (elapsed < TAP_THRESHOLD) { resetGlobalProgress(); advanceMenuSelection(); } else { resetGlobalProgress(); }
+      }
+    }
+  });
+}
+
+// initialize persistent control if user already chose a hand
+initGlobalFromStorage();
+
+// Global back control (opposite side)
+const globalBack = document.getElementById('global-back');
+
+function updateGlobalBackLabel() {
+  if (!globalBack) return;
+  const lang = document.body.dataset.lang || document.documentElement.lang || 'fr';
+  const label = lang === 'fr' ? 'Retour' : 'Back';
+  const lbl = globalBack.querySelector('.enter-label'); if (lbl) lbl.textContent = label;
+}
+
+function updateGlobalVisibility() {
+  // show back control only when a page is active (not menu)
+  const pageActive = !!document.querySelector('.page.active');
+  if (globalBack) {
+    if (pageActive) { globalBack.style.display = 'inline-flex'; globalBack.classList.add('show'); globalBack.setAttribute('aria-hidden', 'false'); }
+    else { globalBack.style.display = 'none'; globalBack.classList.remove('show'); globalBack.setAttribute('aria-hidden', 'true'); }
+  }
+  // update labels
+  updateGlobalLabel();
+  updateGlobalBackLabel();
+}
+
+function goBackToMenu() {
+  // simulate data-back behavior: hide pages and show menu
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  setTimeout(() => {
+    menu.classList.add('active');
+    menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
+    updateGlobalVisibility();
+  }, 20);
+}
+
+if (globalBack) {
+  globalBack.addEventListener('click', e => { e.preventDefault(); goBackToMenu(); });
+}
+
+// Ensure visibility is updated when navigating to a page
+// Add visibility update in categories click handler
+document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.target;
+    console.debug('menu button clicked', { id: btn.id, target });
+
+    menu.classList.remove("active");
+    // clear selection highlight when navigating
+    document.querySelectorAll('#menu .menu-btn').forEach(b => b.classList.remove('selected'));
+
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+
+    setTimeout(() => {
+      document.getElementById(target).classList.add("active");
+      // update back control visibility when on page
+      updateGlobalVisibility();
+    }, 20);
+  });
+});
+
+// update visibility when returning to menu via back buttons
+document.querySelectorAll("[data-back]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+
+    setTimeout(() => {
+      menu.classList.add("active");
+      // reset & highlight first option
+      menuSelectedIndex = 0;
+      highlightMenuSelection(menuSelectedIndex);
+      // update global label to long-press when returning to menu
+      updateGlobalLabel();
+      // update visibility
+      updateGlobalVisibility();
+    }, 20);
   });
 });
 
@@ -512,8 +846,11 @@ function doComplete(hand) {
 document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
   btn.addEventListener("click", () => {
     const target = btn.dataset.target;
+    console.debug('menu button clicked (categories)', { id: btn.id, target });
 
     menu.classList.remove("active");
+    // clear selection highlight when navigating
+    document.querySelectorAll('#menu .menu-btn').forEach(b => b.classList.remove('selected'));
 
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
 
@@ -530,6 +867,11 @@ document.querySelectorAll("[data-back]").forEach(btn => {
 
     setTimeout(() => {
       menu.classList.add("active");
+      // reset & highlight first option
+      menuSelectedIndex = 0;
+      highlightMenuSelection(menuSelectedIndex);
+      // update global label to long-press when returning to menu
+      updateGlobalLabel();
     }, 20);
   });
 }); 
@@ -555,10 +897,12 @@ function setFR() {
   const rightBtn = document.getElementById('enter-right');
   if (leftBtn) leftBtn.title = "Entrer — Main gauche";
   if (rightBtn) rightBtn.title = "Entrer — Main droite";
-  // enter labels
+  // enter labels (update; final label may change when in menu)
   document.querySelectorAll('.enter-label').forEach(el => el.textContent = 'Appuyer pour entrer');
   const progressTextElFr = document.getElementById('press-progress-text');
   if (progressTextElFr) progressTextElFr.textContent = 'Chargement 0%';
+  // if global control exists and menu already active, set the menu-specific text
+  if (globalControl && menu && menu.classList.contains('active')) updateGlobalLabel();
 
   document.querySelector('[data-target="page1"]').textContent =
     "🌿 Confort & Bien‑Être at Home";
@@ -590,10 +934,12 @@ function setEN() {
   const rightBtnEn = document.getElementById('enter-right');
   if (leftBtnEn) leftBtnEn.title = "Enter — Left hand";
   if (rightBtnEn) rightBtnEn.title = "Enter — Right hand";
-  // enter labels
+  // enter labels (update; final label may change when in menu)
   document.querySelectorAll('.enter-label').forEach(el => el.textContent = 'Press to enter');
   const progressTextElEn = document.getElementById('press-progress-text');
   if (progressTextElEn) progressTextElEn.textContent = 'Loading 0%';
+  // if global control exists and menu already active, set the menu-specific text
+  if (globalControl && menu && menu.classList.contains('active')) updateGlobalLabel();
 
   document.querySelector('[data-target="page1"]').textContent =
     "Comfort & Well‑Being at Home";
