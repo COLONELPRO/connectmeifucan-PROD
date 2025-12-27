@@ -225,6 +225,22 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
         text-align: center;
         z-index: 9000;
     }
+
+    /* On small screens, move the yellow discs lower so they don't overlap centered buttons
+       and place them at equal distances from the left/right edges */
+    .enter-sides { bottom: 6%; padding: 0 6%; transition: bottom .18s ease; }
+    #enter-left { left: 6%; }
+    #enter-right { right: 6%; }
+
+    /* Make persistent global controls sit at the same lower vertical position on mobile */
+    .global { bottom: 6%; }
+    body.hand-left .global { left: 6%; }
+    body.hand-right .global { right: 6%; }
+    body.hand-left .global.back { right: 6%; }
+    body.hand-right .global.back { left: 6%; }
+
+    /* slightly reduce the size of the discs on mobile to avoid covering content */
+    .enter-side { width: 56px; height: 56px; font-size: 1.4rem; }
 }
 
 /* 📲 Tablette : 768px → 1023px */
