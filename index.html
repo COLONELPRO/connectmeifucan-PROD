@@ -191,6 +191,10 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   z-index: 10000;
 }
 
+/* language content blocks: hide by default; show the active language */
+.lang { display: none; }
+.lang.active { display: block; }
+
 .lang-btn {
   padding: 6px 12px;
   background: var(--accent);
@@ -304,6 +308,8 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   width: calc(100% - 48px);
   max-width: 1200px;
   box-shadow: 0 8px 40px rgba(0,0,0,0.45);
+  margin: 0 auto; /* center the frame horizontally */
+  padding: 18px 24px; /* add breathing room inside the framed block */
 }
 
 .page.active {
@@ -315,6 +321,52 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   opacity: 1;
   pointer-events: auto;
   transform: scale(1);
+  text-align: center; /* ensure centered text on mobile and desktop */
+}
+
+/* Center the content blocks horizontally on each page and make responsive */
+.page > * {
+  width: 92%;
+  max-width: 1000px; /* comfortable reading width on desktop */
+  margin: 0 auto;
+  text-align: center; /* ensure inner text is centered by default */
+}
+/* Make images and logo centered within pages */
+.page img, .page .logo { display: block; margin: 0 auto; }
+/* Ensure language blocks center their content */
+.page .lang { width: 100%; text-align: center; }
+/* Mobile: slightly narrower max-width for better fit */
+@media (max-width: calc(var(--mobile) - 1px)) {
+  .page > * { width: 92%; max-width: 760px; padding: 0 12px; }
+}
+/* Tablet and up: allow more width and padding */
+@media (min-width: var(--mobile)) and (max-width: calc(var(--tablet) - 1px)) {
+  .page > * { width: min(96%, 900px); padding: 0 20px; }
+}
+@media (min-width: var(--tablet)) {
+  .page > * { width: min(100%, 1000px); padding: 0 24px; }
+}
+
+/* Ensure main content inside each page is centered horizontally and vertically */
+.page main,
+.page .page-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 12px;
+}
+
+/* take available vertical space so content can be perfectly centered */
+.page main {
+  min-height: calc(100dvh - 120px);
+}
+
+@media (max-width: calc(var(--mobile) - 1px)) {
+  .page main { min-height: calc(100dvh - 80px); padding: 12px; }
 }
 
 .page.scale-in {
@@ -494,8 +546,6 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 
 
 
-  </main>
-
   <button class="back-btn" data-back>⬅ Retour au menu</button>
 </div>
 
@@ -503,18 +553,22 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 <!-- PAGE 2                    -->
 <!-- ========================= -->
 <div id="page2" class="page">
-  <h2>👨‍👩‍👧‍👦 Connect Me to My Circle</h2>
-  <p>Contenu à venir…</p>
-  <button class="back-btn" data-back>⬅ Retour au menu</button>
+  <main>
+    <h2>👨‍👩‍👧‍👦 Connect Me to My Circle</h2>
+    <p>Contenu à venir…</p>
+    <button class="back-btn" data-back>⬅ Retour au menu</button>
+  </main>
 </div>
 
 <!-- ========================= -->
 <!-- PAGE 3                    -->
 <!-- ========================= -->
 <div id="page3" class="page">
-  <h2>🌌 Connect Me to New Realities</h2>
-  <p>Contenu à venir…</p>
-  <button class="back-btn" data-back>⬅ Retour au menu</button>
+  <main>
+    <h2>🌌 Connect Me to New Realities</h2>
+    <p>Contenu à venir…</p>
+    <button class="back-btn" data-back>⬅ Retour au menu</button>
+  </main>
 </div>
 
 <!-- ========================= -->
@@ -1034,6 +1088,7 @@ const menuSubtitle = document.getElementById("menu-subtitle");
 
 function setFR() {
   document.body.dataset.lang = 'fr';
+  localStorage.setItem('cmuc_lang', 'fr');
   menuTitle.textContent = "Choisissez une catégorie";
   menuSubtitle.textContent = "Sélectionnez une catégorie";
 
@@ -1067,6 +1122,10 @@ function setFR() {
   document.querySelector("#page3 h2").textContent =
     "🌌 Connecte‑Moi aux Nouvelles Réalités";
   document.querySelectorAll("[data-back]").forEach(btn => { btn.textContent = "⬅ Retour au menu"; });
+
+  // show/hide language content blocks
+  document.querySelectorAll('.lang').forEach(el => el.classList.toggle('active', el.id === 'fr'));
+
   // update global control/back labels and visibility
   updateGlobalLabel();
   updateGlobalBackLabel();
@@ -1107,6 +1166,14 @@ function setEN() {
     "👨‍👩‍👧‍👦 Connect Me to My Circle";
   document.querySelector("#page3 h2").textContent =
     "🌌 Connect Me to New Realities";
+
+  // show/hide language content blocks
+  document.querySelectorAll('.lang').forEach(el => el.classList.toggle('active', el.id === 'en'));
+
+  // update global control/back labels and visibility
+  updateGlobalLabel();
+  updateGlobalBackLabel();
+  updateGlobalVisibility();
   document.querySelectorAll("[data-back]").forEach(btn => { btn.textContent = "⬅ Back to menu"; });
   // update global control/back labels and visibility
   updateGlobalLabel();
@@ -1116,6 +1183,13 @@ function setEN() {
 
 btnFR.addEventListener("click", setFR);
 btnEN.addEventListener("click", setEN);
+
+// Initialize language on load using stored preference or HTML lang, default to French
+function initLanguageFromStorage() {
+  const stored = localStorage.getItem('cmuc_lang') || document.body.dataset.lang || document.documentElement.lang || 'fr';
+  if (stored === 'en') setEN(); else setFR();
+}
+initLanguageFromStorage();
 </script>
 
 </body>
