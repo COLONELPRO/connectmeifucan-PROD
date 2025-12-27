@@ -441,18 +441,20 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   .page > * { width: min(100%, 1000px); padding: 0 24px; }
 }
 
-/* Ensure main content inside each page is centered horizontally and vertically */
+/* Ensure main content inside each page is laid out vertically; back button stays after content */
 .page main,
 .page .page-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* start at top so back button sits after content */
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
   padding: 12px;
 }
+/* helper class to center a page if desired */
+.page.centered main { justify-content: center; }
 
 /* take available vertical space so content can be perfectly centered */
 .page main {
@@ -550,6 +552,8 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   background: var(--accent-hover);
   transform: translateY(-2px) scale(1.05);
 }
+.btn-remove { padding:6px 10px; background:transparent; border:1px solid var(--border); color:var(--text); border-radius:6px; cursor:pointer; }
+.btn-remove:hover { background: rgba(255,255,255,0.02); }
 </style>
 </head>
 
@@ -664,14 +668,8 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
         </div>
       </div>
     </section>
+    <button class="back-btn" data-back>⬅ Retour au menu</button>
   </main>
-  
-  
-  
-  
-
-
-  <button class="back-btn" data-back>⬅ Retour au menu</button>
 </div>
 
 <!-- ========================= -->
@@ -1234,21 +1232,7 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
   });
 });
 
-/* BOUTON RETOUR AU MENU */
-document.querySelectorAll("[data-back]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
 
-    setTimeout(() => {
-      menu.classList.add("active");
-      // reset & highlight first option
-      menuSelectedIndex = 0;
-      highlightMenuSelection(menuSelectedIndex);
-      // update global label to long-press when returning to menu
-      updateGlobalLabel();
-    }, 20);
-  });
-}); 
 
 // ---------------------------
 // Catalogue / Vitrine produit (JS)
@@ -1701,7 +1685,7 @@ document.querySelectorAll("[data-back]").forEach(btn => {
       const left = document.createElement('div'); left.innerHTML = `<strong>${localizedName(p)}</strong><div class="muted">${p.price}</div>`;
       const right = document.createElement('div'); right.style.display='flex'; right.style.gap='8px';
       const qty = document.createElement('input'); qty.type='number'; qty.value=item.qty; qty.min=1; qty.style.width='64px'; qty.addEventListener('change', ()=>{ setCartItem(item.id, Math.max(1, parseInt(qty.value)||1)); renderCartPage(); });
-      const remove = document.createElement('button'); remove.textContent = (document.body.dataset.lang === 'fr') ? 'Retirer' : 'Remove'; remove.className='back-btn'; remove.addEventListener('click', ()=>{ removeFromCart(item.id); renderCartPage(); });
+      const remove = document.createElement('button'); remove.textContent = (document.body.dataset.lang === 'fr') ? 'Retirer' : 'Remove'; remove.className='btn-remove'; remove.addEventListener('click', ()=>{ removeFromCart(item.id); renderCartPage(); });
       right.appendChild(qty); right.appendChild(remove);
       row.appendChild(left); row.appendChild(right);
       container.appendChild(row);
