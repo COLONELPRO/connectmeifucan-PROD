@@ -633,9 +633,25 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
           <small style="margin-left:8px;color:var(--muted);">Prix depuis fichiers .txt</small>
         </div>
         <div class="right">
+          <button id="btn-open-cart" class="toggle-selector" title="Panier">🧺 <span id="basket-count" class="basket-badge">0</span></button>
           <button id="btn-toggle-selector" class="toggle-selector" aria-pressed="false" title="Afficher / Masquer la sélection">☰</button>
           <span id="catalogue-pages">Page 1</span>
         </div>
+      </div>
+
+      <div class="catalogue-wrap" id="catalogue-wrap">
+        <aside class="catalogue-selector" id="catalogue-selector" aria-label="Sélecteur de produits">
+          <button id="btn-hide-selector" class="hide-selector">Masquer</button>
+          <div class="selector-filter">
+            <input id="catalogue-filter" class="filter-input" placeholder="Filtrer par mot‑clé" aria-label="Filtrer les produits">
+            <button id="btn-clear-filter" class="btn-clear-filter" title="Effacer">✕</button>
+          </div>
++          <div class="selector-actions" style="display:flex;gap:8px;margin-bottom:8px;">
++            <button id="btn-validate" class="btn-validate" disabled>Valider</button>
++            <button id="btn-add-selection" class="btn-add-to-cart" disabled>Ajouter sélection</button>
++          </div>
+          <ul id="catalogue-list" role="listbox" aria-label="Liste des produits"></ul>
+        </aside>
       </div>
 
       <div class="catalogue-wrap" id="catalogue-wrap">
@@ -707,6 +723,21 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
       <div class="note">💡 Personal projects under development</div>
     </div>    
     <button class="back-btn" data-back>⬅ Retour au menu</button>
+  </main>
+</div>
+
+<!-- ========================= -->
+<!-- CART PAGE                 -->
+<!-- ========================= -->
+<div id="page-cart" class="page">
+  <main>
+    <h2>🧺 Panier</h2>
+    <div id="cart-list" style="width:100%; max-width:720px; margin:0 auto; text-align:left;"></div>
+    <div id="cart-total" style="margin-top:12px; font-weight:800; color:var(--accent);">Total: —</div>
+    <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
+      <button id="btn-cart-order" class="menu-btn">Passer commande</button>
+      <button class="back-btn" data-back>⬅ Retour au menu</button>
+    </div>
   </main>
 </div>
 
@@ -1233,6 +1264,7 @@ document.querySelectorAll("[data-back]").forEach(btn => {
   const PAGE_SIZE = 8; // changed to 8 items per page
   let currentPage = 0;
   let selectedProductId = null; // current selected product from selector
+  let filterSaveTimer = null; // debounce timer for storing filter in localStorage
 
   function imageExists(url) {
     return new Promise(resolve => {
@@ -1292,11 +1324,14 @@ document.querySelectorAll("[data-back]").forEach(btn => {
 
   function renderSelector() {
     const list = document.getElementById('catalogue-list');
+    const countEl = document.querySelector('#catalogue-selector .selector-count');
     if (!list) return;
     const filterInput = document.getElementById('catalogue-filter');
     const filter = (filterInput && filterInput.value) ? filterInput.value.trim().toLowerCase() : '';
     list.innerHTML = '';
     let count = 0;
+    const compact = !!filter; // compact mode when filtering
+
     catalogueProducts.forEach((p, idx) => {
       const nameText = ((p.nameFr||'') + ' ' + (p.nameEn||'')).toLowerCase();
       const tagMatch = p.tags && p.tags.some(t => t.includes(filter));
@@ -1306,34 +1341,84 @@ document.querySelectorAll("[data-back]").forEach(btn => {
       const li = document.createElement('li'); li.dataset.id = p.id; li.role = 'option';
       const lang = document.body.dataset.lang || document.documentElement.lang || 'fr';
       const localizedDesc = (lang === 'fr') ? (p.descFr || p.descEn || '') : (p.descEn || p.descFr || '');
-      const tagsHtml = (p.tags || []).map(t=>`<span class="tag">${t}</span>`).join('');
-      li.innerHTML = `<img src="${encodeURI(p.image)}" alt=""> <div class="meta"><strong>${(p.nameFr||p.nameEn)||''}</strong><div class="muted">${p.price}</div><div class="desc">${localizedDesc}</div><div class="tags">${tagsHtml}</div></div>`;
+
+      if (compact) {
+        li.classList.add('compact');
+        const checked = p._selectedInSelector ? 'checked' : '';
+        li.innerHTML = `<input type="checkbox" class="sel-checkbox" ${checked} aria-label="Sélectionner ${localizedName(p)}"> <img src="${encodeURI(p.image)}" alt=""> <div class="meta"><strong>${(p.nameFr||p.nameEn)||''}</strong><div class="muted">${p.price}</div></div>`;
+        li.addEventListener('click', (e) => {
+          // if user clicked the checkbox directly, use its checked state (avoid double toggle)
+          if (e.target && e.target.tagName && e.target.tagName.toLowerCase() === 'input') {
+            p._selectedInSelector = e.target.checked;
+            updateSelectorActions();
+            return;
+          }
+          // toggle checkbox selection
+          p._selectedInSelector = !p._selectedInSelector;
+          renderSelector();
+          updateSelectorActions();
+        });
+      } else {
+        const tagsHtml = (p.tags || []).map(t=>`<span class="tag">${t}</span>`).join('');
+        li.innerHTML = `<img src="${encodeURI(p.image)}" alt=""> <div class="meta"><strong>${(p.nameFr||p.nameEn)||''}</strong><div class="muted">${p.price}</div><div class="desc">${localizedDesc}</div><div class="tags">${tagsHtml}</div></div>`;
+        li.addEventListener('click', () => {
+          selectedProductId = p.id;
+          // show the page where this product is located
+          const index = catalogueProducts.findIndex(x=>String(x.id)===String(p.id));
+          if (index >= 0) { currentPage = Math.floor(index / PAGE_SIZE); renderCatalogue(); }
+          // update selector highlight
+          renderSelector();
+          // ensure the selected card is visible
+          setTimeout(()=>{
+            const card = document.querySelector(`.product-card[data-id="${p.id}"]`);
+            card && card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 50);
+        });
+      }
+
       if (String(p.id) === String(selectedProductId)) li.classList.add('selected');
-      li.addEventListener('click', () => {
-        selectedProductId = p.id;
-        // show the page where this product is located
-        const index = catalogueProducts.findIndex(x=>String(x.id)===String(p.id));
-        if (index >= 0) { currentPage = Math.floor(index / PAGE_SIZE); renderCatalogue(); }
-        // update selector highlight
-        renderSelector();
-        // ensure the selected card is visible
-        setTimeout(()=>{
-          const card = document.querySelector(`.product-card[data-id="${p.id}"]`);
-          card && card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 50);
-      });
       list.appendChild(li);
       count++;
     });
+
+    // show count
+    if (!countEl && document.getElementById('catalogue-selector')) {
+      const el = document.getElementById('catalogue-selector');
+      const span = document.createElement('div'); span.className='selector-count'; span.textContent = `${count} produit${count>1?'s':''}`; el.insertBefore(span, el.querySelector('#catalogue-list'));
+    } else if (countEl) { countEl.textContent = `${count} produit${count>1?'s':''}`; }
+
+    updateSelectorActions();
+
     if (count === 0) { const li = document.createElement('li'); li.className='muted'; li.textContent = 'Aucun produit correspondant.'; list.appendChild(li); }
+
+    function updateSelectorActions() {
+      const btnVal = document.getElementById('btn-validate');
+      const btnAdd = document.getElementById('btn-add-selection');
+      const anySelected = catalogueProducts.some(p=>p._selectedInSelector);
+      if (btnVal) btnVal.disabled = !anySelected;
+      if (btnAdd) btnAdd.disabled = !anySelected;
+    }
   }
 
   function toggleSelector(hidden) {
     const wrap = document.getElementById('catalogue-wrap');
     const btn = document.getElementById('btn-toggle-selector');
-    if (!wrap || !btn) return;
+    const selector = document.getElementById('catalogue-selector');
+    if (!wrap || !btn || !selector) return;
     if (hidden === undefined) hidden = wrap.classList.contains('selector-hidden');
-    if (hidden) { wrap.classList.remove('selector-hidden'); btn.setAttribute('aria-pressed','false'); } else { wrap.classList.add('selector-hidden'); btn.setAttribute('aria-pressed','true'); }
+    // when showing selector on small screens, use overlay mode
+    const isMobile = window.matchMedia && window.matchMedia(`(max-width: calc(var(--mobile) - 1px))`).matches;
+    if (hidden) {
+      wrap.classList.remove('selector-hidden');
+      btn.setAttribute('aria-pressed','false');
+      if (isMobile) selector.classList.add('open-mobile');
+    } else {
+      wrap.classList.add('selector-hidden');
+      btn.setAttribute('aria-pressed','true');
+      if (isMobile) selector.classList.remove('open-mobile');
+    }
+    // persist choice
+    try { localStorage.setItem('cmuc_selector_hidden', wrap.classList.contains('selector-hidden') ? '1' : '0'); } catch (e) { }
   }
 
   async function loadCatalogue() {
@@ -1374,20 +1459,32 @@ document.querySelectorAll("[data-back]").forEach(btn => {
     const pagination = document.getElementById('catalogue-pagination');
     if (!grid || !count || !pagesEl || !pagination) return;
 
-    const total = catalogueProducts.length;
+    const total = activeFilterIds ? catalogueProducts.filter(p => activeFilterIds.includes(String(p.id))).length : catalogueProducts.length;
     count.textContent = `${total} produit${total>1? 's':''}`;
     const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
     currentPage = Math.min(currentPage, pageCount - 1);
     pagesEl.textContent = `Page ${currentPage + 1} / ${pageCount}`;
 
-    const slice = catalogueProducts.slice(currentPage*PAGE_SIZE, currentPage*PAGE_SIZE + PAGE_SIZE);
+    // apply filter by ids if set
+    const sourceList = activeFilterIds ? catalogueProducts.filter(p => activeFilterIds.includes(String(p.id))) : catalogueProducts;
+    const slice = sourceList.slice(currentPage*PAGE_SIZE, currentPage*PAGE_SIZE + PAGE_SIZE);
     grid.innerHTML = '';
     for (const p of slice) {
       const card = document.createElement('article'); card.className = 'product-card'; card.dataset.id = p.id; card.setAttribute('tabindex','0'); card.setAttribute('role','article');
-      card.innerHTML = `<img src="${encodeURI(p.image)}" alt="${(p.nameFr||p.nameEn)||''}"><h4>${localizedName(p)}</h4><div class="price">${p.price}</div><button class="btn-order">${document.body.dataset.lang === 'fr' ? 'Commander' : 'Order'}</button>`;
+      card.innerHTML = `<img src="${encodeURI(p.image)}" alt="${(p.nameFr||p.nameEn)||''}"><h4>${localizedName(p)}</h4><div class="price">${p.price}</div><div style="display:flex;gap:8px;justify-content:center;margin-top:8px;"><button class="btn-order">${document.body.dataset.lang === 'fr' ? 'Commander' : 'Order'}</button><button class="btn-addcart">${document.body.dataset.lang === 'fr' ? 'Ajouter au panier' : 'Add to cart'}</button></div>`;
       if (String(p.id) === String(selectedProductId)) card.classList.add('selected');
       grid.appendChild(card);
     }
+    // attach order button handlers
+    grid.querySelectorAll('.btn-order').forEach(btn => btn.addEventListener('click', (e)=>{
+      const id = e.currentTarget.closest('.product-card').dataset.id;
+      const p = catalogueProducts.find(x => String(x.id) === String(id)); if (p) openOrderModal(p);
+    }));
+    // attach add-to-cart handlers
+    grid.querySelectorAll('.btn-addcart').forEach(btn => btn.addEventListener('click', (e)=>{
+      const id = e.currentTarget.closest('.product-card').dataset.id;
+      addToCart(id,1); renderCartPage();
+    }));
     // if a selected product is on the current page, ensure it is visible
     if (selectedProductId) {
       setTimeout(()=>{
@@ -1425,6 +1522,47 @@ document.querySelectorAll("[data-back]").forEach(btn => {
     modal.classList.add('active'); modal.dataset.productId = product.id; document.getElementById('order-title').textContent = localizedName(product); document.getElementById('order-product-info').innerHTML = `<div>Prix: ${product.price}</div><div>ID: ${product.id}</div>`;
   }
 
+  // Cart order modal (for whole basket)
+  function openCartOrderModal() {
+    let modal = document.getElementById('catalogue-modal-cart');
+    if (!modal) {
+      modal = document.createElement('div'); modal.id = 'catalogue-modal-cart'; modal.className = 'catalogue-modal';
+      modal.innerHTML = `<div class="modal-inner" role="dialog" aria-modal="true"><h3 id="order-cart-title">Commande — Panier</h3><div id="order-cart-info"></div><label>Nom<input type="text" id="order-name-cart" placeholder="Votre nom"></label><label>Email<input type="email" id="order-email-cart" placeholder="Votre email"></label><label>Message<textarea id="order-msg-cart" rows="4" placeholder="Informations supplémentaires (optionnel)"></textarea></label><div class="modal-actions"><button id="order-cart-download">Télécharger commande</button><button id="order-cart-mail">Envoyer par mail</button><button id="order-cart-close">Fermer</button></div></div>`;
+      document.body.appendChild(modal);
+      document.getElementById('order-cart-close').addEventListener('click', ()=> modal.classList.remove('active'));
+      document.getElementById('order-cart-download').addEventListener('click', ()=>{
+        const data = collectCartOrderData(); const blob=new Blob([data.text],{type:'text/plain;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`commande_panier.txt`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      });
+      document.getElementById('order-cart-mail').addEventListener('click', ()=>{
+        const data = collectCartOrderData(); const subject = encodeURIComponent(`Commande Panier`); const body = encodeURIComponent(data.text); window.location.href = `mailto:?subject=${subject}&body=${body}`;
+      });
+    }
+    // populate cart info
+    const info = document.getElementById('order-cart-info'); info.innerHTML = '';
+    let sum = 0;
+    cart.forEach(item => {
+      const p = catalogueProducts.find(pp=>String(pp.id)===String(item.id)); const n = parseFloat((p.price||'').replace(/[^0-9.,]/g,'').replace(',', '.')) || 0; sum += n * (item.qty||1);
+      const r = document.createElement('div'); r.style.marginBottom='6px'; r.textContent = `${localizedName(p)} — ${item.qty} × ${p.price}`; info.appendChild(r);
+    });
+    const tot = document.createElement('div'); tot.style.fontWeight='800'; tot.style.marginTop='8px'; tot.textContent = `Total: ${sum? (sum.toFixed(2) + ' €') : '—'}`; info.appendChild(tot);
+    modal.classList.add('active');
+  }
+
+  function collectCartOrderData() {
+    let text = `Commande (Panier)\n`;
+    let sum = 0;
+    cart.forEach(item => {
+      const p = catalogueProducts.find(pp=>String(pp.id)===String(item.id)); const n = parseFloat((p.price||'').replace(/[^0-9.,]/g,'').replace(',', '.')) || 0; sum += n * (item.qty||1);
+      text += `Produit: ${localizedName(p)}\nID: ${p.id}\nQuantité: ${item.qty}\nPrix unitaire: ${p.price}\n\n`;
+    });
+    text += `Total: ${sum? (sum.toFixed(2) + ' €') : '—'}\n`;
+    const name = (document.getElementById('order-name-cart')||{}).value || '';
+    const email = (document.getElementById('order-email-cart')||{}).value || '';
+    const msg = (document.getElementById('order-msg-cart')||{}).value || '';
+    text += `Nom: ${name}\nEmail: ${email}\nMessage: ${msg}`;
+    return { text };
+  }
+
   function collectOrderData() {
     const modal = document.getElementById('catalogue-modal'); const product = catalogueProducts.find(p => String(p.id) === String(modal.dataset.productId)); const qty = document.getElementById('order-qty').value || 1; const name = document.getElementById('order-name').value || ''; const email = document.getElementById('order-email').value || ''; const msg = document.getElementById('order-msg').value || '';
     const text = `Commande\nProduit: ${localizedName(product)}\nID: ${product.id}\nQuantité: ${qty}\nPrix unitaire: ${product.price}\nNom: ${name}\nEmail: ${email}\nMessage: ${msg}`;
@@ -1437,20 +1575,82 @@ document.querySelectorAll("[data-back]").forEach(btn => {
   const bindRefresh = ()=>{ /* no-op: manual price button removed */ };
 
   // Selector toggle / hide bindings
+  let activeFilterIds = null; // when set, renderCatalogue will show only these ids
+  const CART_KEY = 'cmuc_cart_v1';
+  let cart = [];
+
+  function loadCart() { try { cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch (e) { cart = []; } updateBasketBadge(); }
+  function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); updateBasketBadge(); }
+  function updateBasketBadge() { const b = document.getElementById('basket-count'); const total = cart.reduce((s,it)=>s+ (it.qty||1),0); if (b) b.textContent = total; }
+  function addToCart(id, qty=1) { const existing = cart.find(x=>String(x.id)===String(id)); if (existing) existing.qty = (existing.qty||1) + qty; else cart.push({ id: String(id), qty }); saveCart(); }
+  function setCartItem(id, qty) { cart = cart.filter(x=>String(x.id)!==String(id)); if (qty>0) cart.push({ id: String(id), qty }); saveCart(); }
+  function removeFromCart(id) { cart = cart.filter(x=>String(x.id)!==String(id)); saveCart(); }
+
+  function applyFilterByIds(ids) { activeFilterIds = (ids && ids.length) ? ids.map(i=>String(i)) : null; currentPage = 0; renderCatalogue(); toggleSelector(true); }
+  function clearSelectorSelection() { catalogueProducts.forEach(p=>{ delete p._selectedInSelector; }); renderSelector(); }
+
   const bindSelectorUI = ()=>{
     const toggle = document.getElementById('btn-toggle-selector');
     const hide = document.getElementById('btn-hide-selector');
     const wrap = document.getElementById('catalogue-wrap');
     const filter = document.getElementById('catalogue-filter');
     const clearBtn = document.getElementById('btn-clear-filter');
+    const btnVal = document.getElementById('btn-validate');
+    const btnAdd = document.getElementById('btn-add-selection');
+    const btnOpenCart = document.getElementById('btn-open-cart');
+
     if (toggle && wrap) {
-      toggle.addEventListener('click', ()=>{ const was = wrap.classList.toggle('selector-hidden'); toggle.setAttribute('aria-pressed', was ? 'true' : 'false'); });
+      toggle.addEventListener('click', ()=>{ toggleSelector(); });
     }
     if (hide && wrap) {
-      hide.addEventListener('click', ()=>{ wrap.classList.add('selector-hidden'); const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed','true'); });
+      hide.addEventListener('click', ()=>{ wrap.classList.add('selector-hidden'); const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed','true'); try{ localStorage.setItem('cmuc_selector_hidden','1'); }catch(e){} });
     }
-    if (filter) { filter.addEventListener('input', ()=>{ renderSelector(); }); }
-    if (clearBtn) { clearBtn.addEventListener('click', ()=>{ if (filter) { filter.value=''; filter.focus(); } renderSelector(); }); }
+
+    // restore stored selector visibility if present
+    try {
+      const storedSel = localStorage.getItem('cmuc_selector_hidden');
+      if (storedSel !== null) {
+        const hidden = storedSel === '1';
+        wrap.classList.toggle('selector-hidden', hidden);
+        const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+        const sel = document.getElementById('catalogue-selector'); if (sel) {
+          if (!hidden && window.matchMedia && window.matchMedia(`(max-width: calc(var(--mobile) - 1px))`).matches) sel.classList.add('open-mobile'); else sel.classList.remove('open-mobile');
+        }
+      }
+    } catch(e){}
+
+    if (filter) {
+      filter.addEventListener('input', ()=>{
+        renderSelector();
+        // debounce save filter
+        try { if (filterSaveTimer) clearTimeout(filterSaveTimer); filterSaveTimer = setTimeout(()=>{ localStorage.setItem('cmuc_catalogue_filter', filter.value || ''); }, 300); } catch(e){}
+      });
+      filter.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); // treat Enter as Valider
+        const ids = catalogueProducts.filter(p=>p._selectedInSelector).map(p=>String(p.id)); if (ids.length) { applyFilterByIds(ids); clearSelectorSelection(); } } });
+      // if no URL tag param, restore stored filter
+      try {
+        const params = new URLSearchParams(window.location.search);
+        let tagParam = params.get('tag');
+        if (!tagParam && location.hash) {
+          const m = location.hash.match(/tag=([^&]+)/);
+          if (m) tagParam = decodeURIComponent(m[1]);
+        }
+        if (!tagParam) {
+          const stored = localStorage.getItem('cmuc_catalogue_filter');
+          if (stored && stored.trim().length) { filter.value = stored; renderSelector(); }
+        }
+      } catch (err) { /* ignore */ }
+    }
+
+    if (clearBtn) { clearBtn.addEventListener('click', ()=>{ if (filter) { filter.value=''; filter.focus(); try{ localStorage.setItem('cmuc_catalogue_filter',''); }catch(e){} } // clear applied filter too
+        applyFilterByIds(null); clearSelectorSelection(); renderSelector(); renderCatalogue(); }); }
+    if (btnVal) { btnVal.addEventListener('click', ()=>{ const ids = catalogueProducts.filter(p=>p._selectedInSelector).map(p=>String(p.id)); if (ids.length) { applyFilterByIds(ids); clearSelectorSelection(); } }); }
+    if (btnAdd) { btnAdd.addEventListener('click', ()=>{ const ids = catalogueProducts.filter(p=>p._selectedInSelector).map(p=>String(p.id)); ids.forEach(id=>addToCart(id,1)); clearSelectorSelection(); renderSelector(); renderCartPage(); }); }
+    if (btnOpenCart) { btnOpenCart.addEventListener('click', ()=>{ // navigate to cart page
+      // ensure page exists
+      navigateToPage('page-cart'); renderCartPage(); }); }
+    // cart order button
+    const btnCartOrder = document.getElementById('btn-cart-order'); if (btnCartOrder) { btnCartOrder.addEventListener('click', ()=>{ openCartOrderModal(); }); }
 
     // apply initial filter from URL if present (?tag=xxx or #tag=xxx)
     try {
@@ -1466,6 +1666,29 @@ document.querySelectorAll("[data-back]").forEach(btn => {
       }
     } catch (err) { /* ignore */ }
   };
+
+  function renderCartPage() {
+    const container = document.getElementById('cart-list');
+    const totalEl = document.getElementById('cart-total');
+    if (!container) return;
+    container.innerHTML = '';
+    let sum = 0;
+    cart.forEach(item => {
+      const p = catalogueProducts.find(pp=>String(pp.id)===String(item.id));
+      const row = document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.style.padding='8px 0';
+      const left = document.createElement('div'); left.innerHTML = `<strong>${localizedName(p)}</strong><div class="muted">${p.price}</div>`;
+      const right = document.createElement('div'); right.style.display='flex'; right.style.gap='8px';
+      const qty = document.createElement('input'); qty.type='number'; qty.value=item.qty; qty.min=1; qty.style.width='64px'; qty.addEventListener('change', ()=>{ setCartItem(item.id, Math.max(1, parseInt(qty.value)||1)); renderCartPage(); });
+      const remove = document.createElement('button'); remove.textContent = (document.body.dataset.lang === 'fr') ? 'Retirer' : 'Remove'; remove.className='back-btn'; remove.addEventListener('click', ()=>{ removeFromCart(item.id); renderCartPage(); });
+      right.appendChild(qty); right.appendChild(remove);
+      row.appendChild(left); row.appendChild(right);
+      container.appendChild(row);
+      // try to parse price number
+      const n = parseFloat((p.price||'').replace(/[^0-9.,]/g,'').replace(',', '.')) || 0;
+      sum += n * (item.qty||1);
+    });
+    totalEl.textContent = `Total: ${sum? (sum.toFixed(2) + ' €') : '—'}`;
+  }
 
   // detect when page1 becomes active and init
   const page1 = document.getElementById('page1'); if (page1) {
@@ -1532,6 +1755,8 @@ function setFR() {
   // mark active language on buttons
   btnFR && btnFR.classList.add('active');
   btnEN && btnEN.classList.remove('active');
+  // localize selector/cart labels
+  try { document.getElementById('btn-validate').textContent = 'Valider'; document.getElementById('btn-add-selection').textContent = 'Ajouter sélection'; document.getElementById('btn-open-cart').title = 'Panier'; document.getElementById('btn-cart-order') && (document.getElementById('btn-cart-order').textContent = 'Passer commande'); const f = document.getElementById('catalogue-filter'); if (f) f.placeholder = 'Filtrer par mot‑clé'; const hide = document.getElementById('btn-hide-selector'); if (hide) hide.textContent = 'Masquer'; const cartH = document.querySelector('#page-cart h2'); if (cartH) cartH.textContent = '🧺 Panier'; } catch (e) {}
 }
 
 function setEN() {
@@ -1585,6 +1810,8 @@ function setEN() {
   // mark active language on buttons
   btnEN && btnEN.classList.add('active');
   btnFR && btnFR.classList.remove('active');
+  // localize selector/cart labels
+  try { document.getElementById('btn-validate').textContent = 'Validate'; document.getElementById('btn-add-selection').textContent = 'Add selection'; document.getElementById('btn-open-cart').title = 'Cart'; document.getElementById('btn-cart-order') && (document.getElementById('btn-cart-order').textContent = 'Checkout'); const f = document.getElementById('catalogue-filter'); if (f) f.placeholder = 'Filter by keyword'; const hide = document.getElementById('btn-hide-selector'); if (hide) hide.textContent = 'Hide'; const cartH = document.querySelector('#page-cart h2'); if (cartH) cartH.textContent = '🧺 Cart'; } catch (e) {}
 }
 
 btnFR.addEventListener("click", setFR);
@@ -1596,6 +1823,8 @@ function initLanguageFromStorage() {
   if (stored === 'en') setEN(); else setFR();
 }
 initLanguageFromStorage();
+// load cart state after language init so UI badge is correct
+loadCart();
 </script>
 
 </body>
