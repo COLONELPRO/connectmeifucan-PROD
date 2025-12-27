@@ -1411,12 +1411,39 @@ document.querySelectorAll("[data-back]").forEach(btn => {
     if (hidden) {
       wrap.classList.remove('selector-hidden');
       btn.setAttribute('aria-pressed','false');
+      // show floating overlay on mobile, and optionally floating on narrow layouts
+      selector.classList.remove('floating');
       if (isMobile) selector.classList.add('open-mobile');
     } else {
       wrap.classList.add('selector-hidden');
       btn.setAttribute('aria-pressed','true');
       if (isMobile) selector.classList.remove('open-mobile');
     }
+    // when explicitly showing (not hidden), make selector float on top for better visibility
+    if (!wrap.classList.contains('selector-hidden')) {
+      selector.classList.add('floating');
+    } else {
+      selector.classList.remove('floating');
+    }
+
+    // manage backdrop overlay on mobile
+    try {
+      let backdrop = document.getElementById('catalogue-backdrop');
+      const createBackdrop = ()=>{
+        backdrop = document.createElement('div'); backdrop.id = 'catalogue-backdrop'; backdrop.className = 'catalogue-backdrop';
+        backdrop.addEventListener('click', ()=>{ toggleSelector(true); });
+        document.body.appendChild(backdrop);
+      };
+      if (!backdrop) createBackdrop();
+      if (isMobile && !wrap.classList.contains('selector-hidden')) {
+        backdrop.classList.add('active');
+        if (!backdrop._escHandler) { backdrop._escHandler = function(e){ if (e.key === 'Escape') toggleSelector(true); }; document.addEventListener('keydown', backdrop._escHandler); }
+      } else {
+        backdrop.classList.remove('active');
+        if (backdrop && backdrop._escHandler) { document.removeEventListener('keydown', backdrop._escHandler); backdrop._escHandler = null; }
+      }
+    } catch(e){}
+
     // persist choice
     try { localStorage.setItem('cmuc_selector_hidden', wrap.classList.contains('selector-hidden') ? '1' : '0'); } catch (e) { }
   }
@@ -1471,7 +1498,7 @@ document.querySelectorAll("[data-back]").forEach(btn => {
     grid.innerHTML = '';
     for (const p of slice) {
       const card = document.createElement('article'); card.className = 'product-card'; card.dataset.id = p.id; card.setAttribute('tabindex','0'); card.setAttribute('role','article');
-      card.innerHTML = `<img src="${encodeURI(p.image)}" alt="${(p.nameFr||p.nameEn)||''}"><h4>${localizedName(p)}</h4><div class="price">${p.price}</div><div style="display:flex;gap:8px;justify-content:center;margin-top:8px;"><button class="btn-order">${document.body.dataset.lang === 'fr' ? 'Commander' : 'Order'}</button><button class="btn-addcart">${document.body.dataset.lang === 'fr' ? 'Ajouter au panier' : 'Add to cart'}</button></div>`;
+      card.innerHTML = `<img src="${encodeURI(p.image)}" alt="${(p.nameFr||p.nameEn)||''}"><h4>${localizedName(p)}</h4><div class="price">${p.price}</div><div class="card-actions"><button class="btn-order">${document.body.dataset.lang === 'fr' ? 'Commander' : 'Order'}</button><button class="btn-addcart">${document.body.dataset.lang === 'fr' ? 'Ajouter au panier' : 'Add to cart'}</button></div>`;
       if (String(p.id) === String(selectedProductId)) card.classList.add('selected');
       grid.appendChild(card);
     }
