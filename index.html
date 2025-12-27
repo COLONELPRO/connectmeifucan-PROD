@@ -323,8 +323,6 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 /* CATALOGUE PRODUITS (Vitrine) */
 .catalogue {
   margin-top: 18px;
-  width: 100%;
-  box-sizing: border-box;
 }
 .catalogue .catalogue-controls {
   display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;
@@ -355,9 +353,6 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 /* when selector hidden, use single column for main content */
 .catalogue-wrap.selector-hidden { grid-template-columns: 0 1fr; }
 .catalogue-wrap.selector-hidden .catalogue-selector { display:none; }
-
-/* when selector is shown as a floating overlay, let the main area occupy full width of the page content */
-.catalogue-wrap.selector-floating { grid-template-columns: 0 1fr; }
 
 .catalogue .catalogue-main { min-width: 0; }
 .catalogue .catalogue-grid { display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:12px; }
@@ -446,20 +441,18 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   .page > * { width: min(100%, 1000px); padding: 0 24px; }
 }
 
-/* Ensure main content inside each page is laid out vertically; back button stays after content */
+/* Ensure main content inside each page is centered horizontally and vertically */
 .page main,
 .page .page-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* start at top so back button sits after content */
+  justify-content: center;
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
   padding: 12px;
 }
-/* helper class to center a page if desired */
-.page.centered main { justify-content: center; }
 
 /* take available vertical space so content can be perfectly centered */
 .page main {
@@ -557,8 +550,6 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   background: var(--accent-hover);
   transform: translateY(-2px) scale(1.05);
 }
-.btn-remove { padding:6px 10px; background:transparent; border:1px solid var(--border); color:var(--text); border-radius:6px; cursor:pointer; }
-.btn-remove:hover { background: rgba(255,255,255,0.02); }
 </style>
 </head>
 
@@ -673,8 +664,14 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
         </div>
       </div>
     </section>
-    <button class="back-btn" data-back>⬅ Retour au menu</button>
   </main>
+  
+  
+  
+  
+
+
+  <button class="back-btn" data-back>⬅ Retour au menu</button>
 </div>
 
 <!-- ========================= -->
@@ -1237,7 +1234,21 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
   });
 });
 
+/* BOUTON RETOUR AU MENU */
+document.querySelectorAll("[data-back]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
 
+    setTimeout(() => {
+      menu.classList.add("active");
+      // reset & highlight first option
+      menuSelectedIndex = 0;
+      highlightMenuSelection(menuSelectedIndex);
+      // update global label to long-press when returning to menu
+      updateGlobalLabel();
+    }, 20);
+  });
+}); 
 
 // ---------------------------
 // Catalogue / Vitrine produit (JS)
@@ -1395,22 +1406,20 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
     if (hidden) {
       wrap.classList.remove('selector-hidden');
       btn.setAttribute('aria-pressed','false');
-      // clear mobile-specific open state
-      selector.classList.remove('open-mobile');
+      // show floating overlay on mobile, and optionally floating on narrow layouts
+      selector.classList.remove('floating');
+      if (isMobile) selector.classList.add('open-mobile');
     } else {
       wrap.classList.add('selector-hidden');
       btn.setAttribute('aria-pressed','true');
       if (isMobile) selector.classList.remove('open-mobile');
     }
-    // when explicitly showing (not hidden), make selector float on top for better visibility on small screens
+    // when explicitly showing (not hidden), make selector float on top for better visibility
     if (!wrap.classList.contains('selector-hidden')) {
       selector.classList.add('floating');
     } else {
       selector.classList.remove('floating');
     }
-
-    // update wrap floating state so main grid resizes when selector floats
-    try { updateSelectorFloatingState(); } catch(e){}
 
     // manage backdrop overlay on mobile
     try {
@@ -1433,30 +1442,6 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
     // persist choice
     try { localStorage.setItem('cmuc_selector_hidden', wrap.classList.contains('selector-hidden') ? '1' : '0'); } catch (e) { }
   }
-
-  function debounce(fn, wait=120){ let t=null; return (...args)=>{ if (t) clearTimeout(t); t = setTimeout(()=>fn(...args), wait); }; }
-
-  function updateSelectorFloatingState(){
-    const wrap = document.getElementById('catalogue-wrap');
-    const selector = document.getElementById('catalogue-selector');
-    if (!wrap || !selector) return;
-    const isHidden = wrap.classList.contains('selector-hidden');
-    const isOverlayPreferred = window.matchMedia && window.matchMedia(`(max-width: calc(var(--tablet) - 1px))`).matches; // overlay on tablet or smaller
-    const isMobile = window.matchMedia && window.matchMedia(`(max-width: calc(var(--mobile) - 1px))`).matches;
-    if (!isHidden && isOverlayPreferred) {
-      selector.classList.add('floating');
-      wrap.classList.add('selector-floating');
-      // on true mobile view use open-mobile class as well
-      if (isMobile) selector.classList.add('open-mobile'); else selector.classList.remove('open-mobile');
-    } else {
-      selector.classList.remove('floating');
-      selector.classList.remove('open-mobile');
-      wrap.classList.remove('selector-floating');
-    }
-  }
-
-  // keep state in sync on viewport resize
-  window.addEventListener('resize', debounce(()=>{ try{ updateSelectorFloatingState(); }catch(e){} }));
 
   async function loadCatalogue() {
     catalogueProducts = [];
@@ -1640,9 +1625,9 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
       toggle.addEventListener('click', ()=>{ toggleSelector(); });
     }
     if (hide && wrap) {
-      hide.addEventListener('click', ()=>{ wrap.classList.add('selector-hidden'); const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed','true'); try{ localStorage.setItem('cmuc_selector_hidden','1'); }catch(e){} try{ updateSelectorFloatingState(); }catch(e){} });
+      hide.addEventListener('click', ()=>{ wrap.classList.add('selector-hidden'); const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed','true'); try{ localStorage.setItem('cmuc_selector_hidden','1'); }catch(e){} });
     }
-    
+
     // restore stored selector visibility if present
     try {
       const storedSel = localStorage.getItem('cmuc_selector_hidden');
@@ -1653,7 +1638,7 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
         const sel = document.getElementById('catalogue-selector'); if (sel) {
           if (!hidden && window.matchMedia && window.matchMedia(`(max-width: calc(var(--mobile) - 1px))`).matches) sel.classList.add('open-mobile'); else sel.classList.remove('open-mobile');
         }
-        try{ updateSelectorFloatingState(); }catch(e){}
+      }
     } catch(e){}
 
     if (filter) {
@@ -1716,7 +1701,7 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
       const left = document.createElement('div'); left.innerHTML = `<strong>${localizedName(p)}</strong><div class="muted">${p.price}</div>`;
       const right = document.createElement('div'); right.style.display='flex'; right.style.gap='8px';
       const qty = document.createElement('input'); qty.type='number'; qty.value=item.qty; qty.min=1; qty.style.width='64px'; qty.addEventListener('change', ()=>{ setCartItem(item.id, Math.max(1, parseInt(qty.value)||1)); renderCartPage(); });
-      const remove = document.createElement('button'); remove.textContent = (document.body.dataset.lang === 'fr') ? 'Retirer' : 'Remove'; remove.className='btn-remove'; remove.addEventListener('click', ()=>{ removeFromCart(item.id); renderCartPage(); });
+      const remove = document.createElement('button'); remove.textContent = (document.body.dataset.lang === 'fr') ? 'Retirer' : 'Remove'; remove.className='back-btn'; remove.addEventListener('click', ()=>{ removeFromCart(item.id); renderCartPage(); });
       right.appendChild(qty); right.appendChild(remove);
       row.appendChild(left); row.appendChild(right);
       container.appendChild(row);
