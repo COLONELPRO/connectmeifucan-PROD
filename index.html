@@ -209,6 +209,11 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   background: var(--accent-hover);
   transform: scale(1.05);
 }
+.lang-btn.active {
+  background: var(--accent-hover);
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
 
 /* ========================= */
 /* ECRAN INTERMEDIAIRE       */
@@ -313,6 +318,35 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   background: var(--accent-hover);
   transform: translateY(-2px) scale(1.05);
 }
+
+/* ========================= */
+/* CATALOGUE PRODUITS (Vitrine) */
+.catalogue {
+  margin-top: 18px;
+}
+.catalogue .catalogue-controls {
+  display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;
+}
+.catalogue .catalogue-controls .left { display:flex; gap:8px; align-items:center; }
+.catalogue .catalogue-controls .right { display:flex; gap:8px; align-items:center; }
+.catalogue .catalogue-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:12px; }
+.catalogue .product-card { background: rgba(255,255,255,0.03); border-radius:8px; padding:10px; text-align:center; box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
+.catalogue .product-card img { max-width:100%; height:120px; object-fit:contain; margin-bottom:8px; border-radius:6px; background: rgba(255,255,255,0.02); }
+.catalogue .product-card h4 { margin:6px 0 4px; font-size:1rem; }
+.catalogue .product-card .price { font-weight:800; color:var(--accent); margin-bottom:8px; }
+.catalogue .product-card button { padding:8px 10px; background:var(--accent); border-radius:8px; border:1px solid var(--border); color:#000; cursor:pointer; }
+.catalogue .pagination { display:flex; gap:8px; justify-content:center; margin-top:12px; }
+.catalogue .pagination button { padding:6px 10px; background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--text); border-radius:6px; cursor:pointer; }
+
+/* simple modal for order form */
+.catalogue-modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:10010; }
+.catalogue-modal.active { display:flex; }
+.catalogue-modal .modal-inner { background: #0b0b0b; padding:18px; border-radius:10px; width: min(92%, 520px); box-shadow: 0 24px 64px rgba(0,0,0,0.7); }
+.catalogue-modal label { display:block; font-size:0.9rem; margin-top:8px; }
+.catalogue-modal input, .catalogue-modal textarea, .catalogue-modal select { width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid var(--border); background:rgba(255,255,255,0.02); color:var(--text); }
+.catalogue-modal .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+.catalogue-modal .modal-actions button { padding:8px 12px; border-radius:6px; border: none; cursor:pointer; }
+.catalogue .update-prices { padding:6px 10px; border-radius:6px; background:rgba(255,255,255,0.03); border:1px solid var(--border); cursor:pointer; }
 
 /* ========================= */
 /* PAGES PRINCIPALES         */
@@ -536,11 +570,6 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 
   <!-- 🔥 INSÈRE ICI TON ANCIEN MAIN COMPLET 🔥 -->
   <!-- Exemple : -->
-  
-  
-  
-  
-  
   <main>
     <img src="connectmeifucan-logo-Noel.jpg" alt="Connect Me If U Can Logo" class="logo">
 
@@ -565,11 +594,26 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
       <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Discover</a>
       <div class="note">💡 Personal projects under development</div>
     </div>
+
+    <!-- Catalogue vitrine -->
+    <section id="catalogue" class="catalogue" aria-label="Catalogue produits">
+      <div class="catalogue-controls">
+        <div class="left">
+          <strong id="catalogue-count">0 produits</strong>
+          <button class="update-prices" id="btn-refresh-prices">Mettre à jour les prix</button>
+        </div>
+        <div class="right">
+          <span id="catalogue-pages">Page 1</span>
+        </div>
+      </div>
+      <div class="catalogue-grid" id="catalogue-grid" aria-live="polite"></div>
+      <div class="pagination" id="catalogue-pagination"></div>
+    </section>
   </main>
-
-
-
-
+  
+  
+  
+  
 
 
   <button class="back-btn" data-back>⬅ Retour au menu</button>
@@ -591,8 +635,33 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 <!-- ========================= -->
 <div id="page3" class="page">
   <main>
-    <h2>🌌 Connect Me to New Realities</h2>
-    <p>Contenu à venir…</p>
+
+  
+  <main>
+    <img src="connectmeifucan-logo-Noel.jpg" alt="Connect Me If U Can Logo" class="logo">
+
+    <h2>Connect Me to New Realities</h2>
+ <h3>🎮 Connect Me If U Can (under construction)</h3>
+   
+    <div id="fr" class="lang">
+      ✨ 1. Déplace-toi sereinement la nuit, en toute simplicité.<br>
+      ✨ 2. Transforme ton salon en expérience immersive à domicile :<br>
+      🔦 Lumières • Sons • Objets connectés.<br>
+      ⏳ Voyage dans le temps entre 1850 et 2050.<br><br>
+
+      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Découvrir</a>
+      <div class="note">💡 Projects personnels en cours de développement</div>
+    </div>
+
+    <div id="en" class="lang">
+      ✨ 1. Move around at night with ease and peace of mind<br>
+      ✨ 2. Turn your living room into an immersive home experience.<br>
+      🔦 Lights • Sounds • Smart objects.<br>
+      ⏳ Time travel between 1850 and 2050.<br><br>
+
+      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Discover</a>
+      <div class="note">💡 Personal projects under development</div>
+    </div>    
     <button class="back-btn" data-back>⬅ Retour au menu</button>
   </main>
 </div>
@@ -1111,6 +1180,150 @@ document.querySelectorAll("[data-back]").forEach(btn => {
   });
 }); 
 
+// ---------------------------
+// Catalogue / Vitrine produit (JS)
+// ---------------------------
+(function(){
+  const CATALOG_DIR = 'Catalogue produits';
+  let catalogueProducts = [];
+  const PAGE_SIZE = 6;
+  let currentPage = 0;
+
+  function imageExists(url) {
+    return new Promise(resolve => {
+      const img = new Image(); img.onload = () => resolve(true); img.onerror = () => resolve(false); img.src = encodeURI(url);
+    });
+  }
+
+  async function fetchPrice(p) {
+    if (!p.priceFile) { p.price = '—'; return; }
+    try {
+      const r = await fetch(encodeURI(p.priceFile));
+      if (!r.ok) { p.price = '—'; return; }
+      const t = (await r.text()).trim(); p.price = t || '—';
+    } catch (e) { p.price = '—'; }
+  }
+
+  async function loadFromManifest() {
+    try {
+      const resp = await fetch(encodeURI(CATALOG_DIR + '/products.json'));
+      if (!resp.ok) return null;
+      return await resp.json();
+    } catch (e) { return null; }
+  }
+
+  async function discoverFallback() {
+    const items = [];
+    for (let i=1;i<=48;i++) {
+      const img = `${CATALOG_DIR}/product-${i}.jpg`;
+      // sequential check keeps network reasonable
+      // eslint-disable-next-line no-await-in-loop
+      if (await imageExists(img)) {
+        items.push({ id: i, image: img, nameFr: `Produit ${i}`, nameEn: `Product ${i}`, priceFile: `${CATALOG_DIR}/product-${i}.txt`, price: '—' });
+      }
+    }
+    return items;
+  }
+
+  async function loadCatalogue() {
+    catalogueProducts = [];
+    const manifest = await loadFromManifest();
+    if (manifest && Array.isArray(manifest)) {
+      for (const it of manifest) {
+        const p = {
+          id: it.id || it.sku || Math.random().toString(36).slice(2,8),
+          image: it.image ? `${CATALOG_DIR}/${it.image}` : (it.imageAbsolute || ''),
+          nameFr: it.nameFr || it.name || `Produit ${it.id || ''}`,
+          nameEn: it.nameEn || it.name || `Product ${it.id || ''}`,
+          priceFile: it.priceFile ? `${CATALOG_DIR}/${it.priceFile}` : (it.priceFileAbsolute || `${CATALOG_DIR}/product-${it.id}.txt`),
+          price: '—'
+        };
+        catalogueProducts.push(p);
+      }
+    } else {
+      const fallback = await discoverFallback();
+      catalogueProducts = fallback;
+    }
+
+    // fetch prices in parallel
+    await Promise.all(catalogueProducts.map(p => fetchPrice(p)));
+    currentPage = 0;
+    renderCatalogue();
+  }
+
+  function localizedName(p) { const lang = document.body.dataset.lang || document.documentElement.lang || 'fr'; return (lang === 'fr') ? (p.nameFr || p.nameEn) : (p.nameEn || p.nameFr); }
+
+  function renderCatalogue() {
+    const grid = document.getElementById('catalogue-grid');
+    const count = document.getElementById('catalogue-count');
+    const pagesEl = document.getElementById('catalogue-pages');
+    const pagination = document.getElementById('catalogue-pagination');
+    if (!grid || !count || !pagesEl || !pagination) return;
+
+    const total = catalogueProducts.length;
+    count.textContent = `${total} produit${total>1? 's':''}`;
+    const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    currentPage = Math.min(currentPage, pageCount - 1);
+    pagesEl.textContent = `Page ${currentPage + 1} / ${pageCount}`;
+
+    const slice = catalogueProducts.slice(currentPage*PAGE_SIZE, currentPage*PAGE_SIZE + PAGE_SIZE);
+    grid.innerHTML = '';
+    for (const p of slice) {
+      const card = document.createElement('article'); card.className = 'product-card'; card.dataset.id = p.id;
+      card.innerHTML = `<img src="${encodeURI(p.image)}" alt="${(p.nameFr||p.nameEn)||''}"><h4>${localizedName(p)}</h4><div class="price">${p.price}</div><button class="btn-order">${document.body.dataset.lang === 'fr' ? 'Commander' : 'Order'}</button>`;
+      grid.appendChild(card);
+    }
+
+    pagination.innerHTML = '';
+    if (pageCount > 1) {
+      const prev = document.createElement('button'); prev.textContent = '<'; prev.disabled = (currentPage===0); prev.addEventListener('click', ()=>{ currentPage = Math.max(0,currentPage-1); renderCatalogue(); });
+      const next = document.createElement('button'); next.textContent = '>'; next.disabled = (currentPage >= pageCount-1); next.addEventListener('click', ()=>{ currentPage = Math.min(pageCount-1,currentPage+1); renderCatalogue(); });
+      pagination.appendChild(prev);
+      for (let i=0;i<pageCount;i++){ const b=document.createElement('button'); b.textContent = (i+1); b.disabled = (i===currentPage); b.addEventListener('click', ()=>{ currentPage = i; renderCatalogue(); }); pagination.appendChild(b); }
+      pagination.appendChild(next);
+    }
+
+    // attach order button handlers
+    grid.querySelectorAll('.btn-order').forEach(btn => btn.addEventListener('click', (e)=>{
+      const id = e.currentTarget.closest('.product-card').dataset.id;
+      const p = catalogueProducts.find(x => String(x.id) === String(id)); if (p) openOrderModal(p);
+    }));
+  }
+
+  function openOrderModal(product) {
+    let modal = document.getElementById('catalogue-modal');
+    if (!modal) {
+      modal = document.createElement('div'); modal.id = 'catalogue-modal'; modal.className = 'catalogue-modal';
+      modal.innerHTML = `<div class="modal-inner" role="dialog" aria-modal="true"><h3 id="order-title"></h3><div id="order-product-info"></div><label>Quantité<input type="number" id="order-qty" value="1" min="1"></label><label>Nom<input type="text" id="order-name" placeholder="Votre nom"></label><label>Email<input type="email" id="order-email" placeholder="Votre email"></label><label>Message<textarea id="order-msg" rows="3" placeholder="Informations supplémentaires (optionnel)"></textarea></label><div class="modal-actions"><button id="order-download">Télécharger commande</button><button id="order-mail">Envoyer par mail</button><button id="order-close">Fermer</button></div></div>`;
+      document.body.appendChild(modal);
+      document.getElementById('order-close').addEventListener('click', ()=> modal.classList.remove('active'));
+      document.getElementById('order-download').addEventListener('click', ()=>{ const data=collectOrderData(); const blob=new Blob([data.text],{type:'text/plain;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`commande_${data.product.id}.txt`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+      document.getElementById('order-mail').addEventListener('click', ()=>{ const data=collectOrderData(); const subject = encodeURIComponent(`Commande: ${data.product.name}`); const body = encodeURIComponent(data.text); window.location.href = `mailto:?subject=${subject}&body=${body}`; });
+    }
+    modal.classList.add('active'); modal.dataset.productId = product.id; document.getElementById('order-title').textContent = localizedName(product); document.getElementById('order-product-info').innerHTML = `<div>Prix: ${product.price}</div><div>ID: ${product.id}</div>`;
+  }
+
+  function collectOrderData() {
+    const modal = document.getElementById('catalogue-modal'); const product = catalogueProducts.find(p => String(p.id) === String(modal.dataset.productId)); const qty = document.getElementById('order-qty').value || 1; const name = document.getElementById('order-name').value || ''; const email = document.getElementById('order-email').value || ''; const msg = document.getElementById('order-msg').value || '';
+    const text = `Commande\nProduit: ${localizedName(product)}\nID: ${product.id}\nQuantité: ${qty}\nPrix unitaire: ${product.price}\nNom: ${name}\nEmail: ${email}\nMessage: ${msg}`;
+    return { product, qty, name, email, msg, text };
+  }
+
+  async function refreshPrices() { await Promise.all(catalogueProducts.map(p=>fetchPrice(p))); renderCatalogue(); }
+
+  // bind update button
+  const bindRefresh = ()=>{ const b = document.getElementById('btn-refresh-prices'); if (b) { b.addEventListener('click', async ()=>{ b.disabled=true; b.textContent='Mise à jour...'; await refreshPrices(); b.textContent='Mettre à jour les prix'; b.disabled=false; }); } };
+
+  // detect when page1 becomes active and init
+  const page1 = document.getElementById('page1'); if (page1) {
+    const obs = new MutationObserver(() => { if (page1.classList.contains('active') && !window._catalogueInit) { window._catalogueInit = true; loadCatalogue().then(()=>bindRefresh()); } });
+    obs.observe(page1,{attributes:true,attributeFilter:['class']});
+  }
+
+  // expose minor helpers for language switching
+  window._refreshCatalogueAfterLang = ()=>{ try{ renderCatalogue(); }catch(e){} };
+})();
+
 /* LANGUE FR / EN */
 const btnFR = document.getElementById("btn-fr");
 const btnEN = document.getElementById("btn-en");
@@ -1162,6 +1375,10 @@ function setFR() {
   updateGlobalLabel();
   updateGlobalBackLabel();
   updateGlobalVisibility();
+  if (window._refreshCatalogueAfterLang) window._refreshCatalogueAfterLang();
+  // mark active language on buttons
+  btnFR && btnFR.classList.add('active');
+  btnEN && btnEN.classList.remove('active');
 }
 
 function setEN() {
@@ -1211,6 +1428,10 @@ function setEN() {
   updateGlobalLabel();
   updateGlobalBackLabel();
   updateGlobalVisibility();
+  if (window._refreshCatalogueAfterLang) window._refreshCatalogueAfterLang();
+  // mark active language on buttons
+  btnEN && btnEN.classList.add('active');
+  btnFR && btnFR.classList.remove('active');
 }
 
 btnFR.addEventListener("click", setFR);

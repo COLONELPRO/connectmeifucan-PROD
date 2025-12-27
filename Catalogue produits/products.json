@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "image": "product-1.svg",
+    "nameFr": "Lampe douce",
+    "nameEn": "Soft Lamp",
+    "priceFile": "product-1.txt"
+  },
+  {
+    "id": "2",
+    "image": "product-2.svg",
+    "nameFr": "Tasse vintage",
+    "nameEn": "Vintage Mug",
+    "priceFile": "product-2.txt"
+  },
+  {
+    "id": "3",
+    "image": "product-3.svg",
+    "nameFr": "Carnet A5",
+    "nameEn": "A5 Notebook",
+    "priceFile": "product-3.txt"
+  }
+]
