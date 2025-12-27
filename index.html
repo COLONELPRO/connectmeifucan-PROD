@@ -55,6 +55,77 @@ body {
 #splash.hidden { opacity: 0; pointer-events: none; }
 
 /* ========================= */
+/* SPLASH: ENTER SIDES + PROGRESS */
+/* ========================= */
+.enter-sides {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 28%;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 24px;
+  width: 100%;
+  max-width: 1200px;
+  pointer-events: none; /* children manage pointer-events */
+}
+.enter-sides .enter-side {
+  pointer-events: auto;
+}
+.enter-side {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  background: var(--accent);
+  color: #000;
+  border: 3px solid rgba(0,0,0,0.12);
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease;
+  user-select: none;
+  touch-action: none; /* avoid double-tap/context issues on touch */
+}
+.enter-side.pressing { transform: scale(.94); box-shadow: 0 10px 28px rgba(0,0,0,.35); }
+
+#press-progress-bar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 40%;
+  width: 60%;
+  max-width: 640px;
+  height: 14px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  display: none;
+  align-items: center;
+}
+#press-progress-bar.visible { display: flex; }
+#press-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  transition: width .05s linear;
+}
+#press-progress-text {
+  position: absolute;
+  right: 8px;
+  font-weight: 800;
+  color: #000;
+  font-size: 0.85rem;
+}
+
+/* ZOOM TRANSITION TO MENU */
+#splash.zooming { transform: scale(1.12); opacity: 0; transition: transform .7s ease, opacity .7s ease; pointer-events: none; }
+#menu { transform: scale(.98); transition: transform .7s ease, opacity .4s ease; opacity: 0; }
+#menu.active.scale-in { transform: scale(1); opacity: 1; }
+
+/* ========================= */
 /* BOUTONS LANGUE            */
 /* ========================= */
 .lang-switch {
@@ -220,7 +291,16 @@ body {
 <div id="splash">
   <h1>Bienvenue</h1>
   <p>Chargement...</p>
-  <button id="enterBtn" class="menu-btn">Entrer</button>
+
+  <div class="enter-sides">
+    <button id="enter-left" class="enter-side" aria-label="Entrer - main gauche" title="Entrer — Main gauche">⬅</button>
+    <button id="enter-right" class="enter-side" aria-label="Entrer - main droite" title="Entrer — Main droite">➡</button>
+  </div>
+
+  <div id="press-progress-bar" aria-hidden="true">
+    <div id="press-progress-fill"></div>
+    <div id="press-progress-text">0%</div>
+  </div>
 </div>
 
 <!-- ========================= -->
@@ -306,17 +386,110 @@ body {
 <!-- SCRIPT GLOBAL             -->
 <!-- ========================= -->
 <script>
-/* SPLASH → MENU */
+/* SPLASH → MENU (long-press left/right with progress + auto-enter fallback) */
 const splash = document.getElementById("splash");
-const enterBtn = document.getElementById("enterBtn");
 const menu = document.getElementById("menu");
 
-enterBtn.addEventListener("click", () => {
-  splash.classList.add("hidden");
+const btnLeft = document.getElementById('enter-left');
+const btnRight = document.getElementById('enter-right');
+const progressBar = document.getElementById('press-progress-bar');
+const progressFill = document.getElementById('press-progress-fill');
+const progressText = document.getElementById('press-progress-text');
+
+const PRESS_MS = 2000; // ms required to reach 100%
+let pressRaf = null;
+let pressStart = 0;
+let currentHand = null;
+let autoEnterTimer = setTimeout(() => {
+  if (splash && !splash.classList.contains('zooming')) {
+    // fallback: auto-complete after 3s
+    doComplete('auto');
+  }
+}, 3000);
+
+function updateProgressUI(percent) {
+  if (progressFill) progressFill.style.width = percent + '%';
+  if (progressText) progressText.textContent = Math.round(percent) + '%';
+}
+
+function resetProgress() {
+  if (pressRaf) { cancelAnimationFrame(pressRaf); pressRaf = null; }
+  if (progressBar) progressBar.classList.remove('visible');
+  updateProgressUI(0);
+  currentHand = null;
+}
+
+function startPress(hand) {
+  clearTimeout(autoEnterTimer);
+  if (!progressBar || !progressFill) return;
+  currentHand = hand;
+  progressBar.classList.add('visible');
+  pressStart = performance.now();
+
+  function step(t) {
+    const elapsed = t - pressStart;
+    const p = Math.min(1, elapsed / PRESS_MS);
+    updateProgressUI(p * 100);
+    if (p >= 1) {
+      pressRaf = null;
+      // Completed: record hand and start zoom transition
+      doComplete(hand);
+    } else {
+      pressRaf = requestAnimationFrame(step);
+    }
+  }
+
+  pressRaf = requestAnimationFrame(step);
+}
+
+function doComplete(hand) {
+  // clear fallback timer
+  clearTimeout(autoEnterTimer);
+
+  // Store detected hand
+  if (hand && hand !== 'auto') document.body.dataset.hand = hand;
+
+  // start zoom-out on splash
+  if (splash) splash.classList.add('zooming');
+
+  // after transition, remove splash and show menu with scale-in
   setTimeout(() => {
-    splash.remove();
-    menu.classList.add("active");
-  }, 600);
+    if (splash && splash.parentNode) splash.remove();
+    if (menu) menu.classList.add('active', 'scale-in');
+    resetProgress();
+  }, 700);
+}
+
+// attach pointer handlers to left/right buttons (works for mouse & touch)
+[btnLeft, btnRight].forEach(btn => {
+  if (!btn) return;
+  const hand = btn.id === 'enter-left' ? 'left' : 'right';
+
+  btn.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    clearTimeout(autoEnterTimer);
+    try { btn.setPointerCapture && btn.setPointerCapture(e.pointerId); } catch (err) {}
+    btn.classList.add('pressing');
+    startPress(hand);
+  });
+
+  btn.addEventListener('pointerup', e => {
+    try { btn.releasePointerCapture && btn.releasePointerCapture(e.pointerId); } catch (err) {}
+    btn.classList.remove('pressing');
+    // if not completed yet, cancel
+    if (pressRaf) resetProgress();
+  });
+
+  btn.addEventListener('pointercancel', e => { btn.classList.remove('pressing'); resetProgress(); });
+  btn.addEventListener('pointerleave', e => { if (pressRaf) resetProgress(); btn.classList.remove('pressing'); });
+
+  // keyboard support
+  btn.addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); btn.classList.add('pressing'); startPress(hand); }
+  });
+  btn.addEventListener('keyup', e => {
+    if (e.key === ' ' || e.key === 'Enter') { btn.classList.remove('pressing'); if (pressRaf) resetProgress(); }
+  });
 });
 
 /* CATEGORIES → PAGES */
@@ -354,7 +527,19 @@ const menuSubtitle = document.getElementById("menu-subtitle");
 
 function setFR() {
   menuTitle.textContent = "Choisissez une catégorie";
-  menuSubtitle.textContent = "Select a category";
+  menuSubtitle.textContent = "Sélectionnez une catégorie";
+
+  // splash texts (FR)
+  const splashH1 = document.querySelector('#splash h1');
+  const splashP = document.querySelector('#splash p');
+  if (splashH1) splashH1.textContent = "Bienvenue";
+  if (splashP) splashP.textContent = "Chargement...";
+  const leftBtn = document.getElementById('enter-left');
+  const rightBtn = document.getElementById('enter-right');
+  if (leftBtn) leftBtn.title = "Entrer — Main gauche";
+  if (rightBtn) rightBtn.title = "Entrer — Main droite";
+  const progressTextElFr = document.getElementById('press-progress-text');
+  if (progressTextElFr) progressTextElFr.textContent = "0%";
 
   document.querySelector('[data-target="page1"]').textContent =
     "🌿 Confort & Bien‑Être at Home";
@@ -374,7 +559,19 @@ function setFR() {
 
 function setEN() {
   menuTitle.textContent = "Choose a category";
-  menuSubtitle.textContent = "Sélectionnez une catégorie";
+  menuSubtitle.textContent = "Select a category";
+
+  // splash texts (EN)
+  const splashH1En = document.querySelector('#splash h1');
+  const splashPEn = document.querySelector('#splash p');
+  if (splashH1En) splashH1En.textContent = "Welcome";
+  if (splashPEn) splashPEn.textContent = "Loading...";
+  const leftBtnEn = document.getElementById('enter-left');
+  const rightBtnEn = document.getElementById('enter-right');
+  if (leftBtnEn) leftBtnEn.title = "Enter — Left hand";
+  if (rightBtnEn) rightBtnEn.title = "Enter — Right hand";
+  const progressTextElEn = document.getElementById('press-progress-text');
+  if (progressTextElEn) progressTextElEn.textContent = "0%";
 
   document.querySelector('[data-target="page1"]').textContent =
     "Comfort & Well‑Being at Home";
@@ -397,4 +594,4 @@ btnEN.addEventListener("click", setEN);
 </script>
 
 </body>
-</html>
+</html> 
