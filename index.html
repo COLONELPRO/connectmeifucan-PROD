@@ -241,6 +241,16 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 
     /* slightly reduce the size of the discs on mobile to avoid covering content */
     .enter-side { width: 56px; height: 56px; font-size: 1.4rem; }
+
+    /* When a category page is open, position the persistent controls where the splash discs are */
+    body.page-open .enter-sides { bottom: 28%; padding: 0 24%; }
+    body.page-open .global { bottom: 28%; }
+    body.hand-left.page-open .global { left: 24px; right: auto; }
+    body.hand-right.page-open .global { right: 24px; left: auto; }
+    body.hand-left.page-open .global.back { right: 24px; left: auto; }
+    body.hand-right.page-open .global.back { left: 24px; right: auto; }
+    /* restore bigger discs on page to match splash size */
+    body.page-open .enter-side { width: 64px; height: 64px; font-size: 1.6rem; }
 }
 
 /* 📲 Tablette : 768px → 1023px */
@@ -1001,6 +1011,8 @@ function goBackToMenu() {
       cancelAutoHideControls();
       globalControl && globalControl.classList.remove('auto-hidden');
       globalBack && globalBack.classList.remove('auto-hidden');
+      // remove page-open flag so controls return to mobile default position
+      document.body.classList.remove('page-open');
       menu.classList.add('active');
       menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
       updateGlobalVisibility();
@@ -1009,6 +1021,8 @@ function goBackToMenu() {
     // fallback immediate show menu
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active','scale-in','frame','zooming','logo-in'));
     setTimeout(() => {
+      // remove page-open flag in fallback as well
+      document.body.classList.remove('page-open');
       menu.classList.add('active');
       menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
       updateGlobalVisibility();
@@ -1024,6 +1038,8 @@ if (globalBack) {
 function navigateToPage(target) {
   const page = document.getElementById(target);
   if (!page) return;
+  // mark that a page is open so we can adjust control positions on mobile
+  document.body.classList.add('page-open');
   // hide menu and clear selection
   menu.classList.remove('active');
   document.querySelectorAll('#menu .menu-btn').forEach(b => b.classList.remove('selected'));
