@@ -323,6 +323,8 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 /* CATALOGUE PRODUITS (Vitrine) */
 .catalogue {
   margin-top: 18px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .catalogue .catalogue-controls {
   display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;
@@ -353,6 +355,9 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 /* when selector hidden, use single column for main content */
 .catalogue-wrap.selector-hidden { grid-template-columns: 0 1fr; }
 .catalogue-wrap.selector-hidden .catalogue-selector { display:none; }
+
+/* when selector is shown as a floating overlay, let the main area occupy full width of the page content */
+.catalogue-wrap.selector-floating { grid-template-columns: 0 1fr; }
 
 .catalogue .catalogue-main { min-width: 0; }
 .catalogue .catalogue-grid { display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:12px; }
@@ -1390,20 +1395,22 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
     if (hidden) {
       wrap.classList.remove('selector-hidden');
       btn.setAttribute('aria-pressed','false');
-      // show floating overlay on mobile, and optionally floating on narrow layouts
-      selector.classList.remove('floating');
-      if (isMobile) selector.classList.add('open-mobile');
+      // clear mobile-specific open state
+      selector.classList.remove('open-mobile');
     } else {
       wrap.classList.add('selector-hidden');
       btn.setAttribute('aria-pressed','true');
       if (isMobile) selector.classList.remove('open-mobile');
     }
-    // when explicitly showing (not hidden), make selector float on top for better visibility
+    // when explicitly showing (not hidden), make selector float on top for better visibility on small screens
     if (!wrap.classList.contains('selector-hidden')) {
       selector.classList.add('floating');
     } else {
       selector.classList.remove('floating');
     }
+
+    // update wrap floating state so main grid resizes when selector floats
+    try { updateSelectorFloatingState(); } catch(e){}
 
     // manage backdrop overlay on mobile
     try {
@@ -1426,6 +1433,30 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
     // persist choice
     try { localStorage.setItem('cmuc_selector_hidden', wrap.classList.contains('selector-hidden') ? '1' : '0'); } catch (e) { }
   }
+
+  function debounce(fn, wait=120){ let t=null; return (...args)=>{ if (t) clearTimeout(t); t = setTimeout(()=>fn(...args), wait); }; }
+
+  function updateSelectorFloatingState(){
+    const wrap = document.getElementById('catalogue-wrap');
+    const selector = document.getElementById('catalogue-selector');
+    if (!wrap || !selector) return;
+    const isHidden = wrap.classList.contains('selector-hidden');
+    const isOverlayPreferred = window.matchMedia && window.matchMedia(`(max-width: calc(var(--tablet) - 1px))`).matches; // overlay on tablet or smaller
+    const isMobile = window.matchMedia && window.matchMedia(`(max-width: calc(var(--mobile) - 1px))`).matches;
+    if (!isHidden && isOverlayPreferred) {
+      selector.classList.add('floating');
+      wrap.classList.add('selector-floating');
+      // on true mobile view use open-mobile class as well
+      if (isMobile) selector.classList.add('open-mobile'); else selector.classList.remove('open-mobile');
+    } else {
+      selector.classList.remove('floating');
+      selector.classList.remove('open-mobile');
+      wrap.classList.remove('selector-floating');
+    }
+  }
+
+  // keep state in sync on viewport resize
+  window.addEventListener('resize', debounce(()=>{ try{ updateSelectorFloatingState(); }catch(e){} }));
 
   async function loadCatalogue() {
     catalogueProducts = [];
@@ -1609,9 +1640,9 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
       toggle.addEventListener('click', ()=>{ toggleSelector(); });
     }
     if (hide && wrap) {
-      hide.addEventListener('click', ()=>{ wrap.classList.add('selector-hidden'); const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed','true'); try{ localStorage.setItem('cmuc_selector_hidden','1'); }catch(e){} });
+      hide.addEventListener('click', ()=>{ wrap.classList.add('selector-hidden'); const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed','true'); try{ localStorage.setItem('cmuc_selector_hidden','1'); }catch(e){} try{ updateSelectorFloatingState(); }catch(e){} });
     }
-
+    
     // restore stored selector visibility if present
     try {
       const storedSel = localStorage.getItem('cmuc_selector_hidden');
@@ -1622,7 +1653,7 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
         const sel = document.getElementById('catalogue-selector'); if (sel) {
           if (!hidden && window.matchMedia && window.matchMedia(`(max-width: calc(var(--mobile) - 1px))`).matches) sel.classList.add('open-mobile'); else sel.classList.remove('open-mobile');
         }
-      }
+        try{ updateSelectorFloatingState(); }catch(e){}
     } catch(e){}
 
     if (filter) {
