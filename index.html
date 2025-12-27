@@ -89,6 +89,16 @@ body {
   user-select: none;
   touch-action: none; /* avoid double-tap/context issues on touch */
 }
+.enter-side .enter-label {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: normal;
+  line-height: 1;
+  text-align: center;
+  padding: 6px 6px;
+  color: #000;
+}
+.enter-side.pressing .enter-label { filter: brightness(.95); }
 .enter-side.pressing { transform: scale(.94); box-shadow: 0 10px 28px rgba(0,0,0,.35); }
 
 #press-progress-bar {
@@ -293,8 +303,8 @@ body {
   <p>Chargement...</p>
 
   <div class="enter-sides">
-    <button id="enter-left" class="enter-side" aria-label="Entrer - main gauche" title="Entrer — Main gauche">⬅</button>
-    <button id="enter-right" class="enter-side" aria-label="Entrer - main droite" title="Entrer — Main droite">➡</button>
+    <button id="enter-left" class="enter-side" aria-label="Entrer - main gauche" title="Entrer — Main gauche"><span class="enter-label">Appuyer pour entrer</span></button>
+    <button id="enter-right" class="enter-side" aria-label="Entrer - main droite" title="Entrer — Main droite"><span class="enter-label">Appuyer pour entrer</span></button>
   </div>
 
   <div id="press-progress-bar" aria-hidden="true">
@@ -400,17 +410,23 @@ const PRESS_MS = 2000; // ms required to reach 100%
 let pressRaf = null;
 let pressStart = 0;
 let currentHand = null;
-let autoEnterTimer = setTimeout(() => {
+// Auto-enter fallback is disabled. Keep the original behavior commented out for reference.
+let autoEnterTimer = null;
+/*
+autoEnterTimer = setTimeout(() => {
   if (splash && !splash.classList.contains('zooming')) {
     // fallback: auto-complete after 3s
     doComplete('auto');
   }
 }, 3000);
+*/
 
 function updateProgressUI(percent) {
   if (progressFill) progressFill.style.width = percent + '%';
-  if (progressText) progressText.textContent = Math.round(percent) + '%';
-}
+  const lang = document.body.dataset.lang || document.documentElement.lang || 'fr';
+  const prefix = lang === 'fr' ? 'Chargement ' : 'Loading ';
+  if (progressText) progressText.textContent = prefix + Math.round(percent) + '%';
+} 
 
 function resetProgress() {
   if (pressRaf) { cancelAnimationFrame(pressRaf); pressRaf = null; }
@@ -526,6 +542,7 @@ const menuTitle = document.getElementById("menu-title");
 const menuSubtitle = document.getElementById("menu-subtitle");
 
 function setFR() {
+  document.body.dataset.lang = 'fr';
   menuTitle.textContent = "Choisissez une catégorie";
   menuSubtitle.textContent = "Sélectionnez une catégorie";
 
@@ -538,8 +555,10 @@ function setFR() {
   const rightBtn = document.getElementById('enter-right');
   if (leftBtn) leftBtn.title = "Entrer — Main gauche";
   if (rightBtn) rightBtn.title = "Entrer — Main droite";
+  // enter labels
+  document.querySelectorAll('.enter-label').forEach(el => el.textContent = 'Appuyer pour entrer');
   const progressTextElFr = document.getElementById('press-progress-text');
-  if (progressTextElFr) progressTextElFr.textContent = "0%";
+  if (progressTextElFr) progressTextElFr.textContent = 'Chargement 0%';
 
   document.querySelector('[data-target="page1"]').textContent =
     "🌿 Confort & Bien‑Être at Home";
@@ -558,6 +577,7 @@ function setFR() {
 }
 
 function setEN() {
+  document.body.dataset.lang = 'en';
   menuTitle.textContent = "Choose a category";
   menuSubtitle.textContent = "Select a category";
 
@@ -570,8 +590,10 @@ function setEN() {
   const rightBtnEn = document.getElementById('enter-right');
   if (leftBtnEn) leftBtnEn.title = "Enter — Left hand";
   if (rightBtnEn) rightBtnEn.title = "Enter — Right hand";
+  // enter labels
+  document.querySelectorAll('.enter-label').forEach(el => el.textContent = 'Press to enter');
   const progressTextElEn = document.getElementById('press-progress-text');
-  if (progressTextElEn) progressTextElEn.textContent = "0%";
+  if (progressTextElEn) progressTextElEn.textContent = 'Loading 0%';
 
   document.querySelector('[data-target="page1"]').textContent =
     "Comfort & Well‑Being at Home";
