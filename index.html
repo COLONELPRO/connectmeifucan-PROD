@@ -340,9 +340,11 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 .catalogue-selector li .meta { display:flex; flex-direction:column; text-align:left; }
 .catalogue-selector li .meta .muted { font-size:0.86rem; color:var(--muted); }
 .catalogue-selector li .meta .desc { font-size:0.86rem; color:var(--muted); margin-top:4px; }
-.catalogue-selector li.selected { background: rgba(255,204,0,0.08); border:1px solid rgba(255,204,0,0.18); }
-.catalogue-selector .hide-selector { display:block; margin-bottom:8px; padding:6px 8px; border-radius:6px; background:var(--accent); color:#000; border:1px solid rgba(0,0,0,0.08); cursor:pointer; font-weight:700; }
-.catalogue-selector .hide-selector:hover { background:var(--accent-hover); }
+.catalogue-selector .selector-filter { display:flex; gap:6px; align-items:center; margin-bottom:8px; }
+.catalogue-selector .selector-filter .filter-input { flex:1; padding:6px 8px; border-radius:6px; border:1px solid var(--border); background:rgba(255,255,255,0.02); color:var(--text); }
+.catalogue-selector .selector-filter .btn-clear-filter { padding:6px 8px; border-radius:6px; background:transparent; border:1px solid var(--border); color:var(--text); cursor:pointer; }
+.catalogue-selector li .tags { margin-top:6px; }
+.catalogue-selector .tag { display:inline-block; padding:2px 6px; border-radius:4px; background:rgba(255,255,255,0.03); color:var(--muted); font-size:0.75rem; margin-right:6px; }
 
 /* when selector hidden, use single column for main content */
 .catalogue-wrap.selector-hidden { grid-template-columns: 0 1fr; }
@@ -639,8 +641,12 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
       <div class="catalogue-wrap" id="catalogue-wrap">
         <aside class="catalogue-selector" id="catalogue-selector" aria-label="Sélecteur de produits">
           <button id="btn-hide-selector" class="hide-selector">Masquer</button>
+          <div class="selector-filter">
+            <input id="catalogue-filter" class="filter-input" placeholder="Filtrer par mot‑clé" aria-label="Filtrer les produits">
+            <button id="btn-clear-filter" class="btn-clear-filter" title="Effacer">✕</button>
+          </div>
           <ul id="catalogue-list" role="listbox" aria-label="Liste des produits"></ul>
-        </aside>
+        </aside> 
         <div class="catalogue-main">
           <div class="catalogue-grid" id="catalogue-grid" aria-live="polite"></div>
           <div class="pagination" id="catalogue-pagination"></div>
@@ -1235,12 +1241,32 @@ document.querySelectorAll("[data-back]").forEach(btn => {
   }
 
   async function fetchPrice(p) {
-    if (!p.priceFile) { p.price = '—'; return; }
+    p.tags = p.tags || [];
+    if (!p.priceFile) { p.price = '—'; p.tags = p.tags || []; return; }
     try {
       const r = await fetch(encodeURI(p.priceFile));
-      if (!r.ok) { p.price = '—'; return; }
-      const t = (await r.text()).trim(); p.price = t || '—';
-    } catch (e) { p.price = '—'; }
+      if (!r.ok) { p.price = '—'; p.tags = p.tags || []; return; }
+      const txt = (await r.text()).trim(); p._rawMeta = txt;
+      const lines = txt.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+      // price detection: first line containing a number (with optional currency)
+      let priceLine = lines.find(l => /[0-9]+(?:[.,][0-9]+)?\s*(€|eur|euro)?/i.test(l));
+      if (!priceLine && lines.length) priceLine = lines[0];
+      p.price = priceLine || '—';
+
+      // tags detection: look for lines starting with tags: or mots: or hashtags
+      let tags = [];
+      const tagLine = lines.find(l => /^(tags?|mots?)[:=]/i.test(l));
+      if (tagLine) {
+        const after = tagLine.replace(/^(tags?|mots?)[:=]\s*/i,'');
+        tags = after.split(/[;,|]+/).map(s=>s.trim()).filter(Boolean);
+      }
+      // also capture #hashtag tokens anywhere
+      try {
+        const matches = [...txt.matchAll(/#([\p{L}\w-]+)/gu)].map(m=>m[1]);
+        tags = tags.concat(matches);
+      } catch (err) { /* Unicode regex may fail in some engines; ignore */ }
+      p.tags = Array.from(new Set(tags.map(t => t.toLowerCase())));
+    } catch (e) { p.price = '—'; p.tags = p.tags || []; }
   }
 
   async function loadFromManifest() {
@@ -1267,12 +1293,21 @@ document.querySelectorAll("[data-back]").forEach(btn => {
   function renderSelector() {
     const list = document.getElementById('catalogue-list');
     if (!list) return;
+    const filterInput = document.getElementById('catalogue-filter');
+    const filter = (filterInput && filterInput.value) ? filterInput.value.trim().toLowerCase() : '';
     list.innerHTML = '';
+    let count = 0;
     catalogueProducts.forEach((p, idx) => {
+      const nameText = ((p.nameFr||'') + ' ' + (p.nameEn||'')).toLowerCase();
+      const tagMatch = p.tags && p.tags.some(t => t.includes(filter));
+      const nameMatch = nameText.includes(filter);
+      if (filter && !(nameMatch || tagMatch)) return; // skip non-matching
+
       const li = document.createElement('li'); li.dataset.id = p.id; li.role = 'option';
       const lang = document.body.dataset.lang || document.documentElement.lang || 'fr';
       const localizedDesc = (lang === 'fr') ? (p.descFr || p.descEn || '') : (p.descEn || p.descFr || '');
-      li.innerHTML = `<img src="${encodeURI(p.image)}" alt=""> <div class="meta"><strong>${(p.nameFr||p.nameEn)||''}</strong><div class="muted">${p.price}</div><div class="desc">${localizedDesc}</div></div>`;
+      const tagsHtml = (p.tags || []).map(t=>`<span class="tag">${t}</span>`).join('');
+      li.innerHTML = `<img src="${encodeURI(p.image)}" alt=""> <div class="meta"><strong>${(p.nameFr||p.nameEn)||''}</strong><div class="muted">${p.price}</div><div class="desc">${localizedDesc}</div><div class="tags">${tagsHtml}</div></div>`;
       if (String(p.id) === String(selectedProductId)) li.classList.add('selected');
       li.addEventListener('click', () => {
         selectedProductId = p.id;
@@ -1288,7 +1323,9 @@ document.querySelectorAll("[data-back]").forEach(btn => {
         }, 50);
       });
       list.appendChild(li);
+      count++;
     });
+    if (count === 0) { const li = document.createElement('li'); li.className='muted'; li.textContent = 'Aucun produit correspondant.'; list.appendChild(li); }
   }
 
   function toggleSelector(hidden) {
@@ -1404,12 +1441,30 @@ document.querySelectorAll("[data-back]").forEach(btn => {
     const toggle = document.getElementById('btn-toggle-selector');
     const hide = document.getElementById('btn-hide-selector');
     const wrap = document.getElementById('catalogue-wrap');
+    const filter = document.getElementById('catalogue-filter');
+    const clearBtn = document.getElementById('btn-clear-filter');
     if (toggle && wrap) {
       toggle.addEventListener('click', ()=>{ const was = wrap.classList.toggle('selector-hidden'); toggle.setAttribute('aria-pressed', was ? 'true' : 'false'); });
     }
     if (hide && wrap) {
       hide.addEventListener('click', ()=>{ wrap.classList.add('selector-hidden'); const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed','true'); });
     }
+    if (filter) { filter.addEventListener('input', ()=>{ renderSelector(); }); }
+    if (clearBtn) { clearBtn.addEventListener('click', ()=>{ if (filter) { filter.value=''; filter.focus(); } renderSelector(); }); }
+
+    // apply initial filter from URL if present (?tag=xxx or #tag=xxx)
+    try {
+      const params = new URLSearchParams(window.location.search);
+      let tagParam = params.get('tag');
+      if (!tagParam && location.hash) {
+        const m = location.hash.match(/tag=([^&]+)/);
+        if (m) tagParam = decodeURIComponent(m[1]);
+      }
+      if (tagParam && document.getElementById('catalogue-filter')) {
+        document.getElementById('catalogue-filter').value = tagParam;
+        renderSelector();
+      }
+    } catch (err) { /* ignore */ }
   };
 
   // detect when page1 becomes active and init
