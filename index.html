@@ -144,11 +144,25 @@ body {
 
 /* ZOOM TRANSITION TO MENU */
 #splash.zooming { transform: scale(1.12); opacity: 0; transition: transform .7s ease, opacity .7s ease; pointer-events: none; }
-#menu { transform: scale(.98); transition: transform .7s ease, opacity .4s ease; opacity: 0; }
-#menu.active.scale-in { transform: scale(1); opacity: 1; }
+/* Center the menu overlay so buttons are centered on screen/mobile */
+#menu {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  transform: scale(.98);
+  transition: transform .7s ease, opacity .4s ease;
+  opacity: 0;
+  z-index: 9000;
+  pointer-events: none;
+}
+#menu.active.scale-in { transform: scale(1); opacity: 1; pointer-events: auto; }
 
 /* GLOBAL CONTROL (persistent) */
-.global { position: fixed !important; bottom: 18%; z-index: 10001; display: none; align-items: center; justify-content: center; width:64px; height:64px; transform: none !important; pointer-events: auto; }
+.global { position: fixed !important; bottom: 18%; z-index: 10001; display: none; align-items: center; justify-content: center; width:64px; height:64px; transform: none !important; pointer-events: auto; transition: opacity .18s ease, transform .18s ease; }
 .global.show { display: inline-flex; }
 body.hand-left .global { left: 18px; right: auto; }
 body.hand-right .global { right: 18px; left: auto; }
@@ -157,6 +171,9 @@ body.hand-left .global.back { right: 18px; left: auto; }
 body.hand-right .global.back { left: 18px; right: auto; }
 /* Hide the other splash disc if a hand is selected */
 body.hand-left #enter-right, body.hand-right #enter-left { display: none !important; }
+/* Auto-hide state for controls when a page is active */
+.global.auto-hidden { opacity: 0; transform: translateY(8px) scale(.98); pointer-events: none; }
+.global.show.auto-hidden { display: inline-flex; }
 
 /* menu selection style */
 .menu-btn.selected { box-shadow: 0 8px 24px rgba(0,0,0,0.35); transform: translateY(-2px) scale(1.02); border: 2px solid rgba(255,204,0,0.95); }
@@ -249,7 +266,9 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 /* BOUTONS CATEGORIES        */
 /* ========================= */
 .menu-btn {
-  width: 260px; /* largeur uniforme */ 
+  width: min(92%, 260px); /* responsive: up to 260px or 92% on small screens */
+  max-width: 520px;
+  margin: 8px 0;
   text-align: center; /* centre le texte */
   padding: 14px 32px;
   background: var(--accent);
@@ -856,6 +875,49 @@ function updateGlobalVisibility() {
   updateGlobalBackLabel();
 }
 
+// --- Auto-hide global controls on sub-pages and show on touch ---
+let hideControlsTimer = null;
+function scheduleAutoHideControls(delay = 1000) {
+  clearTimeout(hideControlsTimer);
+  // only hide when on a page (not on menu)
+  hideControlsTimer = setTimeout(() => {
+    if (document.querySelector('.page.active')) {
+      globalControl && globalControl.classList.add('auto-hidden');
+      globalBack && globalBack.classList.add('auto-hidden');
+    }
+  }, delay);
+}
+
+function cancelAutoHideControls() {
+  clearTimeout(hideControlsTimer);
+  hideControlsTimer = null;
+}
+
+function showControlsOnTouch() {
+  // only relevant when a page is active
+  if (!document.querySelector('.page.active')) return;
+  globalControl && globalControl.classList.remove('auto-hidden');
+  globalBack && globalBack.classList.remove('auto-hidden');
+  // re-schedule hide
+  cancelAutoHideControls();
+  scheduleAutoHideControls(1000);
+}
+
+// touch and mouse events (pointerdown / pointermove for modern browsers, touchstart as fallback)
+document.addEventListener('pointerdown', (e) => {
+  // Show controls on touch or mouse pointer activation
+  if (e.pointerType === 'touch' || e.pointerType === 'mouse') showControlsOnTouch();
+});
+// also listen for mouse movement (hover) to reveal controls when user moves the cursor
+document.addEventListener('pointermove', (e) => {
+  if (e.pointerType === 'mouse') showControlsOnTouch();
+}, { passive: true });
+// fallback for older touch-only browsers
+document.addEventListener('touchstart', (e) => { showControlsOnTouch(); }, { passive: true });
+// fallback for older mouse-only browsers
+document.addEventListener('mousemove', () => { showControlsOnTouch(); }, { passive: true });
+
+
 function goBackToMenu() {
   const activePage = document.querySelector('.page.active');
   if (activePage) {
@@ -865,6 +927,10 @@ function goBackToMenu() {
     activePage.classList.remove('logo-in');
     setTimeout(() => {
       activePage.classList.remove('active','scale-in','frame','zooming');
+      // ensure controls are visible again and cancel auto-hide
+      cancelAutoHideControls();
+      globalControl && globalControl.classList.remove('auto-hidden');
+      globalBack && globalBack.classList.remove('auto-hidden');
       menu.classList.add('active');
       menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
       updateGlobalVisibility();
@@ -902,6 +968,8 @@ function navigateToPage(target) {
     setTimeout(() => page.classList.add('logo-in'), 30);
     // update back control visibility when on page
     updateGlobalVisibility();
+    // schedule auto-hide of persistent controls on sub-pages
+    scheduleAutoHideControls(1000);
   }, 20);
 }
 
