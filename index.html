@@ -319,6 +319,53 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   color: var(--muted);
 }
 
+/* Logo sizing + entrance animation */
+.logo {
+  display: block;
+  margin: 0 auto 18px;
+  width: 48%;
+  max-width: 420px;
+  height: auto;
+  opacity: 0;
+  transform: translateY(12px) scale(1.03);
+  transition: transform .7s cubic-bezier(.2,.9,.25,1), opacity .45s ease;
+}
+
+/* when page finishes scaling in, the logo animates into place */
+.page.scale-in .logo {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* also allow toggling via a dedicated class for timing control */
+.page.logo-in .logo {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+@media (max-width: calc(var(--mobile) - 1px)) {
+  .page.logo-in .logo { transform: translateY(0) scale(0.88); }
+}
+
+/* On narrow screens, reduce logo so it visually matches splash zoom */
+@media (max-width: calc(var(--mobile) - 1px)) {
+  .logo {
+    width: 60%;
+    max-width: 320px;
+  }
+  /* mobile final scale during page reveal to visually match splash */
+  .page.scale-in .logo {
+    transform: translateY(0) scale(0.88);
+  }
+}
+
+/* on tablet and up, slightly smaller logo to keep layout balanced */
+@media (min-width: var(--mobile)) and (max-width: calc(var(--tablet) - 1px)) {
+  .logo { width: 44%; max-width: 360px; }
+}
+@media (min-width: var(--tablet)) {
+  .logo { width: 36%; max-width: 420px; }
+}
+
 /* ========================= */
 /* BOUTON RETOUR AU MENU     */
 /* ========================= */
@@ -814,6 +861,8 @@ function goBackToMenu() {
   if (activePage) {
     // animate page out with a subtle zoom & fade
     activePage.classList.add('zooming');
+    // remove logo animation immediately so it scales with the page zoom
+    activePage.classList.remove('logo-in');
     setTimeout(() => {
       activePage.classList.remove('active','scale-in','frame','zooming');
       menu.classList.add('active');
@@ -822,7 +871,7 @@ function goBackToMenu() {
     }, 700);
   } else {
     // fallback immediate show menu
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active','scale-in','frame','zooming'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active','scale-in','frame','zooming','logo-in'));
     setTimeout(() => {
       menu.classList.add('active');
       menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
@@ -849,6 +898,8 @@ function navigateToPage(target) {
   page.classList.add('active');
   setTimeout(() => {
     page.classList.add('scale-in');
+    // add 'logo-in' as a separate hook for fine-grained animation (small delay)
+    setTimeout(() => page.classList.add('logo-in'), 30);
     // update back control visibility when on page
     updateGlobalVisibility();
   }, 20);
