@@ -99,7 +99,6 @@ body {
 #enter-right { right: 24px; }
 /* keep pressing transform while preserving translate */
 .enter-side.pressing { transform: translateY(calc(-50% + var(--enter-ty, 0))) scale(.94); box-shadow: 0 10px 28px rgba(0,0,0,.35); }
-.enter-side.pressing { transform: translateY(var(--enter-ty, 0)) scale(.94); box-shadow: 0 10px 28px rgba(0,0,0,.35); }
 
 .enter-side .enter-label {
   display: inline-block;
@@ -323,6 +322,8 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 /* CATALOGUE PRODUITS (Vitrine) */
 .catalogue {
   margin-top: 18px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .catalogue .catalogue-controls {
   display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;
@@ -353,6 +354,9 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 /* when selector hidden, use single column for main content */
 .catalogue-wrap.selector-hidden { grid-template-columns: 0 1fr; }
 .catalogue-wrap.selector-hidden .catalogue-selector { display:none; }
+
+/* when selector is shown as a floating overlay, let the main area occupy full width of the page content */
+.catalogue-wrap.selector-floating { grid-template-columns: 0 1fr; }
 
 .catalogue .catalogue-main { min-width: 0; }
 .catalogue .catalogue-grid { display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:12px; }
@@ -441,18 +445,20 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   .page > * { width: min(100%, 1000px); padding: 0 24px; }
 }
 
-/* Ensure main content inside each page is centered horizontally and vertically */
+/* Ensure main content inside each page is laid out vertically; back button stays after content */
 .page main,
 .page .page-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* start at top so back button sits after content */
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
   padding: 12px;
 }
+/* helper class to center a page if desired */
+.page.centered main { justify-content: center; }
 
 /* take available vertical space so content can be perfectly centered */
 .page main {
@@ -551,7 +557,7 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   transform: translateY(-2px) scale(1.05);
 }
 .btn-remove { padding:6px 10px; background:transparent; border:1px solid var(--border); color:var(--text); border-radius:6px; cursor:pointer; }
-.btn-remove:hover { background: rgba(255,255,255,0.02); }																																			   
+.btn-remove:hover { background: rgba(255,255,255,0.02); }
 </style>
 </head>
 
@@ -561,6 +567,7 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 <!-- BOUTONS LANGUE            -->
 <!-- ========================= -->
 <div class="lang-switch">
+  <button class="lang-btn" id="cmuc-user-btn">Invité</button>
   <button class="lang-btn" id="btn-fr">FR</button>
   <button class="lang-btn" id="btn-en">EN</button>
 </div>
@@ -666,13 +673,8 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
         </div>
       </div>
     </section>
-				  <button class="back-btn" data-back>⬅ Retour au menu</button>												  
+    <button class="back-btn" data-back>⬅ Retour au menu</button>
   </main>
-  
-  
-  
-  
-
 </div>
 
 <!-- ========================= -->
@@ -1235,21 +1237,7 @@ document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
   });
 });
 
-/* BOUTON RETOUR AU MENU */
-document.querySelectorAll("[data-back]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
 
-    setTimeout(() => {
-      menu.classList.add("active");
-      // reset & highlight first option
-      menuSelectedIndex = 0;
-      highlightMenuSelection(menuSelectedIndex);
-      // update global label to long-press when returning to menu
-      updateGlobalLabel();
-    }, 20);
-  });
-}); 
 
 // ---------------------------
 // Catalogue / Vitrine produit (JS)
@@ -1407,20 +1395,22 @@ document.querySelectorAll("[data-back]").forEach(btn => {
     if (hidden) {
       wrap.classList.remove('selector-hidden');
       btn.setAttribute('aria-pressed','false');
-      // show floating overlay on mobile, and optionally floating on narrow layouts
-      selector.classList.remove('floating');
-      if (isMobile) selector.classList.add('open-mobile');
+      // clear mobile-specific open state
+      selector.classList.remove('open-mobile');
     } else {
       wrap.classList.add('selector-hidden');
       btn.setAttribute('aria-pressed','true');
       if (isMobile) selector.classList.remove('open-mobile');
     }
-    // when explicitly showing (not hidden), make selector float on top for better visibility
+    // when explicitly showing (not hidden), make selector float on top for better visibility on small screens
     if (!wrap.classList.contains('selector-hidden')) {
       selector.classList.add('floating');
     } else {
       selector.classList.remove('floating');
     }
+
+    // update wrap floating state so main grid resizes when selector floats
+    try { updateSelectorFloatingState(); } catch(e){}
 
     // manage backdrop overlay on mobile
     try {
@@ -1443,6 +1433,30 @@ document.querySelectorAll("[data-back]").forEach(btn => {
     // persist choice
     try { localStorage.setItem('cmuc_selector_hidden', wrap.classList.contains('selector-hidden') ? '1' : '0'); } catch (e) { }
   }
+
+  function debounce(fn, wait=120){ let t=null; return (...args)=>{ if (t) clearTimeout(t); t = setTimeout(()=>fn(...args), wait); }; }
+
+  function updateSelectorFloatingState(){
+    const wrap = document.getElementById('catalogue-wrap');
+    const selector = document.getElementById('catalogue-selector');
+    if (!wrap || !selector) return;
+    const isHidden = wrap.classList.contains('selector-hidden');
+    const isOverlayPreferred = window.matchMedia && window.matchMedia(`(max-width: calc(var(--tablet) - 1px))`).matches; // overlay on tablet or smaller
+    const isMobile = window.matchMedia && window.matchMedia(`(max-width: calc(var(--mobile) - 1px))`).matches;
+    if (!isHidden && isOverlayPreferred) {
+      selector.classList.add('floating');
+      wrap.classList.add('selector-floating');
+      // on true mobile view use open-mobile class as well
+      if (isMobile) selector.classList.add('open-mobile'); else selector.classList.remove('open-mobile');
+    } else {
+      selector.classList.remove('floating');
+      selector.classList.remove('open-mobile');
+      wrap.classList.remove('selector-floating');
+    }
+  }
+
+  // keep state in sync on viewport resize
+  window.addEventListener('resize', debounce(()=>{ try{ updateSelectorFloatingState(); }catch(e){} }));
 
   async function loadCatalogue() {
     catalogueProducts = [];
@@ -1626,9 +1640,9 @@ document.querySelectorAll("[data-back]").forEach(btn => {
       toggle.addEventListener('click', ()=>{ toggleSelector(); });
     }
     if (hide && wrap) {
-      hide.addEventListener('click', ()=>{ wrap.classList.add('selector-hidden'); const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed','true'); try{ localStorage.setItem('cmuc_selector_hidden','1'); }catch(e){} });
+      hide.addEventListener('click', ()=>{ wrap.classList.add('selector-hidden'); const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed','true'); try{ localStorage.setItem('cmuc_selector_hidden','1'); }catch(e){} try{ updateSelectorFloatingState(); }catch(e){} });
     }
-
+    
     // restore stored selector visibility if present
     try {
       const storedSel = localStorage.getItem('cmuc_selector_hidden');
@@ -1639,6 +1653,7 @@ document.querySelectorAll("[data-back]").forEach(btn => {
         const sel = document.getElementById('catalogue-selector'); if (sel) {
           if (!hidden && window.matchMedia && window.matchMedia(`(max-width: calc(var(--mobile) - 1px))`).matches) sel.classList.add('open-mobile'); else sel.classList.remove('open-mobile');
         }
+        try{ updateSelectorFloatingState(); }catch(e){}
       }
     } catch(e){}
 
@@ -1702,7 +1717,7 @@ document.querySelectorAll("[data-back]").forEach(btn => {
       const left = document.createElement('div'); left.innerHTML = `<strong>${localizedName(p)}</strong><div class="muted">${p.price}</div>`;
       const right = document.createElement('div'); right.style.display='flex'; right.style.gap='8px';
       const qty = document.createElement('input'); qty.type='number'; qty.value=item.qty; qty.min=1; qty.style.width='64px'; qty.addEventListener('change', ()=>{ setCartItem(item.id, Math.max(1, parseInt(qty.value)||1)); renderCartPage(); });
-      const remove = document.createElement('button'); remove.textContent = (document.body.dataset.lang === 'fr') ? 'Retirer' : 'Remove'; remove.className='back-btn'; remove.addEventListener('click', ()=>{ removeFromCart(item.id); renderCartPage(); });
+      const remove = document.createElement('button'); remove.textContent = (document.body.dataset.lang === 'fr') ? 'Retirer' : 'Remove'; remove.className='btn-remove'; remove.addEventListener('click', ()=>{ removeFromCart(item.id); renderCartPage(); });
       right.appendChild(qty); right.appendChild(remove);
       row.appendChild(left); row.appendChild(right);
       container.appendChild(row);
@@ -1848,6 +1863,83 @@ function initLanguageFromStorage() {
 initLanguageFromStorage();
 // load cart state after language init so UI badge is correct
 loadCart();
+</script>
+
+</div>
+<!-- CMUC Settings Modal -->
+<style>
+  .cmuc-modal.hidden{display:none}
+  .cmuc-modal{position:fixed;inset:0;z-index:10020}
+  .cmuc-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.4)}
+  .cmuc-modal-content{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;color:#222;width:min(90vw,480px);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+  .cmuc-modal-content h2{margin:0;padding:16px 16px 8px 16px;font-size:18px}
+  .cmuc-modal-content .cmuc-body{padding:0 16px 12px 16px}
+  .cmuc-modal-actions{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid #eee}
+  .cmuc-btn{padding:8px 12px;border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer}
+  .cmuc-btn:hover{background:#f6f6f6}
+  .cmuc-btn-danger{border-color:#d33;color:#d33}
+</style>
+
+<div id="cmuc-settings-modal" class="cmuc-modal hidden" aria-hidden="true" role="dialog" aria-labelledby="cmuc-settings-title">
+  <div class="cmuc-modal-backdrop" id="cmuc-settings-backdrop"></div>
+  <div class="cmuc-modal-content">
+    <h2 id="cmuc-settings-title">Paramètres du compte</h2>
+    <div class="cmuc-body">
+      <p><span id="cmuc-settings-username-label">Pseudo:</span> <strong id="cmuc-settings-username">Invité</strong></p>
+      <p id="cmuc-settings-help">Gérez votre compte connecté.</p>
+    </div>
+    <div class="cmuc-modal-actions">
+      <button id="cmuc-logout-btn" class="cmuc-btn cmuc-btn-danger">Se déconnecter</button>
+      <button id="cmuc-close-settings" class="cmuc-btn">Fermer</button>
+    </div>
+  </div>
+  </div>
+
+<script>
+  (function(){
+    const lang = (localStorage.getItem('cmuc_lang')||'fr')==='fr' ? 'fr':'en';
+    function getAuth(){
+      try{ const raw = localStorage.getItem('cmuc_auth_v1'); return raw? JSON.parse(raw): null; }catch(e){ return null; }
+    }
+    function setTexts(){
+      const isFR = lang==='fr';
+      document.getElementById('cmuc-settings-title').textContent = isFR? 'Paramètres du compte':'Account Settings';
+      document.getElementById('cmuc-settings-username-label').textContent = isFR? 'Pseudo:':'Username:';
+      document.getElementById('cmuc-settings-help').textContent = isFR? 'Gérez votre compte connecté.':'Manage your signed-in account.';
+      document.getElementById('cmuc-logout-btn').textContent = isFR? 'Se déconnecter':'Sign out';
+      document.getElementById('cmuc-close-settings').textContent = isFR? 'Fermer':'Close';
+    }
+    function initUser(){
+      const auth = getAuth();
+      const username = auth?.username || (lang==='fr'? 'Invité':'Guest');
+      document.getElementById('cmuc-user-btn').textContent = username;
+      document.getElementById('cmuc-settings-username').textContent = username;
+    }
+    function openSettings(){
+      const m = document.getElementById('cmuc-settings-modal');
+      m.classList.remove('hidden'); m.setAttribute('aria-hidden','false');
+    }
+    function closeSettings(){
+      const m = document.getElementById('cmuc-settings-modal');
+      m.classList.add('hidden'); m.setAttribute('aria-hidden','true');
+    }
+    function toggleSettings(){
+      const m = document.getElementById('cmuc-settings-modal');
+      if(m.classList.contains('hidden')){ openSettings(); } else { closeSettings(); }
+    }
+    function logout(){
+      localStorage.removeItem('cmuc_auth_v1');
+      // Redirect to .com entry to re-auth
+      try{ window.location.href = 'index.com.html'; }catch(e){ closeSettings(); }
+    }
+    setTexts();
+    initUser();
+    document.getElementById('cmuc-user-btn').addEventListener('click', toggleSettings);
+    document.getElementById('cmuc-close-settings').addEventListener('click', closeSettings);
+    document.getElementById('cmuc-settings-backdrop').addEventListener('click', closeSettings);
+    document.getElementById('cmuc-logout-btn').addEventListener('click', logout);
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeSettings(); });
+  })();
 </script>
 
 </body>
