@@ -28,15 +28,15 @@ route = "dev-api.connectmeifucan.com/*"
 
 [[env.development.kv_namespaces]]
 binding = "USERS"
-id = "838b01b67eb1440b985dd7971c5dbbc0"
+id = "bb0312684a45404c9c1de52c647930f1"
 
 [[env.development.kv_namespaces]]
 binding = "ACCESS_CODES"
-id = "cb69fa5633ed46fdb4d9ef7a74b5c80d"
+id = "9c5ea0b26f4b4c42b8effcfb0183ddc4"
 
 [[env.development.kv_namespaces]]
 binding = "ROOMS"
-id = "4047469aae424a2888d2fe1606ed8c8f"
+id = "51726feb33184c94a89e258b5d5097fc"
 
 [env.development.vars]
 MQTT_BROKER = "mqtt://broker.hivemq.com:1883"
@@ -51,15 +51,15 @@ route = "api.connectmeifucan.com/*"
 
 [[env.production.kv_namespaces]]
 binding = "USERS"
-id = "44976d8e259c45b090f228e688f1c095"
+id = "578ad5bdb8544316818a0dd4db00dbca"
 
 [[env.production.kv_namespaces]]
 binding = "ACCESS_CODES"
-id = "6fd7b97846e54fc5a739aff1150ad3e1"
+id = "67a3e90de18c450b8ac95943db71ec10"
 
 [[env.production.kv_namespaces]]
 binding = "ROOMS"
-id = "44976d8e259c45b090f228e688f1c095"
+id = "2eae2b1b52da40e7a1bc62003adfd183"
 
 [env.production.vars]
 MQTT_BROKER = "mqtt://broker.hivemq.com:1883"
