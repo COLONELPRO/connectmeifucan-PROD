@@ -2404,20 +2404,21 @@ loadCart();
           roleBtn.style.color = isHost ? '#ff6b6b' : '#ffa500';
         }
         
-        // Players count
-        const webPlayers = this.currentRoom.players.filter(p => p.type === 'web').length;
-        const tvPlayers = this.currentRoom.players.filter(p => p.type === 'tv').length;
+        // Players count - use participants array from Durable Object
+        const participants = this.currentRoom.participants || [];
+        const webPlayers = participants.filter(p => p.clientType === 'web').length;
+        const tvPlayers = participants.filter(p => p.clientType === 'tv').length;
         const playersCountEl = document.getElementById('room-players-count');
         const tvWebCountEl = document.getElementById('tv-web-count');
         const tvTvCountEl = document.getElementById('tv-tv-count');
-        if (playersCountEl) playersCountEl.textContent = `${this.currentRoom.players.length}/4`;
+        if (playersCountEl) playersCountEl.textContent = `${participants.length}/4`;
         if (tvWebCountEl) tvWebCountEl.textContent = webPlayers;
         if (tvTvCountEl) tvTvCountEl.textContent = tvPlayers;
         
         // Status
         const statusEl = document.getElementById('room-status');
         if (statusEl) {
-          const tvConnected = this.currentRoom.players.some(p => p.type === 'tv');
+          const tvConnected = participants.some(p => p.clientType === 'tv');
           if (tvConnected) {
             statusEl.textContent = lang === 'fr' ? '📺 LIVE' : '📺 LIVE';
             statusEl.style.color = '#2ecc71';
