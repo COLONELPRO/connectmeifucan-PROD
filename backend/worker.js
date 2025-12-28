@@ -34,18 +34,30 @@ export default {
     const url = new URL(request.url);
     
     // Handle WebSocket connections for rooms
-    if (url.pathname.startsWith('/room/') && request.headers.get('Upgrade') === 'websocket') {
-      const roomCode = url.pathname.split('/')[2];
-      if (!isValidRoomId(roomCode)) {
-        return new Response('Invalid room code', { status: 400 });
+    const upgradeHeader = request.headers.get('Upgrade');
+    console.log('[Worker] Path:', url.pathname, 'Upgrade header:', upgradeHeader);
+    
+    if (url.pathname.startsWith('/room/')) {
+      if (upgradeHeader && upgradeHeader.toLowerCase() === 'websocket') {
+        const roomCode = url.pathname.split('/')[2];
+        console.log('[Worker] WebSocket request for room:', roomCode);
+        
+        if (!isValidRoomId(roomCode)) {
+          console.log('[Worker] Invalid room code:', roomCode);
+          return new Response('Invalid room code', { status: 400 });
+        }
+        
+        // Get Durable Object instance for this room
+        const id = env.ROOM_DO.idFromName(roomCode);
+        const room = env.ROOM_DO.get(id);
+        
+        console.log('[Worker] Forwarding to Durable Object');
+        // Forward the request to the Durable Object
+        return room.fetch(request);
+      } else {
+        console.log('[Worker] Non-WebSocket request to /room/');
+        return new Response('WebSocket upgrade required', { status: 426 });
       }
-      
-      // Get Durable Object instance for this room
-      const id = env.ROOM_DO.idFromName(roomCode);
-      const room = env.ROOM_DO.get(id);
-      
-      // Forward the request to the Durable Object
-      return room.fetch(request);
     }
     
     // CORS headers with security

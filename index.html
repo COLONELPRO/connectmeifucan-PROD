@@ -2204,20 +2204,32 @@ loadCart();
       }
       
       handleMessage(message) {
+        console.log('[ROOM] Received message:', message);
+        
         switch(message.type) {
           case 'ROOM_CREATED':
           case 'ROOM_JOINED':
-            this.currentRoom = message.room;
+            // Build room object from message
+            this.currentRoom = {
+              roomCode: message.roomCode,
+              host: message.host,
+              participants: message.participants || [],
+              tvState: null
+            };
             this.readyState = false;
             this.updateUI();
-            this.updateTVDisplay(message.room.tvState || null);
+            this.updateTVDisplay(null);
             break;
             
           case 'ROOM_UPDATED':
-            this.currentRoom = message.room;
-            this.updateUI();
-            this.updateTVDisplay(message.room.tvState || null);
-            updateSharedTVDisplay();
+          case 'PARTICIPANT_JOINED':
+          case 'READY_STATE_CHANGED':
+            if (this.currentRoom) {
+              this.currentRoom.participants = message.participants || [];
+              if (message.host) this.currentRoom.host = message.host;
+              this.updateUI();
+              updateSharedTVDisplay();
+            }
             break;
             
           case 'ROOM_STATE_UPDATED':
