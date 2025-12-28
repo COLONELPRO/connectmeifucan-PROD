@@ -2,10 +2,11 @@
 
 ## 📋 Vue d'ensemble
 
-- **Frontend Web**: Cloudflare Pages → **connectmeifucan.com**
-- **Android TV**: Cloudflare Pages → **connectmeifucan.app**
-- **Backend API**: Cloudflare Workers → **api.connectmeifucan.com**
-- **Stockage**: Cloudflare KV
+- **Frontend Web**: Cloudflare Pages → **connectmeifucan.pages.dev**
+- **Android TV**: Cloudflare Pages → **connectmeifucan-tv.pages.dev**
+- **Backend API**: Cloudflare Workers → **cmuc-backend-dev.connectmeifucan.workers.dev**
+- **WebSocket URL**: **wss://cmuc-backend-dev.connectmeifucan.workers.dev/room/**
+- **Stockage**: Cloudflare KV + Durable Objects
 - **Workflow Git**: `main` (dev) → `branch-prod` (production)
 
 ---
