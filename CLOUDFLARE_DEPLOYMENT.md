@@ -1,11 +1,11 @@
-# 🚀 Déploiement Cloudflare - connectmeifucan.com
+# 🚀 Déploiement Cloudflare - Connect Me If U Can
 
 ## 📋 Vue d'ensemble
 
-- **Frontend**: Cloudflare Pages
-- **Backend**: Cloudflare Workers
+- **Frontend Web**: Cloudflare Pages → **connectmeifucan.com**
+- **Android TV**: Cloudflare Pages → **connectmeifucan.app**
+- **Backend API**: Cloudflare Workers → **api.connectmeifucan.com**
 - **Stockage**: Cloudflare KV
-- **Domaine**: connectmeifucan.com
 
 ---
 
@@ -121,9 +121,9 @@ npx wrangler pages deploy . --project-name=connectmeifucan
 4. Glissez-déposez tous les fichiers (sauf `backend/` et `node_modules/`)
 5. Deploy
 
-### 2.4 Configurer le domaine
+### 2.4 Configurer les domaines
 
-**DNS Cloudflare:**
+**DNS Cloudflare pour connectmeifucan.com (Frontend Web):**
 1. DNS → Ajouter un enregistrement:
 ```
 Type: CNAME
@@ -140,24 +140,40 @@ Target: connectmeifucan.pages.dev
 Proxy: Activé (orange)
 ```
 
-**Lier le domaine custom:**
+**DNS Cloudflare pour connectmeifucan.app (Android TV):**
+1. DNS → Ajouter un enregistrement:
+```
+Type: CNAME
+Name: @
+Target: connectmeifucan-tv.pages.dev (ou même Pages project)
+Proxy: Activé (orange)
+```
+
+**Lier les domaines custom:**
 1. Pages → connectmeifucan → Custom domains
-2. Ajouter: `connectmeifucan.com` et `www.connectmeifucan.com`
+2. Ajouter:
+   - `connectmeifucan.com` et `www.connectmeifucan.com` (frontend web)
+   - `connectmeifucan.app` (Android TV simulator)
 
 ---
 
 ## ✅ Étape 3: Configuration DNS complète
 
-Dans votre zone DNS Cloudflare:
+Dans vos zones DNS Cloudflare:
 
+**Zone: connectmeifucan.com (Frontend Web)**
 ```
-# Frontend
 Type: CNAME, Name: @, Target: connectmeifucan.pages.dev, Proxy: ON
 Type: CNAME, Name: www, Target: connectmeifucan.pages.dev, Proxy: ON
-
-# Backend API
-Type: CNAME, Name: api, Target: votre-worker.workers.dev, Proxy: ON
+Type: CNAME, Name: api, Target: cmuc-backend.workers.dev, Proxy: ON
 ```
+
+**Zone: connectmeifucan.app (Android TV)**
+```
+Type: CNAME, Name: @, Target: connectmeifucan-tv.pages.dev, Proxy: ON
+```
+
+**Note**: Si vous hébergez les deux sites sur le même Cloudflare Pages project, pointez les deux domaines vers le même target Pages.
 
 ---
 
@@ -175,11 +191,18 @@ Invoke-RestMethod -Method Post -Uri "https://api.connectmeifucan.com/auth/check"
 
 ### Test Frontend
 
+**Frontend Web (connectmeifucan.com):**
 1. Ouvrez: https://connectmeifucan.com/index.com.html
 2. Entrez un pseudo
 3. Entrez le code: **DEMO2025** ou **PROD2025**
 4. Créez le compte
-5. ✅ Vérifiez la redirection vers l'app
+5. ✅ Vérifiez la redirection vers https://connectmeifucan.com/index.html
+
+**Android TV (connectmeifucan.app):**
+1. Ouvrez: https://connectmeifucan.app/android-tv/tv-simulator.html
+2. Créez une room
+3. ✅ Vérifiez la connexion WebSocket à api.connectmeifucan.com
+4. ✅ Testez le toggle Host/Guest instantané
 
 ---
 
@@ -195,13 +218,24 @@ Dashboard → SSL/TLS → Overview → Mode: Full (strict)
 
 ### 5.3 Page Rules (Caching)
 
+**Pour connectmeifucan.com:**
 ```
-# Images et assets
 URL: *connectmeifucan.com/*.jpg
 Cache Level: Cache Everything
 Edge Cache TTL: 1 month
 
 URL: *connectmeifucan.com/*.png
+Cache Level: Cache Everything
+Edge Cache TTL: 1 month
+```
+
+**Pour connectmeifucan.app:**
+```
+URL: *connectmeifucan.app/*.jpg
+Cache Level: Cache Everything
+Edge Cache TTL: 1 month
+
+URL: *connectmeifucan.app/*.png
 Cache Level: Cache Everything
 Edge Cache TTL: 1 month
 ```
@@ -315,12 +349,14 @@ wrangler deployments list
 ## 📝 Checklist finale
 
 - [ ] Backend Worker déployé sur `api.connectmeifucan.com`
-- [ ] Frontend Pages déployé sur `connectmeifucan.com`
+- [ ] Frontend Web déployé sur `connectmeifucan.com`
+- [ ] Android TV déployé sur `connectmeifucan.app`
 - [ ] KV Namespaces créés et configurés
 - [ ] Codes d'accès initialisés
-- [ ] DNS configuré et propagé
-- [ ] SSL/TLS actif
+- [ ] DNS configuré et propagé (les deux domaines)
+- [ ] SSL/TLS actif (les deux domaines)
 - [ ] Tests d'authentification réussis
+- [ ] WebSocket host/guest toggle testé
 - [ ] Monitoring actif
 - [ ] WAF activé
 - [ ] Backups configurés
@@ -336,7 +372,8 @@ Votre application est maintenant déployée sur Cloudflare avec:
 - 💰 Gratuit (dans les limites du plan Free)
 
 **URLs:**
-- Frontend: https://connectmeifucan.com
-- Auth: https://connectmeifucan.com/index.com.html
-- API: https://api.connectmeifucan.com
-- Health: https://api.connectmeifucan.com/health
+- 🌐 Frontend Web: https://connectmeifucan.com
+- 📱 Auth: https://connectmeifucan.com/index.com.html
+- 📺 Android TV: https://connectmeifucan.app/android-tv/tv-simulator.html
+- 🔌 API Backend: https://api.connectmeifucan.com
+- ✅ Health: https://api.connectmeifucan.com/health
