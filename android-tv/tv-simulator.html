@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Android TV App - Test Simulator</title>
-    <link rel="stylesheet" href="../Site/theme.css">
     <style>
         :root {
             --bg: #0b0b0b;
@@ -958,38 +957,6 @@
             // Enter room UI
             enterRoom(roomId);
             showStatus(`✓ Connecting to room ${roomId}...`, 'success');
-        }
-                    renderDevRooms();
-                    enterRoom(roomId);
-                } else {
-                    showStatus(`✗ [DEV] ${res.message}`, 'error');
-                }
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/rooms/join`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        roomId: roomId,
-                        username: username
-                    })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    showStatus(`✓ Joined room ${roomId}! Host: ${data.host}`, 'success');
-                    enterRoom(roomId);
-                } else {
-                    showStatus(`✗ ${data.message}`, 'error');
-                }
-            } catch (error) {
-                showStatus(`✗ Connection error: ${error.message}`, 'error');
-                console.error('Join room error:', error);
-            }
         }
         
         function generateRoomId() {
