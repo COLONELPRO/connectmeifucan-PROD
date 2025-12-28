@@ -32,8 +32,8 @@ jobs:
         working-directory: ./backend
         run: npx wrangler deploy --env development
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_CMIUC }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID_CMIIUC }}
 
   deploy-frontend-preview:
     name: Deploy Frontend Preview
@@ -46,8 +46,8 @@ jobs:
       - name: Deploy to Cloudflare Pages (Preview)
         uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN_CMIUC }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID_CMIIUC }}
           command: pages deploy . --project-name=connectmeifucan --branch=preview
 
   deploy-android-tv-preview:
@@ -61,6 +61,6 @@ jobs:
       - name: Deploy Android TV to Cloudflare Pages (Preview)
         uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN_CMIUC }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID_CMIIUC }}
           command: pages deploy ./android-tv --project-name=connectmeifucan-tv --branch=preview
