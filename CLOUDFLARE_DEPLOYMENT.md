@@ -203,7 +203,7 @@ const API_BASE = localStorage.getItem('cmuc_api_base') || 'https://api.connectme
    ```
 6. Cliquez **Save and Deploy**
 7. ⏳ Premier déploiement en cours (1-2 min)
-8. ✅ Votre site est sur: `https://connectmeifucan.pages.dev`
+8. ✅ Votre site est sur: `https://connectmeifucan-prod.pages.dev`
 
 **Option B: Via Wrangler (pour tests rapides)**
 ```powershell
@@ -245,7 +245,7 @@ npx wrangler pages deploy . --project-name=connectmeifucan --branch=branch-prod
    ```
    Type: CNAME
    Name: @
-   Target: connectmeifucan.pages.dev
+   Target: connectmeifucan-prod.pages.dev
    Proxy status: Proxied (☁️ orange)
    TTL: Auto
    ```
@@ -253,7 +253,7 @@ npx wrangler pages deploy . --project-name=connectmeifucan --branch=branch-prod
    ```
    Type: CNAME
    Name: www
-   Target: connectmeifucan.pages.dev
+   Target: connectmeifucan-prod.pages.dev
    Proxy status: Proxied (☁️ orange)
    ```
 5. **Save**
@@ -264,7 +264,7 @@ npx wrangler pages deploy . --project-name=connectmeifucan --branch=branch-prod
    ```
    Type: CNAME
    Name: @
-   Target: connectmeifucan.pages.dev (même target que .com)
+   Target: connectmeifucan-prod.pages.dev (même target que .com)
    Proxy status: Proxied (☁️ orange)
    ```
 3. **Save**
@@ -306,8 +306,8 @@ Dans vos zones DNS Cloudflare:
 
 **Zone: connectmeifucan.com (Frontend Web)**
 ```
-Type: CNAME, Name: @, Target: connectmeifucan.pages.dev, Proxy: ON
-Type: CNAME, Name: www, Target: connectmeifucan.pages.dev, Proxy: ON
+Type: CNAME, Name: @, Target: connectmeifucan-prod.pages.dev, Proxy: ON
+Type: CNAME, Name: www, Target: connectmeifucan-prod.pages.dev, Proxy: ON
 Type: CNAME, Name: api, Target: cmuc-backend.workers.dev, Proxy: ON
 ```
 
@@ -316,7 +316,22 @@ Type: CNAME, Name: api, Target: cmuc-backend.workers.dev, Proxy: ON
 Type: CNAME, Name: @, Target: connectmeifucan-tv.pages.dev, Proxy: ON
 ```
 
-**Note**: Si vous hébergez les deux sites sur le même Cloudflare Pages project, pointez les deux domaines vers le même target Pages.
+**📝 Note importante sur la configuration :**
+
+Vous avez **deux options** pour héberger vos sites :
+
+**Option 1 : Deux projets Pages séparés (Recommandé pour ce projet)**
+- `connectmeifucan-prod.pages.dev` → pour connectmeifucan.com (Frontend Web)
+- `connectmeifucan-tv.pages.dev` → pour connectmeifucan.app (Android TV)
+- ✅ Séparation claire des environnements
+- ✅ Déploiements indépendants configurés dans GitHub Actions
+
+**Option 2 : Un seul projet Pages pour les deux domaines**
+- Les deux domaines pointent vers `connectmeifucan-prod.pages.dev`
+- Les deux sites partagent le même build
+- ⚠️ Nécessite de modifier les workflows GitHub Actions
+
+**Pour ce projet, nous utilisons l'Option 1 (deux projets séparés).**
 
 ---
 
@@ -493,7 +508,7 @@ git push origin main
 
 # 4. Tester sur l'environnement de preview
 # Cloudflare déploiera automatiquement main sur une URL preview:
-# https://preview-main.connectmeifucan.pages.dev
+# https://preview-main.connectmeifucan-prod.pages.dev
 
 # 5. Quand tout fonctionne, merger vers production
 git checkout branch-prod
@@ -521,7 +536,7 @@ git push origin branch-prod --force-with-lease
 
 | Branche | Environnement | URLs |
 |---------|---------------|------|
-| `main` | Preview/Staging | `https://preview-main.connectmeifucan.pages.dev` |
+| `main` | Preview/Staging | `https://preview-main.connectmeifucan-prod.pages.dev` |
 | `branch-prod` | Production | `connectmeifucan.com`, `connectmeifucan.app` |
 
 ---
