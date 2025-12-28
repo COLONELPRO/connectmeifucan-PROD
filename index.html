@@ -2576,14 +2576,8 @@ loadCart();
     
     // Initialize WebSocket room manager
     const roomManager = new WebSocketRoomManager();
-    console.log('[ROOM] Calling roomManager.connect()...');
-    try {
-      roomManager.connect();
-      console.log('[ROOM] roomManager.connect() called successfully');
-    } catch (err) {
-      console.error('[ROOM] Error calling connect():', err);
-      setWSStatus(`WS: erreur au démarrage (${err.message})`, '#ff6b6b');
-    }
+    // WebSocket will connect when user creates or joins a room
+    console.log('[ROOM] Room manager initialized, ready to connect when joining/creating room');
 
     function bindRoomUI(){
       const joinBtn = document.getElementById('btn-join-room');
