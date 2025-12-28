@@ -2091,6 +2091,10 @@ loadCart();
       const host = window.location.hostname;
       // Local dev or file://
       if (!host || host === 'localhost' || host === '127.0.0.1' || host === '::1') return 'ws://localhost:3000';
+      // Production: use Cloudflare Worker
+      if (host.includes('connectmeifucan.pages.dev') || host.includes('connectmeifucan.com')) {
+        return 'wss://cmuc-backend-prod.workers.dev';
+      }
       // If site runs on a domain, assume backend on port 3000 on same host
       return (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + host + ':3000';
     }
