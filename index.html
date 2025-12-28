@@ -2091,10 +2091,9 @@ loadCart();
       const host = window.location.hostname;
       // Local dev or file://
       if (!host || host === 'localhost' || host === '127.0.0.1' || host === '::1') return 'ws://localhost:3000';
-      // Production: Cloudflare Workers don't support WebSocket without Durable Objects
-      // Return null to disable WebSocket in production
+      // Production: Use Cloudflare Worker with WebSocket support via Durable Objects
       if (host.includes('connectmeifucan.pages.dev') || host.includes('connectmeifucan.com')) {
-        return null;
+        return 'wss://cmuc-backend-prod.workers.dev/room/';
       }
       // If site runs on a domain, assume backend on port 3000 on same host
       return (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + host + ':3000';
@@ -2105,20 +2104,12 @@ loadCart();
       if (wsEl){ wsEl.textContent = text; wsEl.style.color = color || 'var(--muted)'; }
     }
     
-    // If no WebSocket support in production, show appropriate message
-    if (!BACKEND_URL) {
-      setWSStatus(lang === 'fr' ? 'Mode REST (WebSocket non disponible en production)' : 'REST mode (WebSocket not available in production)', 'var(--accent)');
-      const wsInput = document.getElementById('room-ws-input');
-      if (wsInput) wsInput.value = 'REST API: https://cmuc-backend-prod.workers.dev';
-      console.log('[ROOM] WebSocket disabled in production, using REST API');
-    } else {
-      // Show initial target immediately so the user sees the WS endpoint
-      setWSStatus(`WS: prêt à se connecter sur ${BACKEND_URL}`, 'var(--muted)');
-      // Prefill WS input
-      const wsInput = document.getElementById('room-ws-input');
-      if (wsInput) wsInput.value = BACKEND_URL;
-      console.log('[ROOM] Backend URL:', BACKEND_URL);
-    }
+    // Show initial target immediately so the user sees the WS endpoint
+    setWSStatus(`WS: prêt à se connecter`, 'var(--muted)');
+    // Prefill WS input
+    const wsInput = document.getElementById('room-ws-input');
+    if (wsInput) wsInput.value = BACKEND_URL;
+    console.log('[ROOM] Backend URL:', BACKEND_URL);
     
     class WebSocketRoomManager {
       constructor() {
@@ -2135,24 +2126,19 @@ loadCart();
       }
       
       // Connect to WebSocket server
-      connect() {
-        // Skip WebSocket connection if not available
-        if (!BACKEND_URL) {
-          console.log('[ROOM] WebSocket not available in production');
-          setWSStatus(lang === 'fr' ? 'Mode REST actif' : 'REST mode active', 'var(--accent)');
-          return;
-        }
-        console.log('[ROOM] connect() entered, creating WebSocket to:', BACKEND_URL);
+      connect(roomCode) {
+        const wsUrl = roomCode ? BACKEND_URL + roomCode : BACKEND_URL + 'TEMP';
+        console.log('[ROOM] connect() entered, creating WebSocket to:', wsUrl);
         try {
-          this.ws = new WebSocket(BACKEND_URL);
+          this.ws = new WebSocket(wsUrl);
           console.log('[ROOM] WebSocket created, readyState:', this.ws.readyState);
-          setWSStatus(`WS: connexion à ${BACKEND_URL}...`, 'var(--muted)');
+          setWSStatus(`WS: connexion...`, 'var(--muted)');
           // Watchdog: if still not open after 1.5s, notify user
           setTimeout(() => {
             if (!this.ws) return;
             if (this.ws.readyState === WebSocket.OPEN) return;
             const state = ['CONNECTING','OPEN','CLOSING','CLOSED'][this.ws.readyState] || this.ws.readyState;
-            setWSStatus(`WS: toujours ${state.toLowerCase()} vers ${BACKEND_URL}`, '#ffd700');
+            setWSStatus(`WS: toujours ${state.toLowerCase()}`, '#ffd700');
           }, 1500);
           
           this.ws.onopen = () => {
@@ -2160,7 +2146,7 @@ loadCart();
             this.reconnectAttempts = 0;
             const msgEl = document.getElementById('room-error');
             if (msgEl){ msgEl.style.display='none'; }
-            setWSStatus(`WS: connecté à ${BACKEND_URL}`, '#2ecc71');
+            setWSStatus(`WS: connecté`, '#2ecc71');
             this.updateUI();
             // Flush any queued messages that were triggered before the socket was open
             if (this.pendingMessages.length) {
@@ -2273,32 +2259,54 @@ loadCart();
       }
       
       createRoom() {
-        this.sendMessage({
-          type: 'CREATE_ROOM',
-          clientType: this.clientType,
-          clientName: this.clientName
-        });
+        // Generate a random room code first
+        const roomCode = this.generateRoomCode();
+        this.connect(roomCode);
+        // Wait for connection then send create message
+        setTimeout(() => {
+          this.sendMessage({
+            type: 'CREATE_ROOM',
+            roomCode,
+            clientType: this.clientType,
+            clientName: this.clientName
+          });
+        }, 500);
       }
       
       createRoomWithCode(code) {
         const roomCode = String(code || '').trim().toUpperCase();
-        this.sendMessage({
-          type: 'CREATE_ROOM',
-          roomCode,
-          clientType: this.clientType,
-          clientName: this.clientName
-        });
+        this.connect(roomCode);
+        setTimeout(() => {
+          this.sendMessage({
+            type: 'CREATE_ROOM',
+            roomCode,
+            clientType: this.clientType,
+            clientName: this.clientName
+          });
+        }, 500);
       }
       
       joinRoom(code) {
         const roomCode = String(code || '').trim().toUpperCase();
         this._lastJoinCode = roomCode;
-        this.sendMessage({
-          type: 'JOIN_ROOM',
-          roomCode,
-          clientType: this.clientType,
-          clientName: this.clientName
-        });
+        this.connect(roomCode);
+        setTimeout(() => {
+          this.sendMessage({
+            type: 'JOIN_ROOM',
+            roomCode,
+            clientType: this.clientType,
+            clientName: this.clientName
+          });
+        }, 500);
+      }
+      
+      generateRoomCode() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let code = '';
+        for (let i = 0; i < 4; i++) {
+          code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return code;
       }
       
       leaveRoom() {

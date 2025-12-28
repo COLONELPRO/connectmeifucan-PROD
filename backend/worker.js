@@ -1,6 +1,10 @@
 // Cloudflare Worker pour le backend CMUC
 // Adapté pour utiliser KV Store au lieu de fichiers JSON
 
+import { RoomDurableObject } from './room-durable-object.js';
+
+export { RoomDurableObject };
+
 // Security utilities
 function sanitizeInput(input, maxLength = 100) {
   if (typeof input !== 'string') return '';
@@ -28,6 +32,21 @@ function isValidAccessCode(code) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    
+    // Handle WebSocket connections for rooms
+    if (url.pathname.startsWith('/room/') && request.headers.get('Upgrade') === 'websocket') {
+      const roomCode = url.pathname.split('/')[2];
+      if (!isValidRoomId(roomCode)) {
+        return new Response('Invalid room code', { status: 400 });
+      }
+      
+      // Get Durable Object instance for this room
+      const id = env.ROOM_DO.idFromName(roomCode);
+      const room = env.ROOM_DO.get(id);
+      
+      // Forward the request to the Durable Object
+      return room.fetch(request);
+    }
     
     // CORS headers with security
     const corsHeaders = {
