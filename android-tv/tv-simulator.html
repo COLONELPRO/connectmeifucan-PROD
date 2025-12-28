@@ -529,20 +529,28 @@
         }
         
         function handleWSMessage(message) {
+          console.log('📩 TV received message:', message.type, message);
+          
           switch(message.type) {
             case 'ROOM_CREATED':
             case 'ROOM_JOINED':
-              console.log('Room synced:', message.room);
-                            if (message.room && message.room.host) {
-                                currentRoomHost = message.room.host;
-                            }
-              updateRoomUI(message.room);
+            case 'PARTICIPANT_JOINED':
+            case 'PARTICIPANT_LEFT':
+            case 'READY_STATE_CHANGED':
+            case 'HOST_CHANGED':
+              // Build room object from message properties
+              const room = {
+                roomCode: message.roomCode,
+                host: message.host,
+                participants: message.participants || [],
+                tvState: message.tvState
+              };
+              console.log('Room synced:', room);
+              currentRoomHost = message.host;
+              updateRoomUI(room);
               break;
-            case 'ROOM_UPDATED':
-                            if (message.room && message.room.host) {
-                                currentRoomHost = message.room.host;
-                            }
-                            updateRoomUI(message.room);
+            case 'CONTROL_COMMAND':
+              handleControlCommand(message.command);
               break;
             case 'ERROR':
               showStatus('⚠ ' + message.error, 'error');
@@ -551,23 +559,39 @@
         }
         
         function updateRoomUI(room) {
-          if (room) {
-            const tvPlayer = room.players.find(p => p.type === 'tv');
-            if (tvPlayer && tvPlayer.ready) {
+          if (room && room.participants) {
+            // Find TV participant using clientType
+            const tvParticipant = room.participants.find(p => p.clientType === 'tv');
+            
+            if (tvParticipant && tvParticipant.isReady) {
               document.getElementById('readyBtn').textContent = 'EN LIGNE';
               document.getElementById('readyBtn').style.backgroundColor = '#2ecc71';
             } else {
               document.getElementById('readyBtn').textContent = 'PAUSE';
               document.getElementById('readyBtn').style.backgroundColor = '#ff6b35';
             }
-                        // Immediate role button update
-                        const roleBtn = document.getElementById('roleBtn');
-                        if (roleBtn && currentRoomHost) {
-                            const hostType = currentRoomHost === 'tv' ? 'Guest' : 'Host';
-                            roleBtn.textContent = `🎬 ${hostType}`;
-                            roleBtn.style.borderColor = (currentRoomHost === 'web') ? '#ff6b6b' : '#ffa500';
-                            roleBtn.style.color = (currentRoomHost === 'web') ? '#ff6b6b' : '#ffa500';
-                        }
+            
+            // Update role button
+            const roleBtn = document.getElementById('roleBtn');
+            if (roleBtn && currentRoomHost) {
+              const hostType = currentRoomHost === 'tv' ? 'Guest' : 'Host';
+              roleBtn.textContent = `🎬 ${hostType}`;
+              roleBtn.style.borderColor = (currentRoomHost === 'web') ? '#ff6b6b' : '#ffa500';
+              roleBtn.style.color = (currentRoomHost === 'web') ? '#ff6b6b' : '#ffa500';
+            }
+            
+            // Display room info
+            console.log('🏠 Room:', room.roomCode, '| Participants:', room.participants.length);
+          }
+        }
+        
+        // Handle control commands from host
+        function handleControlCommand(command) {
+          console.log('📺 TV received control command:', command);
+          
+          if (command === 'START_GAME') {
+            showStatus('🎮 Game started by host!', 'success');
+            // Additional game start logic here
           }
         }
         
