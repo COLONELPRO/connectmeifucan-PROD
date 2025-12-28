@@ -113,12 +113,18 @@ export class RoomDurableObject {
     });
 
     ws.addEventListener('close', () => {
-      this.sessions.delete(sessionId);
-      this.broadcast({
-        type: 'PARTICIPANT_LEFT',
-        sessionId,
-        participants: this.getParticipants()
-      });
+      if (this.sessions.has(sessionId)) {
+        this.sessions.delete(sessionId);
+        try {
+          this.broadcast({
+            type: 'PARTICIPANT_LEFT',
+            sessionId,
+            participants: this.getParticipants()
+          });
+        } catch (error) {
+          console.error('[DurableObject] Error in close handler:', error);
+        }
+      }
     });
 
     ws.addEventListener('error', (error) => {
@@ -141,7 +147,6 @@ export class RoomDurableObject {
         if (!this.roomData) {
           this.roomData = {
             roomCode: message.roomCode,
-            createdAt: Date.now(),
             host: session.clientType
           };
           try {
@@ -188,7 +193,6 @@ export class RoomDurableObject {
         const roomCode = message.roomCode || this.generateRoomCode();
         this.roomData = {
           roomCode,
-          createdAt: Date.now(),
           host: session.clientType
         };
         try {
@@ -219,7 +223,12 @@ export class RoomDurableObject {
       case 'CHANGE_HOST':
         if (this.roomData) {
           this.roomData.host = message.host || 'web';
-          await this.state.storage.put('roomData', this.roomData);
+          try {
+            await this.state.storage.put('roomData', this.roomData);
+          } catch (error) {
+            console.error('[DurableObject] Failed to save host change:', error);
+            throw new Error('Failed to change host');
+          }
           this.broadcast({
             type: 'HOST_CHANGED',
             host: this.roomData.host
@@ -266,15 +275,30 @@ export class RoomDurableObject {
   sendToSession(sessionId, message) {
     const session = this.sessions.get(sessionId);
     if (session && session.ws.readyState === 1) { // WebSocket.OPEN = 1
-      session.ws.send(JSON.stringify(message));
+      try {
+        session.ws.send(JSON.stringify(message));
+      } catch (error) {
+        console.error('[DurableObject] Error sending to session:', sessionId, error);
+        this.sessions.delete(sessionId);
+      }
     }
   }
 
   broadcast(message, excludeSessionId = null) {
+    const deadSessions = [];
     for (const [sessionId, session] of this.sessions) {
       if (sessionId !== excludeSessionId && session.ws.readyState === 1) {
-        session.ws.send(JSON.stringify(message));
+        try {
+          session.ws.send(JSON.stringify(message));
+        } catch (error) {
+          console.error('[DurableObject] Error broadcasting to session:', sessionId, error);
+          deadSessions.push(sessionId);
+        }
       }
+    }
+    // Cleanup dead sessions
+    for (const sessionId of deadSessions) {
+      this.sessions.delete(sessionId);
     }
   }
 
@@ -303,8 +327,7 @@ export class RoomDurableObject {
     return {
       roomCode: this.roomData?.roomCode,
       participants: this.getParticipants(),
-      host: this.roomData?.host,
-      createdAt: this.roomData?.createdAt
+      host: this.roomData?.host
     };
   }
 }
