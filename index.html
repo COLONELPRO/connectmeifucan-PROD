@@ -2091,9 +2091,10 @@ loadCart();
       const host = window.location.hostname;
       // Local dev or file://
       if (!host || host === 'localhost' || host === '127.0.0.1' || host === '::1') return 'ws://localhost:3000';
-      // Production: use Cloudflare Worker
+      // Production: Cloudflare Workers don't support WebSocket without Durable Objects
+      // Return null to disable WebSocket in production
       if (host.includes('connectmeifucan.pages.dev') || host.includes('connectmeifucan.com')) {
-        return 'wss://cmuc-backend-prod.workers.dev';
+        return null;
       }
       // If site runs on a domain, assume backend on port 3000 on same host
       return (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + host + ':3000';
@@ -2103,12 +2104,21 @@ loadCart();
       const wsEl = document.getElementById('room-ws-status');
       if (wsEl){ wsEl.textContent = text; wsEl.style.color = color || 'var(--muted)'; }
     }
-    // Show initial target immediately so the user sees the WS endpoint
-    setWSStatus(`WS: prêt à se connecter sur ${BACKEND_URL}`, 'var(--muted)');
-    // Prefill WS input
-    const wsInput = document.getElementById('room-ws-input');
-    if (wsInput) wsInput.value = BACKEND_URL;
-    console.log('[ROOM] Backend URL:', BACKEND_URL);
+    
+    // If no WebSocket support in production, show appropriate message
+    if (!BACKEND_URL) {
+      setWSStatus(lang === 'fr' ? 'Mode REST (WebSocket non disponible en production)' : 'REST mode (WebSocket not available in production)', 'var(--accent)');
+      const wsInput = document.getElementById('room-ws-input');
+      if (wsInput) wsInput.value = 'REST API: https://cmuc-backend-prod.workers.dev';
+      console.log('[ROOM] WebSocket disabled in production, using REST API');
+    } else {
+      // Show initial target immediately so the user sees the WS endpoint
+      setWSStatus(`WS: prêt à se connecter sur ${BACKEND_URL}`, 'var(--muted)');
+      // Prefill WS input
+      const wsInput = document.getElementById('room-ws-input');
+      if (wsInput) wsInput.value = BACKEND_URL;
+      console.log('[ROOM] Backend URL:', BACKEND_URL);
+    }
     
     class WebSocketRoomManager {
       constructor() {
@@ -2126,6 +2136,12 @@ loadCart();
       
       // Connect to WebSocket server
       connect() {
+        // Skip WebSocket connection if not available
+        if (!BACKEND_URL) {
+          console.log('[ROOM] WebSocket not available in production');
+          setWSStatus(lang === 'fr' ? 'Mode REST actif' : 'REST mode active', 'var(--accent)');
+          return;
+        }
         console.log('[ROOM] connect() entered, creating WebSocket to:', BACKEND_URL);
         try {
           this.ws = new WebSocket(BACKEND_URL);
