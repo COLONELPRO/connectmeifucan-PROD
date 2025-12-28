@@ -1,26 +1,66 @@
-name = "cmuc-backend"
+name = "cmuc-backend-dev"
 main = "worker.js"
 compatibility_date = "2025-12-27"
 
-# KV pour stocker users et access_codes
+# KV pour stocker users et access_codes (Development)
 [[kv_namespaces]]
 binding = "USERS"
-id = "votre-kv-namespace-id"
+id = "votre-kv-namespace-dev-users-id"
 
 [[kv_namespaces]]
 binding = "ACCESS_CODES"
-id = "votre-kv-namespace-id-2"
+id = "votre-kv-namespace-dev-codes-id"
 
 [[kv_namespaces]]
 binding = "ROOMS"
-id = "votre-kv-namespace-id-3"
+id = "votre-kv-namespace-dev-rooms-id"
 
 [vars]
 MQTT_BROKER = "mqtt://broker.hivemq.com:1883"
+ENVIRONMENT = "development"
 
+# ============================
+# DEVELOPMENT ENVIRONMENT
+# ============================
+[env.development]
+name = "cmuc-backend-dev"
+route = "dev-api.connectmeifucan.com/*"
+
+[[env.development.kv_namespaces]]
+binding = "USERS"
+id = "votre-kv-namespace-dev-users-id"
+
+[[env.development.kv_namespaces]]
+binding = "ACCESS_CODES"
+id = "votre-kv-namespace-dev-codes-id"
+
+[[env.development.kv_namespaces]]
+binding = "ROOMS"
+id = "votre-kv-namespace-dev-rooms-id"
+
+[env.development.vars]
+MQTT_BROKER = "mqtt://broker.hivemq.com:1883"
+ENVIRONMENT = "development"
+
+# ============================
+# PRODUCTION ENVIRONMENT
+# ============================
 [env.production]
 name = "cmuc-backend-prod"
 route = "api.connectmeifucan.com/*"
 
+[[env.production.kv_namespaces]]
+binding = "USERS"
+id = "votre-kv-namespace-prod-users-id"
+
+[[env.production.kv_namespaces]]
+binding = "ACCESS_CODES"
+id = "votre-kv-namespace-prod-codes-id"
+
+[[env.production.kv_namespaces]]
+binding = "ROOMS"
+id = "votre-kv-namespace-prod-rooms-id"
+
 [env.production.vars]
 MQTT_BROKER = "mqtt://broker.hivemq.com:1883"
+ENVIRONMENT = "production"
