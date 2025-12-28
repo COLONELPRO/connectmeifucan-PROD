@@ -1,0 +1,56 @@
+/* Shared theme for ConnectMeIfUCan (.com + app) */
+:root {
+  --bg: #0b0b0b;
+  --text: #f5f5f5;
+  --muted: #9aa0a6;
+  --accent: #ffcc00;
+  --accent-hover: #ffd84a;
+  --border: rgba(255,255,255,0.12);
+  --danger: #ff5463;
+  --ok: #2ecc71;
+}
+
+html, body { background: var(--bg); color: var(--text); }
+
+/* Buttons */
+.button, .btn, button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-weight: 800;
+}
+.button.primary, .btn.primary {
+  background: var(--accent);
+  color: #000;
+  border-color: rgba(0,0,0,0.15);
+}
+.button.primary:hover, .btn.primary:hover {
+  background: var(--accent-hover);
+}
+.button.secondary, .btn.secondary {
+  background: transparent;
+  color: var(--text);
+}
+.button.danger, .btn.danger {
+  background: var(--danger);
+  color: #000;
+}
+
+/* Inputs */
+input, select, textarea {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+input::placeholder { color: var(--muted); }
+
+/* Panels */
+.panel {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* Status */
+.status.loading { color: var(--accent); }
+.status.ok { color: var(--ok); }
+.status.error { color: var(--danger); }
