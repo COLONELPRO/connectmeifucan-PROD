@@ -6,6 +6,84 @@
 - **Android TV**: Cloudflare Pages → **connectmeifucan.app**
 - **Backend API**: Cloudflare Workers → **api.connectmeifucan.com**
 - **Stockage**: Cloudflare KV
+- **Workflow Git**: `main` (dev) → `branch-prod` (production)
+
+---
+
+## 📚 Table des matières
+
+1. [Étape 0: Configuration initiale Cloudflare](#-étape-0-configuration-initiale-cloudflare)
+2. [Étape 1: Déployer le Backend (Workers)](#-étape-1-déployer-le-backend-cloudflare-workers)
+3. [Étape 2: Déployer le Frontend (Pages)](#-étape-2-déployer-le-frontend-cloudflare-pages)
+4. [Étape 3: Configuration DNS complète](#-étape-3-configuration-dns-complète)
+5. [Étape 4: Tester](#-étape-4-tester)
+6. [Étape 5: Sécurité et Optimisation](#-étape-5-sécurité-et-optimisation)
+7. [Workflow de déploiement](#-workflow-de-déploiement)
+
+---
+
+## 🌐 Étape 0: Configuration initiale Cloudflare
+
+### 0.1 Créer un compte Cloudflare
+
+1. Allez sur https://dash.cloudflare.com/sign-up
+2. Créez un compte (gratuit)
+3. Vérifiez votre email
+
+### 0.2 Ajouter vos domaines à Cloudflare
+
+**Pour connectmeifucan.com:**
+
+1. Dashboard → **Add a Site**
+2. Entrez: `connectmeifucan.com`
+3. Choisissez le plan **Free** (0$/mois)
+4. Cloudflare va scanner vos DNS existants
+5. Cliquez sur **Continue**
+
+**Cloudflare vous donnera 2 nameservers, exemple:**
+```
+ns1.cloudflare.com
+ns2.cloudflare.com
+```
+
+6. **Chez votre registrar (ex: OVH, Namecheap, GoDaddy):**
+   - Connectez-vous à votre compte
+   - Trouvez la section DNS/Nameservers
+   - Remplacez les nameservers actuels par ceux de Cloudflare
+   - Exemple chez OVH: Domaines → Modifier les serveurs DNS → DNS personnalisés
+
+7. Retournez sur Cloudflare et cliquez **Done, check nameservers**
+8. ⏳ Attendez la propagation (quelques minutes à 48h max)
+9. ✅ Cloudflare vous enverra un email quand c'est actif
+
+**Répétez pour connectmeifucan.app:**
+- Même processus
+- Ajoutez `connectmeifucan.app` comme nouveau site
+- Configurez ses nameservers chez le registrar
+
+### 0.3 Configuration SSL/TLS
+
+**Pour chaque domaine:**
+
+1. Dashboard → Sélectionnez votre domaine
+2. **SSL/TLS** (menu gauche)
+3. Mode: **Full (strict)** ← Important !
+4. Edge Certificates → **Always Use HTTPS**: ON
+5. Edge Certificates → **Automatic HTTPS Rewrites**: ON
+
+✅ SSL actif immédiatement !
+
+### 0.4 Vérifier que vos domaines sont actifs
+
+```powershell
+# Test connectmeifucan.com
+nslookup connectmeifucan.com
+
+# Test connectmeifucan.app
+nslookup connectmeifucan.app
+```
+
+Les IPs retournées doivent être celles de Cloudflare (commence par 104.x ou 172.x)
 
 ---
 
@@ -109,45 +187,110 @@ const API_BASE = localStorage.getItem('cmuc_api_base') || 'https://api.connectme
 
 ### 2.3 Déployer sur Cloudflare Pages
 
-**Option A: Via Wrangler**
+**Option A: Via GitHub (Recommandé pour production)**
+
+1. **Dashboard Cloudflare** → **Workers & Pages** → **Create application**
+2. Choisissez **Pages** → **Connect to Git**
+3. **Autoriser Cloudflare** à accéder à votre GitHub
+4. Sélectionnez le repo: **COLONELPRO/connectmeifucan-PROD**
+5. Configuration du build:
+   ```
+   Project name: connectmeifucan
+   Production branch: branch-prod  ← Important !
+   Build command: (laisser vide)
+   Build output directory: /
+   Root directory: (laisser vide)
+   ```
+6. Cliquez **Save and Deploy**
+7. ⏳ Premier déploiement en cours (1-2 min)
+8. ✅ Votre site est sur: `https://connectmeifucan.pages.dev`
+
+**Option B: Via Wrangler (pour tests rapides)**
 ```powershell
-npx wrangler pages deploy . --project-name=connectmeifucan
+# Déployer depuis le dossier local
+npx wrangler pages deploy . --project-name=connectmeifucan --branch=main
+
+# Ou en production
+npx wrangler pages deploy . --project-name=connectmeifucan --branch=branch-prod
 ```
 
-**Option B: Via le Dashboard**
-1. Allez sur https://dash.cloudflare.com
-2. Pages → Create a project
-3. Connect to Git ou Upload assets
-4. Glissez-déposez tous les fichiers (sauf `backend/` et `node_modules/`)
-5. Deploy
+**Option C: Drag & Drop (occasionnel)**
+1. Dashboard → Pages → Create a project
+2. Upload assets
+3. Glissez-déposez tous les fichiers **sauf** `backend/` et `node_modules/`
+4. Deploy
 
-### 2.4 Configurer les domaines
+### 2.4 Lier le projet Pages à votre repo GitHub
 
-**DNS Cloudflare pour connectmeifucan.com (Frontend Web):**
-1. DNS → Ajouter un enregistrement:
-```
-Type: CNAME
-Name: @
-Target: connectmeifucan.pages.dev
-Proxy: Activé (orange)
+**Si vous avez utilisé Option B ou C, connectez GitHub:**
+
+1. Pages → **connectmeifucan** (votre projet)
+2. **Settings** → **Builds & deployments**
+3. **Connect to Git** → Autoriser GitHub
+4. Sélectionnez **COLONELPRO/connectmeifucan-PROD**
+5. **Production branch**: `branch-prod`
+6. **Preview branches**: `main` (optionnel, pour tester avant prod)
+7. **Save**
+
+🎯 **Maintenant chaque push sur `branch-prod` déploiera automatiquement !**
+
+### 2.5 Configurer les domaines custom
+
+**Étape 1: Ajouter les CNAME dans DNS (pour chaque domaine)**
+
+**Pour connectmeifucan.com:**
+1. Dashboard Cloudflare → Sélectionnez **connectmeifucan.com**
+2. **DNS** (menu gauche) → **Records**
+3. **Add record**:
+   ```
+   Type: CNAME
+   Name: @
+   Target: connectmeifucan.pages.dev
+   Proxy status: Proxied (☁️ orange)
+   TTL: Auto
+   ```
+4. **Add record** (pour www):
+   ```
+   Type: CNAME
+   Name: www
+   Target: connectmeifucan.pages.dev
+   Proxy status: Proxied (☁️ orange)
+   ```
+5. **Save**
+
+**Pour connectmeifucan.app:**
+1. Dashboard → Sélectionnez **connectmeifucan.app**
+2. **DNS** → **Records** → **Add record**:
+   ```
+   Type: CNAME
+   Name: @
+   Target: connectmeifucan.pages.dev (même target que .com)
+   Proxy status: Proxied (☁️ orange)
+   ```
+3. **Save**
+
+**Étape 2: Lier les domaines au projet Pages**
+
+1. **Workers & Pages** → **connectmeifucan** (votre projet)
+2. **Custom domains** (onglet)
+3. **Set up a custom domain**
+4. Entrez: `connectmeifucan.com` → **Continue**
+5. Cloudflare détecte le CNAME → **Activate domain**
+6. Répétez pour `www.connectmeifucan.com`
+7. Répétez pour `connectmeifucan.app`
+
+✅ **Vos domaines sont maintenant actifs sur HTTPS !**
+
+**Vérification:**
+```powershell
+# Test connectmeifucan.com
+curl -I https://connectmeifucan.com
+
+# Test connectmeifucan.app
+curl -I https://connectmeifucan.app
 ```
 
-2. Ajouter www:
-```
-Type: CNAME
-Name: www
-Target: connectmeifucan.pages.dev
-Proxy: Activé (orange)
-```
-
-**DNS Cloudflare pour connectmeifucan.app (Android TV):**
-1. DNS → Ajouter un enregistrement:
-```
-Type: CNAME
-Name: @
-Target: connectmeifucan-tv.pages.dev (ou même Pages project)
-Proxy: Activé (orange)
-```
+Vous devriez voir `HTTP/2 200` et `cf-ray:` (preuve que Cloudflare fonctionne)
 
 **Lier les domaines custom:**
 1. Pages → connectmeifucan → Custom domains
@@ -332,7 +475,58 @@ wrangler deployments list
 
 ---
 
-## 💰 Coûts Cloudflare
+## � Workflow de déploiement
+
+### Développement local → Production
+
+```powershell
+# 1. Développer sur la branche main
+git checkout main
+
+# 2. Faire vos modifications
+# ... éditer les fichiers ...
+
+# 3. Commiter et pusher sur main
+git add .
+git commit -m "feat: nouvelle fonctionnalité"
+git push origin main
+
+# 4. Tester sur l'environnement de preview
+# Cloudflare déploiera automatiquement main sur une URL preview:
+# https://preview-main.connectmeifucan.pages.dev
+
+# 5. Quand tout fonctionne, merger vers production
+git checkout branch-prod
+git merge main
+git push origin branch-prod
+
+# 6. Déploiement automatique en production !
+# Cloudflare détecte le push et déploie sur:
+# - https://connectmeifucan.com
+# - https://connectmeifucan.app
+```
+
+### Rollback rapide
+
+```powershell
+# Si un bug en production
+git checkout branch-prod
+git reset --hard HEAD~1  # Revenir au commit précédent
+git push origin branch-prod --force-with-lease
+
+# Cloudflare redéploie l'ancienne version automatiquement
+```
+
+### Environnements disponibles
+
+| Branche | Environnement | URLs |
+|---------|---------------|------|
+| `main` | Preview/Staging | `https://preview-main.connectmeifucan.pages.dev` |
+| `branch-prod` | Production | `connectmeifucan.com`, `connectmeifucan.app` |
+
+---
+
+## �💰 Coûts Cloudflare
 
 **Free Plan inclut:**
 - ✅ Cloudflare Pages (illimité)
