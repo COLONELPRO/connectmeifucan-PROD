@@ -431,9 +431,24 @@
     <script>
         // Simulate Android TV app behavior
         const API_BASE = 'http://localhost:3000';
-        const WS_URL = window.location.hostname === 'localhost' 
-          ? 'ws://localhost:3000'
-          : 'wss://' + window.location.host;
+        
+        // WebSocket URL resolver - must match main site logic
+        function resolveWSUrl() {
+            const host = window.location.hostname;
+            // Local dev
+            if (!host || host === 'localhost' || host === '127.0.0.1') {
+                return 'ws://localhost:3000/room/';
+            }
+            // Production: Use Cloudflare Worker with Durable Objects
+            if (host.includes('connectmeifucan-tv.pages.dev') || host.includes('connectmeifucan.com')) {
+                return 'wss://cmuc-backend-prod.workers.dev/room/';
+            }
+            // Fallback
+            return 'wss://' + host + '/room/';
+        }
+        
+        const WS_BASE_URL = resolveWSUrl();
+        let WS_URL = null; // Will be set dynamically when joining a room
         
         let username = 'demo';
         let token = 'test-token-123';
@@ -453,22 +468,28 @@
         let currentRoomHost = null;
         const maxWsReconnect = 5;
         
-        function connectWebSocket() {
+        function connectWebSocket(roomCode) {
+          if (!roomCode) {
+            console.error('Cannot connect WebSocket without room code');
+            return;
+          }
+          
           try {
+            WS_URL = WS_BASE_URL + roomCode;
             ws = new WebSocket(WS_URL);
             
             ws.onopen = () => {
-              console.log('✅ TV WebSocket connected');
+              console.log('✅ TV WebSocket connected to room:', roomCode);
               wsReconnectAttempts = 0;
-              if (currentRoomId) {
-                // Re-join room after reconnect
+              // Send JOIN_ROOM message after connection
+              setTimeout(() => {
                 sendWSMessage({
                   type: 'JOIN_ROOM',
-                  roomCode: currentRoomId,
+                  roomCode: roomCode,
                   clientType: 'tv',
                   clientName: username
                 });
-              }
+              }, 100);
             };
             
             ws.onmessage = (event) => {
@@ -495,9 +516,9 @@
         }
         
         function attemptWSReconnect() {
-          if (wsReconnectAttempts < maxWsReconnect) {
+          if (wsReconnectAttempts < maxWsReconnect && currentRoomId) {
             wsReconnectAttempts++;
-            setTimeout(() => connectWebSocket(), 2000 * wsReconnectAttempts);
+            setTimeout(() => connectWebSocket(currentRoomId), 2000 * wsReconnectAttempts);
           }
         }
         
@@ -550,8 +571,9 @@
           }
         }
         
-        // Connect WebSocket on load
-        connectWebSocket();
+        // WebSocket will be connected when joining a room
+        // connectWebSocket() is now called in joinRoom() with the room code
+
         
         // Translation helper function
         function t(key) {
@@ -905,23 +927,14 @@
             localStorage.setItem('cmuc_last_room', roomId);
             showStatus(`Joining room ${roomId}...`, 'loading');
             
-            // Try WebSocket first (backend), fallback to dev mode
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                sendWSMessage({
-                  type: 'JOIN_ROOM',
-                  roomCode: roomId,
-                  clientType: 'tv',
-                  clientName: username
-                });
-                currentRoomId = roomId;
-                enterRoom(roomId);
-                return;
-            }
+            // Connect to WebSocket with room code
+            currentRoomId = roomId;
+            connectWebSocket(roomId);
             
-            if (devMode) {
-                const res = devJoinRoom(roomId, username);
-                if (res.success) {
-                    showStatus(`✓ [DEV] Joined ${roomId}. Host: ${res.host}. Players: ${res.players.join(', ')}`, 'success');
+            // Enter room UI
+            enterRoom(roomId);
+            showStatus(`✓ Connecting to room ${roomId}...`, 'success');
+        }
                     renderDevRooms();
                     enterRoom(roomId);
                 } else {
