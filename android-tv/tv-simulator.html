@@ -1266,6 +1266,10 @@
         }
 
         async function refreshImagesPanel() {
+            // Images feature disabled in WebSocket mode - would require backend implementation
+            console.log('⚠️ Images panel disabled in WebSocket mode');
+            return;
+            
             const input = document.getElementById('imageInput');
             const meta = document.getElementById('imagesMeta');
             const list = document.getElementById('imagesList');
