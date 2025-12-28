@@ -2384,8 +2384,8 @@ loadCart();
         // Room code
         const roomIdEl = document.getElementById('room-id-display');
         const tvTitleEl = document.getElementById('tv-title');
-        if (roomIdEl) roomIdEl.textContent = this.currentRoom.code;
-        if (tvTitleEl) tvTitleEl.textContent = `Room ${this.currentRoom.code}`;
+        if (roomIdEl) roomIdEl.textContent = this.currentRoom.roomCode || 'XXXX';
+        if (tvTitleEl) tvTitleEl.textContent = `Room ${this.currentRoom.roomCode || '?'}`;
         
         // Host display
         const hostDisplay = document.getElementById('room-host-display');
