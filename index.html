@@ -2115,6 +2115,7 @@ loadCart();
       constructor() {
         this.ws = null;
         this.currentRoom = null;
+        this.currentRoomCode = null;
         this.readyState = false;
         this.readyTimeout = null;
         this.clientType = 'web';
@@ -2127,6 +2128,7 @@ loadCart();
       
       // Connect to WebSocket server
       connect(roomCode) {
+        this.currentRoomCode = roomCode;
         const wsUrl = roomCode ? BACKEND_URL + roomCode : BACKEND_URL + 'TEMP';
         console.log('[ROOM] connect() entered, creating WebSocket to:', wsUrl);
         try {
@@ -2195,9 +2197,9 @@ loadCart();
       }
       
       attemptReconnect() {
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+        if (this.reconnectAttempts < this.maxReconnectAttempts && this.currentRoomCode) {
           this.reconnectAttempts++;
-          setTimeout(() => this.connect(), this.reconnectDelay * this.reconnectAttempts);
+          setTimeout(() => this.connect(this.currentRoomCode), this.reconnectDelay * this.reconnectAttempts);
         }
       }
       
