@@ -1,0 +1,29 @@
+[
+  {
+    "id": "1",
+    "image": "product-1.svg",
+    "nameFr": "Lampe douce",
+    "nameEn": "Soft Lamp",
+    "shortDescFr": "Éclairage d'ambiance doux pour le salon.",
+    "shortDescEn": "Soft ambient lighting for your living room.",
+    "priceFile": "product-1.txt"
+  },
+  {
+    "id": "2",
+    "image": "product-2.svg",
+    "nameFr": "Tasse vintage",
+    "nameEn": "Vintage Mug",
+    "shortDescFr": "Céramique unique, poignée confortable.",
+    "shortDescEn": "Unique ceramic mug with comfy handle.",
+    "priceFile": "product-2.txt"
+  },
+  {
+    "id": "3",
+    "image": "product-3.svg",
+    "nameFr": "Carnet A5",
+    "nameEn": "A5 Notebook",
+    "shortDescFr": "Papier ligné, couverture robuste.",
+    "shortDescEn": "Lined paper with sturdy cover.",
+    "priceFile": "product-3.txt"
+  }
+]
