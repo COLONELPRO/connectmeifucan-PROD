@@ -31,12 +31,11 @@ function isValidAccessCode(code) {
 
 export default {
   async fetch(request, env) {
-    try {
-      const url = new URL(request.url);
-      
-      // Handle WebSocket connections for rooms
-      const upgradeHeader = request.headers.get('Upgrade');
-      console.log('[Worker] Path:', url.pathname, 'Upgrade header:', upgradeHeader);
+    const url = new URL(request.url);
+    
+    // Handle WebSocket connections for rooms
+    const upgradeHeader = request.headers.get('Upgrade');
+    console.log('[Worker] Path:', url.pathname, 'Upgrade header:', upgradeHeader);
     
     if (url.pathname.startsWith('/room/')) {
       if (upgradeHeader && upgradeHeader.toLowerCase() === 'websocket') {
