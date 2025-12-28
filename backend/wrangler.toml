@@ -23,7 +23,7 @@ id = "4047469aae424a2888d2fe1606ed8c8f"
 
 [[migrations]]
 tag = "v1"
-new_classes = ["RoomDurableObject"]
+new_sqlite_classes = ["RoomDurableObject"]
 
 [vars]
 MQTT_BROKER = "mqtt://broker.hivemq.com:1883"
