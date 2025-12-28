@@ -441,7 +441,7 @@
             }
             // Production: Use Cloudflare Worker with Durable Objects
             if (host.includes('connectmeifucan-tv.pages.dev') || host.includes('connectmeifucan.com')) {
-                return 'wss://cmuc-backend-prod.workers.dev/room/';
+                return 'wss://cmuc-backend-dev.connectmeifucan.workers.dev/room/';
             }
             // Fallback
             return 'wss://' + host + '/room/';
