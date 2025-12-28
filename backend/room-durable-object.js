@@ -5,30 +5,59 @@ export class RoomDurableObject {
     this.env = env;
     this.sessions = new Map(); // WebSocket connections: sessionId -> { ws, clientType, clientName, isReady }
     this.roomData = null;
+    this.initialized = false;
+  }
+  
+  async initialize() {
+    if (this.initialized) return;
+    
+    try {
+      // Load room data from storage if it exists
+      const storedData = await this.state.storage.get('roomData');
+      if (storedData) {
+        this.roomData = storedData;
+        console.log('[DurableObject] Loaded existing room data:', this.roomData.roomCode);
+      }
+      this.initialized = true;
+    } catch (error) {
+      console.error('[DurableObject] Failed to initialize:', error);
+      this.initialized = true; // Mark as initialized anyway to prevent repeated failures
+    }
   }
 
   async fetch(request) {
-    const url = new URL(request.url);
-    const upgradeHeader = request.headers.get('Upgrade');
+    // Ensure initialization
+    await this.initialize();
     
-    console.log('[DurableObject] fetch() called, path:', url.pathname, 'Upgrade:', upgradeHeader);
-    
-    // Handle WebSocket upgrade
-    if (upgradeHeader && upgradeHeader.toLowerCase() === 'websocket') {
-      console.log('[DurableObject] Handling WebSocket upgrade');
-      return this.handleWebSocket(request);
-    }
+    try {
+      const url = new URL(request.url);
+      const upgradeHeader = request.headers.get('Upgrade');
+      
+      console.log('[DurableObject] fetch() called, path:', url.pathname, 'Upgrade:', upgradeHeader);
+      
+      // Handle WebSocket upgrade
+      if (upgradeHeader && upgradeHeader.toLowerCase() === 'websocket') {
+        console.log('[DurableObject] Handling WebSocket upgrade');
+        return this.handleWebSocket(request);
+      }
 
-    // Handle REST API for room info
-    if (url.pathname === '/info') {
-      const roomData = await this.getRoomInfo();
-      return new Response(JSON.stringify(roomData), {
+      // Handle REST API for room info
+      if (url.pathname === '/info') {
+        const roomData = await this.getRoomInfo();
+        return new Response(JSON.stringify(roomData), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      console.log('[DurableObject] No handler found, returning 404');
+      return new Response('Not found', { status: 404 });
+    } catch (error) {
+      console.error('[DurableObject] Error in fetch():', error.message, error.stack);
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
-
-    console.log('[DurableObject] No handler found, returning 404');
-    return new Response('Not found', { status: 404 });
   }
 
   async handleWebSocket(request) {
@@ -46,6 +75,18 @@ export class RoomDurableObject {
   async handleSession(ws, request) {
     ws.accept();
     
+    // Limit maximum sessions to prevent memory issues
+    const MAX_SESSIONS = 50;
+    if (this.sessions.size >= MAX_SESSIONS) {
+      console.warn('[DurableObject] Max sessions reached, rejecting connection');
+      ws.send(JSON.stringify({
+        type: 'ERROR',
+        error: 'Room is full'
+      }));
+      ws.close(1008, 'Room is full');
+      return;
+    }
+    
     const sessionId = crypto.randomUUID();
     const session = {
       ws,
@@ -56,6 +97,7 @@ export class RoomDurableObject {
     };
     
     this.sessions.set(sessionId, session);
+    console.log('[DurableObject] Session added:', sessionId, 'Total sessions:', this.sessions.size);
 
     ws.addEventListener('message', async (msg) => {
       try {
@@ -86,10 +128,11 @@ export class RoomDurableObject {
   }
 
   async handleMessage(sessionId, message) {
-    const session = this.sessions.get(sessionId);
-    if (!session) return;
+    try {
+      const session = this.sessions.get(sessionId);
+      if (!session) return;
 
-    switch (message.type) {
+      switch (message.type) {
       case 'JOIN_ROOM':
         session.clientType = message.clientType || 'web';
         session.clientName = message.clientName || 'Guest';
@@ -101,7 +144,12 @@ export class RoomDurableObject {
             createdAt: Date.now(),
             host: session.clientType
           };
-          await this.state.storage.put('roomData', this.roomData);
+          try {
+            await this.state.storage.put('roomData', this.roomData);
+          } catch (error) {
+            console.error('[DurableObject] Failed to save room data:', error);
+            throw new Error('Failed to initialize room');
+          }
         }
 
         // Send room joined confirmation
@@ -143,7 +191,12 @@ export class RoomDurableObject {
           createdAt: Date.now(),
           host: session.clientType
         };
-        await this.state.storage.put('roomData', this.roomData);
+        try {
+          await this.state.storage.put('roomData', this.roomData);
+        } catch (error) {
+          console.error('[DurableObject] Failed to save room data:', error);
+          throw new Error('Failed to create room');
+        }
 
         this.sendToSession(sessionId, {
           type: 'ROOM_CREATED',
@@ -195,6 +248,18 @@ export class RoomDurableObject {
 
       default:
         console.log('Unknown message type:', message.type);
+    }
+    } catch (error) {
+      console.error('[DurableObject] Error in handleMessage:', error.message, error.stack);
+      // Try to notify the client of the error
+      try {
+        this.sendToSession(sessionId, {
+          type: 'ERROR',
+          error: 'Server error: ' + error.message
+        });
+      } catch (e) {
+        console.error('[DurableObject] Failed to send error message:', e);
+      }
     }
   }
 
