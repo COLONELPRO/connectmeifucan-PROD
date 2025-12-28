@@ -262,16 +262,6 @@ function sanitizeString(str) {
   return str.replace(/[<>"'&;]/g, '').trim();
 }
 
-function isValidUsername(username) {
-  if (typeof username !== 'string') return false;
-  return /^[a-zA-Z0-9_-]{3,20}$/.test(username);
-}
-
-function isValidRoomId(roomId) {
-  if (typeof roomId !== 'string') return false;
-  return /^[A-Z]{4}$/.test(roomId);
-}
-
 // ========================================
 // Room Management Functions
 // ========================================
