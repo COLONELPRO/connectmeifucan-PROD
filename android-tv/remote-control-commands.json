@@ -1,0 +1,106 @@
+{
+  "description": "Format des commandes JSON pour contrôler l'Android TV depuis le smartphone",
+  "version": "1.0",
+  "examples": [
+    {
+      "name": "Navigation - Haut",
+      "command": {
+        "action": "navigate",
+        "direction": "up"
+      }
+    },
+    {
+      "name": "Navigation - Bas",
+      "command": {
+        "action": "navigate",
+        "direction": "down"
+      }
+    },
+    {
+      "name": "Navigation - Gauche (Image précédente dans le viewer)",
+      "command": {
+        "action": "navigate",
+        "direction": "left"
+      }
+    },
+    {
+      "name": "Navigation - Droite (Image suivante dans le viewer)",
+      "command": {
+        "action": "navigate",
+        "direction": "right"
+      }
+    },
+    {
+      "name": "Sélection (Enter)",
+      "command": {
+        "action": "select"
+      }
+    },
+    {
+      "name": "Retour (Escape)",
+      "command": {
+        "action": "back"
+      }
+    },
+    {
+      "name": "Basculer Ready/Pause",
+      "command": {
+        "action": "toggleReady"
+      }
+    },
+    {
+      "name": "Ouvrir une image spécifique",
+      "command": {
+        "action": "openImage",
+        "value": 0
+      },
+      "note": "value = index de l'image dans la liste courante"
+    },
+    {
+      "name": "Fermer le viewer d'images",
+      "command": {
+        "action": "closeImage"
+      }
+    },
+    {
+      "name": "Image suivante",
+      "command": {
+        "action": "nextImage"
+      }
+    },
+    {
+      "name": "Image précédente",
+      "command": {
+        "action": "prevImage"
+      }
+    }
+  ],
+  "usage": {
+    "description": "Pour envoyer une commande depuis le smartphone vers la TV",
+    "methods": [
+      {
+        "type": "JavaScript",
+        "code": "window.handleRemoteControl({ action: 'navigate', direction: 'up' });"
+      },
+      {
+        "type": "WebSocket (futur)",
+        "code": "ws.send(JSON.stringify({ action: 'navigate', direction: 'up' }));"
+      },
+      {
+        "type": "API POST (futur)",
+        "endpoint": "/api/tv/control",
+        "body": "{ \"action\": \"navigate\", \"direction\": \"up\" }"
+      }
+    ]
+  },
+  "joystick": {
+    "description": "Mapping du joystick virtuel du smartphone",
+    "controls": {
+      "up": { "action": "navigate", "direction": "up" },
+      "down": { "action": "navigate", "direction": "down" },
+      "left": { "action": "navigate", "direction": "left" },
+      "right": { "action": "navigate", "direction": "right" },
+      "center": { "action": "select" }
+    }
+  }
+}

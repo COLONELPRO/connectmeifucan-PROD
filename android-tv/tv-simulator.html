@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Android TV App - Test Simulator</title>
+    <link rel="stylesheet" href="../Site/theme.css">
+    <style>
+        :root {
+            --bg: #0b0b0b;
+            --text: #f5f5f5;
+            --muted: #9aa0a6;
+            --accent: #ffcc00;
+            --accent-hover: #ffd84a;
+            --border: rgba(255,255,255,0.12);
+            --danger: #ff5463;
+            --ok: #2ecc71;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .tv-frame {
+            width: 100%;
+            max-width: 1280px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+        
+        .tv-header {
+            background: #000;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .tv-header h1 {
+            font-size: 18px;
+            font-weight: 400;
+        }
+        
+        .tv-status {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+            color: var(--muted);
+        }
+        
+        .tv-screen {
+            padding: 60px;
+            min-height: 600px;
+            background: rgba(255,255,255,0.03);
+        }
+        
+        .screen-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .welcome-text {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .section-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .input-wrapper {
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 20px;
+            font-size: 24px;
+            text-align: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.06);
+        }
+        
+        input::placeholder {
+            color: var(--muted);
+            letter-spacing: 2px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 20px 40px;
+            font-size: 22px;
+            font-weight: 700;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            min-width: 200px;
+        }
+        
+        button:focus {
+            outline: 3px solid #fff;
+            outline-offset: 4px;
+        }
+        
+        .btn-create {
+            background: var(--accent);
+            color: #000;
+            border-color: rgba(0,0,0,0.15);
+        }
+        
+        .btn-create:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+        }
+        
+        .btn-join {
+            background: transparent;
+            color: var(--text);
+        }
+        
+        .btn-join:hover {
+            background: rgba(255,255,255,0.06);
+            transform: scale(1.05);
+        }
+        
+        .btn-logout {
+            background: var(--danger);
+            color: #000;
+            padding: 15px 30px;
+            font-size: 18px;
+            min-width: 150px;
+        }
+        
+        .btn-logout:hover {
+            background: #ff6b7a;
+        }
+        
+        .status-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 20px;
+            display: none;
+        }
+        
+        .status-message.show {
+            display: block;
+        }
+        
+        .status-message.loading {
+            background: rgba(255,255,255,0.06);
+            color: var(--accent);
+        }
+        
+        .status-message.success {
+            background: rgba(46, 204, 113, 0.12);
+            color: var(--ok);
+        }
+        
+        .status-message.error {
+            background: rgba(255, 84, 99, 0.12);
+            color: var(--danger);
+        }
+        
+        .info-panel {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .info-panel h3 {
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        .info-panel p {
+            color: var(--muted);
+            line-height: 1.6;
+        }
+        
+        .controls-hint {
+            margin-top: 40px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+        }
+        
+        .controls-hint kbd {
+            background: rgba(255,255,255,0.04);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            font-family: monospace;
+            margin: 0 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="tv-frame">
+        <div class="tv-header">
+            <h1>📺 Android TV Simulator - Connect Me If U Can</h1>
+            <div class="tv-status">
+                <span id="username-display">User: demo</span>
+                <span>•</span>
+                <label style="display:flex; align-items:center; gap:6px;">
+                    <span style="color:var(--muted);">Preset:</span>
+                    <select id="userPreset" style="background:rgba(255,255,255,0.04); color:var(--text); border:1px solid var(--border); border-radius:4px; padding:4px 8px;">
+                        <option value="demo1">demo1</option>
+                        <option value="demo2">demo2</option>
+                    </select>
+                </label>
+                <span>•</span>
+                <span id="connection-status">🟢 Connected</span>
+                <span>•</span>
+                <label style="cursor:pointer;">
+                    <input type="checkbox" id="devModeToggle" style="vertical-align:middle; margin-right:6px;">
+                    <span id="lbl-dev-mode">Dev Rooms (local)</span>
+                </label>
+                <span>•</span>
+                <select id="languageSelect" style="background:rgba(255,255,255,0.04); color:var(--text); border:1px solid var(--border); border-radius:4px; padding:4px 8px; margin-left:8px; cursor:pointer;">
+                    <option value="en">EN</option>
+                    <option value="fr">FR</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="tv-screen">
+            <div class="screen-content" id="homeScreen">
+                <div class="welcome-text" id="welcome-text">Welcome, demo</div>
+                
+                <div class="section-title" id="sectionRoomMgmt">Room Management</div>
+                
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="roomIdInput" 
+                            placeholder="CODE" 
+                            maxlength="4"
+                            autocomplete="off"
+                            style="text-transform: uppercase;"
+                        >
+                    </div>
+                    <div style="display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap;">
+                        <button class="btn-join" style="padding:6px 12px; font-size:13px;" onclick="document.getElementById('roomIdInput').value='TEST'; document.getElementById('roomIdInput').focus();">TEST</button>
+                        <button class="btn-join" style="padding:6px 12px; font-size:13px;" onclick="document.getElementById('roomIdInput').value='DEMO'; document.getElementById('roomIdInput').focus();">DEMO</button>
+                        <button class="btn-join" style="padding:6px 12px; font-size:13px;" onclick="document.getElementById('roomIdInput').value='ABCD'; document.getElementById('roomIdInput').focus();">ABCD</button>
+                        <button class="btn-join" style="padding:6px 12px; font-size:13px;" onclick="fillLastRoom()">📌 Last</button>
+                    </div>
+                </div>
+                
+                <div class="buttons">
+                    <button class="btn-create" id="createRoomBtn" onclick="createRoom()">
+                        Create Room
+                    </button>
+                    <button class="btn-join" id="joinRoomBtn" onclick="joinRoom()">
+                        Join Room
+                    </button>
+                </div>
+                
+                <div class="status-message" id="statusMessage"></div>
+                
+                <div class="buttons" style="margin-top: 40px;">
+                    <button class="btn-logout" id="logoutBtn" onclick="logout()">
+                        Logout
+                    </button>
+                </div>
+                
+                <div class="info-panel">
+                    <h3>📱 Test Mode Active</h3>
+                    <p>
+                        This is a web-based simulator of the Android TV app interface.
+                        Enter a 4-letter room code (A-Z) to test room creation and joining.
+                        The actual Android app will connect to your backend API.
+                    </p>
+                </div>
+                
+                <div class="controls-hint">
+                    <strong>D-pad Navigation:</strong>
+                    <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> to navigate •
+                    <kbd>Enter</kbd> to select •
+                    <kbd>Esc</kbd> to go back
+                </div>
+
+                <div id="devPanel" class="info-panel" style="display:none; margin-top:24px;">
+                    <h3>🛠 Dev Room Manager</h3>
+                    <p class="sub">Rooms are stored locally for development. No backend required.</p>
+                    <div style="margin:12px 0; display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="btn-join" id="refreshDevRoomsBtn">Refresh</button>
+                        <button class="btn-logout" id="clearDevRoomsBtn">Clear All Rooms</button>
+                    </div>
+                    <div id="devRoomsList" class="panel" style="padding:12px; max-height:280px; overflow:auto;">
+                        <div style="color: var(--muted);">No rooms yet.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- In-room screen -->
+            <div class="screen-content" id="roomScreen" style="display:none;">
+                <div class="section-title" id="roomTitle">Room XXXX</div>
+                <div class="panel" style="padding:16px; margin-bottom:16px;" id="roomPanel">
+                    <div id="roomMeta" style="margin-bottom:8px; color: var(--muted);">Host: -, Started: false</div>
+                    <div id="playersList"></div>
+                </div>
+                <!-- User Images Panel (backend only) -->
+                <div class="panel" id="imagesPanel" style="padding:16px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                        <div>
+                            <strong>🖼️ User Images</strong>
+                            <span id="imagesMeta" style="color: var(--muted); margin-left:8px;">Backend only</span>
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input type="file" id="imageInput" accept="image/*" multiple style="display:none;">
+                            <button class="btn-create" id="chooseFilesBtn" onclick="document.getElementById('imageInput').click()" style="min-width:140px;">Choose Files</button>
+                            <button class="btn-join" id="refreshImagesBtn">Refresh</button>
+                        </div>
+                    </div>
+                    <div id="imagesList" style="display:flex; flex-wrap:wrap; gap:12px; margin-top:12px;"></div>
+                    <div class="status-message" id="imagesStatus"></div>
+                </div>
+                
+                <!-- Room Controls Section -->
+                <div class="panel" style="padding:16px; margin-bottom:16px;">
+                    <div style="margin-bottom:12px;">
+                        <strong id="sectionRoomControls" style="color:var(--accent);">🎮 Room Controls</strong>
+                    </div>
+                    <div class="buttons" id="roomControls">
+                        <button class="btn-create" id="readyBtn">I'm Ready</button>
+                        <button class="btn-create" id="roleBtn" style="background:rgba(255,165,0,0.3); color:#ffa500; border:1px solid #ffa500;">🎬 Guest</button>
+                        <button class="btn-join" id="leaveRoomBtn">Leave Room</button>
+                        <button class="btn-create" id="startGameBtn" style="display:none;">Start Game (Host)</button>
+                    </div>
+                </div>
+                
+                <div class="status-message" id="roomStatus"></div>
+                    
+                    <!-- YouTube Player Window -->
+                    <div id="videoWindow" style="display:none; position:fixed; inset:0; z-index:10000; background: #000; padding:0; margin:0; width:100vw; height:100vh; overflow:hidden;">
+                        <div style="position:absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0; gap:0;">
+                            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#000;">
+                                <div id="ytPlayerContainer" style="width:100vw; height:100vh; display:flex; align-items:center; justify-content:center;">
+                                    <iframe id="ytPlayer" 
+                                        style="width:100vw; height:100vh; border:4px solid var(--accent); box-sizing:border-box;"
+                                        src="" 
+                                        frameborder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                        allowfullscreen>
+                                    </iframe>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="position:absolute; bottom:24px; left:0; right:0; text-align:center; z-index:10001;">
+                            <button class="btn-logout" onclick="closeVideo()" style="min-width:200px; font-size:18px; padding:16px 32px; background: rgba(0,0,0,0.8);">✕ Close Video</button>
+                        </div>
+                    </div>
+
+                    <!-- Fullscreen Image Viewer -->
+                    <div id="imageViewerWindow" style="display:none; position:fixed; inset:0; z-index:10000; background: rgba(0,0,0,0.95); padding:0; margin:0; width:100vw; height:100vh; overflow:hidden;">
+                        <div style="position:absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;" onclick="closeImageViewer()">
+                            <img id="imageViewerImg" alt="fullscreen" style="max-width:95vw; max-height:85vh; object-fit:contain;">
+                        </div>
+                        <div style="position:absolute; bottom:24px; left:0; right:0; text-align:center; z-index:10001; display:flex; justify-content:center; gap:12px;">
+                            <button class="btn-logout" onclick="prevImage()" style="min-width:120px; font-size:16px; padding:12px 24px; background: rgba(0,0,0,0.8);">◀ Prev</button>
+                            <button class="btn-logout" onclick="closeImageViewer()" style="min-width:120px; font-size:16px; padding:12px 24px; background: rgba(0,0,0,0.8);">✕ Close</button>
+                            <button class="btn-logout" onclick="nextImage()" style="min-width:120px; font-size:16px; padding:12px 24px; background: rgba(0,0,0,0.8);">Next ▶</button>
+                        </div>
+                        <div id="imageCounterDisplay" style="position:absolute; top:24px; left:0; right:0; text-align:center; color:var(--text); font-size:14px;"></div>
+                    </div>
+                    
+                    <div class="controls-hint" style="margin-top:24px;" id="roomHint">
+                        Players must be ready before host can start.
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        // Simulate Android TV app behavior
+        const API_BASE = 'http://localhost:3000';
+        const WS_URL = window.location.hostname === 'localhost' 
+          ? 'ws://localhost:3000'
+          : 'wss://' + window.location.host;
+        
+        let username = 'demo';
+        let token = 'test-token-123';
+        let devMode = false;
+        let currentRoomId = null;
+        let pollTimer = null;
+        const VIDEO_ID = 'Wgx6WvlOv_0';
+        let ytPlayer = null;
+        const imageObjectUrls = {};
+        let currentLanguage = 'en';
+        let translations = {};
+        let readyTimeout = null;
+        
+        // WebSocket connection
+        let ws = null;
+        let wsReconnectAttempts = 0;
+        let currentRoomHost = null;
+        const maxWsReconnect = 5;
+        
+        function connectWebSocket() {
+          try {
+            ws = new WebSocket(WS_URL);
+            
+            ws.onopen = () => {
+              console.log('✅ TV WebSocket connected');
+              wsReconnectAttempts = 0;
+              if (currentRoomId) {
+                // Re-join room after reconnect
+                sendWSMessage({
+                  type: 'JOIN_ROOM',
+                  roomCode: currentRoomId,
+                  clientType: 'tv',
+                  clientName: username
+                });
+              }
+            };
+            
+            ws.onmessage = (event) => {
+              try {
+                const message = JSON.parse(event.data);
+                handleWSMessage(message);
+              } catch (err) {
+                console.error('WS message parse error:', err);
+              }
+            };
+            
+            ws.onerror = (err) => {
+              console.error('WebSocket error:', err);
+            };
+            
+            ws.onclose = () => {
+              console.log('❌ TV WebSocket disconnected');
+              attemptWSReconnect();
+            };
+          } catch (err) {
+            console.error('WebSocket connection error:', err);
+            attemptWSReconnect();
+          }
+        }
+        
+        function attemptWSReconnect() {
+          if (wsReconnectAttempts < maxWsReconnect) {
+            wsReconnectAttempts++;
+            setTimeout(() => connectWebSocket(), 2000 * wsReconnectAttempts);
+          }
+        }
+        
+        function sendWSMessage(message) {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(message));
+          }
+        }
+        
+        function handleWSMessage(message) {
+          switch(message.type) {
+            case 'ROOM_CREATED':
+            case 'ROOM_JOINED':
+              console.log('Room synced:', message.room);
+                            if (message.room && message.room.host) {
+                                currentRoomHost = message.room.host;
+                            }
+              updateRoomUI(message.room);
+              break;
+            case 'ROOM_UPDATED':
+                            if (message.room && message.room.host) {
+                                currentRoomHost = message.room.host;
+                            }
+                            updateRoomUI(message.room);
+              break;
+            case 'ERROR':
+              showStatus('⚠ ' + message.error, 'error');
+              break;
+          }
+        }
+        
+        function updateRoomUI(room) {
+          if (room) {
+            const tvPlayer = room.players.find(p => p.type === 'tv');
+            if (tvPlayer && tvPlayer.ready) {
+              document.getElementById('readyBtn').textContent = 'EN LIGNE';
+              document.getElementById('readyBtn').style.backgroundColor = '#2ecc71';
+            } else {
+              document.getElementById('readyBtn').textContent = 'PAUSE';
+              document.getElementById('readyBtn').style.backgroundColor = '#ff6b35';
+            }
+                        // Immediate role button update
+                        const roleBtn = document.getElementById('roleBtn');
+                        if (roleBtn && currentRoomHost) {
+                            const hostType = currentRoomHost === 'tv' ? 'Guest' : 'Host';
+                            roleBtn.textContent = `🎬 ${hostType}`;
+                            roleBtn.style.borderColor = (currentRoomHost === 'web') ? '#ff6b6b' : '#ffa500';
+                            roleBtn.style.color = (currentRoomHost === 'web') ? '#ff6b6b' : '#ffa500';
+                        }
+          }
+        }
+        
+        // Connect WebSocket on load
+        connectWebSocket();
+        
+        // Translation helper function
+        function t(key) {
+            return translations[currentLanguage]?.[key] || key;
+        }
+        
+        // Load translations from JSON file
+        async function loadTranslations() {
+            try {
+                const response = await fetch('./translations.json');
+                translations = await response.json();
+                return true;
+            } catch (error) {
+                console.error('Failed to load translations:', error);
+                return false;
+            }
+        }
+        
+        // Switch language and update UI
+        function switchLanguage(lang) {
+            if (!translations[lang]) return;
+            currentLanguage = lang;
+            localStorage.setItem('cmuc_language', lang);
+            document.getElementById('languageSelect').value = lang;
+            updateUILanguage();
+        }
+        
+        // Update all UI text based on current language
+        function updateUILanguage() {
+            // Header
+            document.getElementById('welcome-text').textContent = `${t('welcome')}, ${username}`;
+            document.getElementById('username-display').textContent = `${t('user')}: ${username}`;
+            document.getElementById('lbl-dev-mode').textContent = t('devMode');
+            
+            // Section titles
+            const sectionRoomMgmt = document.getElementById('sectionRoomMgmt');
+            const sectionRoomControls = document.getElementById('sectionRoomControls');
+            if (sectionRoomMgmt) sectionRoomMgmt.textContent = t('roomManagement');
+            if (sectionRoomControls) sectionRoomControls.textContent = '🎮 ' + t('roomControls');
+            
+            // Home screen
+            const createRoomBtn = document.getElementById('createRoomBtn');
+            const joinRoomBtn = document.getElementById('joinRoomBtn');
+            const roomIdInput = document.getElementById('roomIdInput');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (createRoomBtn) createRoomBtn.textContent = t('createRoom');
+            if (joinRoomBtn) joinRoomBtn.textContent = t('joinRoom');
+            if (roomIdInput) roomIdInput.placeholder = t('roomId');
+            if (logoutBtn) logoutBtn.textContent = t('logout');
+            
+            // Room screen
+            const readyBtn = document.getElementById('readyBtn');
+            const startGameBtn = document.getElementById('startGameBtn');
+            const leaveRoomBtn = document.getElementById('leaveRoomBtn');
+            const playerCountDisplay = document.getElementById('playerCountDisplay');
+            
+            if (readyBtn) {
+                const isReady = readyBtn.dataset.ready === 'true';
+                readyBtn.textContent = isReady ? t('pauseBtn') : t('readyBtn');
+                readyBtn.style.backgroundColor = isReady ? '#2ecc71' : '#ff9800';
+                readyBtn.style.color = '#fff';
+            }
+            if (startGameBtn) startGameBtn.textContent = t('startGame');
+            if (leaveRoomBtn) leaveRoomBtn.textContent = t('leaveRoom');
+            if (playerCountDisplay) {
+                playerCountDisplay.textContent = `${t('players')}: ${playerCountDisplay.dataset.count || 0}`;
+            }
+            
+            // Image section
+            const uploadBtn = document.getElementById('uploadImagesBtn');
+            const chooseFilesBtn = document.getElementById('chooseFilesBtn');
+            const refreshImagesBtn = document.getElementById('refreshImagesBtn');
+            const yourImagesLabel = document.querySelector('[data-label="yourImages"]');
+            const sharedByOthersLabel = document.querySelector('[data-label="sharedByOthers"]');
+            
+            if (chooseFilesBtn) chooseFilesBtn.textContent = t('chooseFiles');
+            if (refreshImagesBtn) refreshImagesBtn.textContent = t('refreshImages');
+            if (yourImagesLabel) yourImagesLabel.textContent = t('yourImages');
+            if (sharedByOthersLabel) sharedByOthersLabel.textContent = t('sharedByOthers');
+            
+            // Dev panel
+            const clearDevRoomsBtn = document.getElementById('clearDevRoomsBtn');
+            const refreshDevRoomsBtn = document.getElementById('refreshDevRoomsBtn');
+            
+            if (clearDevRoomsBtn) clearDevRoomsBtn.textContent = t('clearDevRooms');
+            if (refreshDevRoomsBtn) refreshDevRoomsBtn.textContent = t('refreshDevRooms');
+        }
+        
+        // YouTube API ready callback
+        function onYouTubeIframeAPIReady() {
+            console.log('YouTube IFrame API ready');
+        }
+        
+        // Focus management
+        const focusableElements = [
+            document.getElementById('roomIdInput'),
+            document.getElementById('createRoomBtn'),
+            document.getElementById('joinRoomBtn')
+        ];
+        let currentFocusIndex = 0;
+        let currentImageList = [];
+        let currentImageIndex = 0;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load translations first
+            await loadTranslations();
+            
+            focusableElements[0].focus();
+            
+            // Load saved language
+            const savedLanguage = localStorage.getItem('cmuc_language') || 'en';
+            currentLanguage = savedLanguage;
+            document.getElementById('languageSelect').value = currentLanguage;
+            
+            // Load saved username if exists
+            const savedAuth = localStorage.getItem('cmuc_auth_v1');
+            const presetSelect = document.getElementById('userPreset');
+            if (savedAuth) {
+                const auth = JSON.parse(savedAuth);
+                username = auth.username;
+                token = auth.token;
+            } else {
+                username = 'demo1';
+                localStorage.setItem('cmuc_auth_v1', JSON.stringify({ username, token }));
+            }
+            presetSelect.value = (username === 'demo1' || username === 'demo2') ? username : 'demo1';
+            updateUILanguage();
+
+            presetSelect.addEventListener('change', () => {
+                username = presetSelect.value;
+                localStorage.setItem('cmuc_auth_v1', JSON.stringify({ username, token }));
+                updateUILanguage();
+                if (currentRoomId) {
+                    // Leave current room context when switching user to avoid stale state
+                    leaveRoom();
+                }
+                showStatus(`${t('user')} switched to ${username}`, 'success');
+            });
+            
+            // Language select change
+            document.getElementById('languageSelect').addEventListener('change', (e) => {
+                switchLanguage(e.target.value);
+            });
+
+            // Dev mode init
+            devMode = localStorage.getItem('cmuc_dev_mode') === '1';
+            const devToggle = document.getElementById('devModeToggle');
+            devToggle.checked = devMode;
+            toggleDevPanel(devMode);
+            devToggle.addEventListener('change', () => {
+                devMode = devToggle.checked;
+                localStorage.setItem('cmuc_dev_mode', devMode ? '1' : '0');
+                toggleDevPanel(devMode);
+                renderDevRooms();
+                const status = document.getElementById('connection-status');
+                status.textContent = devMode ? '🟡 Dev Local' : '🟢 Connected';
+                if (currentRoomId) {
+                    // re-render to show backend/dev differences
+                    refreshRoomView();
+                }
+            });
+
+            document.getElementById('refreshDevRoomsBtn').addEventListener('click', renderDevRooms);
+            document.getElementById('clearDevRoomsBtn').addEventListener('click', () => {
+                if (confirm('Clear all local dev rooms?')) {
+                    localStorage.removeItem('cmuc_rooms_dev');
+                    renderDevRooms();
+                    showStatus('✓ Cleared local dev rooms', 'success');
+                }
+            });
+
+            // Auto-uppercase room input
+            document.getElementById('roomIdInput').addEventListener('input', (e) => {
+                e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+            });
+            
+            // Enter key to join
+            document.getElementById('roomIdInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const input = e.target;
+                    if (input.value.length === 4) {
+                        joinRoom();
+                    }
+                }
+            });
+            
+            // Initial render
+            renderDevRooms();
+            // Bind images panel actions
+            const imageInput = document.getElementById('imageInput');
+            const refreshBtn = document.getElementById('refreshImagesBtn');
+            if (imageInput) imageInput.addEventListener('change', shareImages);
+            if (refreshBtn) refreshBtn.addEventListener('click', refreshImagesPanel);
+        });
+        
+        // D-pad navigation
+        document.addEventListener('keydown', (e) => {
+            // Si le viewer d'images est ouvert, gérer la navigation dédiée
+            const viewer = document.getElementById('imageViewerWindow');
+            if (viewer && viewer.style.display === 'block') {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        prevImage();
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        nextImage();
+                        break;
+                    case 'Enter':
+                    case 'Escape':
+                        e.preventDefault();
+                        closeImageViewer();
+                        break;
+                }
+                return;
+            }
+            
+            // Navigation normale dans l'interface
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    currentFocusIndex = (currentFocusIndex + 1) % focusableElements.length;
+                    focusableElements[currentFocusIndex].focus();
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    currentFocusIndex = (currentFocusIndex - 1 + focusableElements.length) % focusableElements.length;
+                    focusableElements[currentFocusIndex].focus();
+                    break;
+                case 'Enter':
+                    if (document.activeElement === focusableElements[1]) {
+                        createRoom();
+                    } else if (document.activeElement === focusableElements[2]) {
+                        joinRoom();
+                    }
+                    break;
+            }
+        });
+        
+        function fillLastRoom() {
+            const lastRoom = localStorage.getItem('cmuc_last_room');
+            const input = document.getElementById('roomIdInput');
+            if (lastRoom) {
+                input.value = lastRoom;
+                input.focus();
+                showStatus(`📌 Last room: ${lastRoom}`, 'success');
+            } else {
+                showStatus('No recent room found', 'error');
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = 'status-message show ' + type;
+        }
+        
+        function hideStatus() {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.className = 'status-message';
+        }
+        
+        async function createRoom() {
+            let roomId = document.getElementById('roomIdInput').value.trim().toUpperCase();
+            
+            if (!roomId) {
+                roomId = generateRoomId();
+                document.getElementById('roomIdInput').value = roomId;
+            }
+            
+            if (roomId.length !== 4 || !/^[A-Z]{4}$/.test(roomId)) {
+                showStatus('Room ID must be 4 letters (A-Z)', 'error');
+                return;
+            }
+            
+            localStorage.setItem('cmuc_last_room', roomId);
+            showStatus(`Creating room ${roomId}...`, 'loading');
+            
+            // Try WebSocket first (backend), fallback to dev mode
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                sendWSMessage({
+                    type: 'CREATE_ROOM',
+                    roomCode: roomId,
+                    clientType: 'tv',
+                    clientName: username
+                });
+                currentRoomId = roomId;
+                enterRoom(roomId);
+                return;
+            }
+            
+            if (devMode) {
+                const res = devCreateRoom(roomId, username);
+                if (res.success) {
+                    showStatus(`✓ [DEV] Room ${roomId} created. Host: ${res.host}`, 'success');
+                    renderDevRooms();
+                    enterRoom(roomId);
+                } else {
+                    showStatus(`✗ [DEV] ${res.message} - Try joining instead or use a different code`, 'error');
+                    setTimeout(() => {
+                        const input = document.getElementById('roomIdInput');
+                        input.select();
+                        input.focus();
+                    }, 100);
+                }
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/rooms/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        roomId: roomId,
+                        username: username,
+                        host: true
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showStatus(`✓ Room ${roomId} created successfully! You are the host.`, 'success');
+                    enterRoom(roomId);
+                } else {
+                    showStatus(`✗ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`✗ Connection error: ${error.message}`, 'error');
+                console.error('Create room error:', error);
+            }
+        }
+        
+        async function joinRoom() {
+            const roomId = document.getElementById('roomIdInput').value.trim().toUpperCase();
+            
+            if (!roomId || roomId.length !== 4) {
+                showStatus('Enter a 4-letter room code', 'error');
+                return;
+            }
+            
+            if (!/^[A-Z]{4}$/.test(roomId)) {
+                showStatus('Invalid room code format', 'error');
+                return;
+            }
+            
+            localStorage.setItem('cmuc_last_room', roomId);
+            showStatus(`Joining room ${roomId}...`, 'loading');
+            
+            // Try WebSocket first (backend), fallback to dev mode
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                sendWSMessage({
+                  type: 'JOIN_ROOM',
+                  roomCode: roomId,
+                  clientType: 'tv',
+                  clientName: username
+                });
+                currentRoomId = roomId;
+                enterRoom(roomId);
+                return;
+            }
+            
+            if (devMode) {
+                const res = devJoinRoom(roomId, username);
+                if (res.success) {
+                    showStatus(`✓ [DEV] Joined ${roomId}. Host: ${res.host}. Players: ${res.players.join(', ')}`, 'success');
+                    renderDevRooms();
+                    enterRoom(roomId);
+                } else {
+                    showStatus(`✗ [DEV] ${res.message}`, 'error');
+                }
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/rooms/join`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        roomId: roomId,
+                        username: username
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showStatus(`✓ Joined room ${roomId}! Host: ${data.host}`, 'success');
+                    enterRoom(roomId);
+                } else {
+                    showStatus(`✗ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`✗ Connection error: ${error.message}`, 'error');
+                console.error('Join room error:', error);
+            }
+        }
+        
+        function generateRoomId() {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let result = '';
+            for (let i = 0; i < 4; i++) {
+                result += letters.charAt(Math.floor(Math.random() * letters.length));
+            }
+            return result;
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('cmuc_auth_v1');
+                alert('Logged out! In the real Android app, this would return to the authentication screen.');
+                location.reload();
+            }
+        }
+
+        // ===== In-room view =====
+        function enterRoom(roomId) {
+            console.log('Entering room:', roomId);
+            currentRoomId = roomId;
+            localStorage.setItem('cmuc_current_room', roomId);
+            
+            const homeScreen = document.getElementById('homeScreen');
+            const roomScreen = document.getElementById('roomScreen');
+            
+            console.log('Home screen:', homeScreen);
+            console.log('Room screen:', roomScreen);
+            
+            if (!homeScreen || !roomScreen) {
+                console.error('Screen elements not found!');
+                return;
+            }
+            
+            homeScreen.style.display = 'none';
+            roomScreen.style.display = 'block';
+            document.getElementById('roomTitle').textContent = `Room ${roomId}`;
+
+            document.getElementById('readyBtn').onclick = toggleReady;
+            // Clicking "Guest" should make this TV client the host
+            document.getElementById('roleBtn').onclick = promoteToHost;
+            document.getElementById('leaveRoomBtn').onclick = leaveRoom;
+            document.getElementById('startGameBtn').onclick = startGame;
+
+            // Initialize ready button state
+            const btn = document.getElementById('readyBtn');
+            if (devMode) {
+                const rooms = loadDevRooms();
+                const r = rooms[currentRoomId];
+                const isReady = r && r.ready && r.ready[username];
+                btn.textContent = isReady ? t('pauseBtn') : t('readyBtn');
+                btn.dataset.ready = isReady ? 'true' : 'false';
+                btn.style.backgroundColor = isReady ? '#2ecc71' : '#ff9800';
+                btn.style.color = '#fff';
+            } else {
+                btn.textContent = t('readyBtn');
+                btn.dataset.ready = 'false';
+                btn.style.backgroundColor = '#ff9800';
+                btn.style.color = '#fff';
+            }
+
+            console.log('Starting polling and refreshing view...');
+            startPolling();
+            refreshRoomView();
+            refreshImagesPanel();
+        }
+
+        function leaveRoom() {
+            if (!currentRoomId) return;
+            
+            // Clear ready timeout if exists
+            if (readyTimeout) {
+                clearTimeout(readyTimeout);
+                readyTimeout = null;
+            }
+            
+            if (devMode) {
+                const rooms = loadDevRooms();
+                const r = rooms[currentRoomId];
+                if (r) {
+                    r.players = r.players.filter(p => p !== username);
+                    if (r.ready) delete r.ready[username];
+                    // If no players left, delete room
+                    if (!r.players.length) delete rooms[currentRoomId];
+                    saveDevRooms(rooms);
+                }
+                showStatus('✓ [DEV] Left room', 'success');
+            } else {
+                // In backend mode, just clear local state (server would handle leave)
+                showStatus('✓ Left room', 'success');
+            }
+            stopPolling();
+            currentRoomId = null;
+            localStorage.removeItem('cmuc_current_room');
+            document.getElementById('roomScreen').style.display = 'none';
+            document.getElementById('homeScreen').style.display = 'block';
+            clearImagesPanel();
+        }
+
+        function promoteToHost() {
+            if (!currentRoomId) return;
+            // Optimistic UI: set host and refresh immediately
+            currentRoomHost = 'tv';
+            refreshRoomView();
+            const roleBtn = document.getElementById('roleBtn');
+            if (roleBtn) {
+                roleBtn.disabled = true;
+                setTimeout(() => { roleBtn.disabled = false; }, 600);
+            }
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                sendWSMessage({ type: 'CHANGE_HOST', host: 'tv' });
+            }
+        }
+
+        function toggleReady() {
+            if (!currentRoomId) return;
+            const btn = document.getElementById('readyBtn');
+            
+            // Send to backend via WebSocket
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                sendWSMessage({ type: 'TOGGLE_READY' });
+            }
+            
+            if (devMode) {
+                const rooms = loadDevRooms();
+                const r = rooms[currentRoomId];
+                if (!r || !btn) {
+                    console.warn('[TV] Room or button not found in devMode:', { room: currentRoomId, btn: !!btn });
+                    if (btn) btn.disabled = false;
+                    return;
+                }
+                if (!r.ready) r.ready = {};
+                
+                const currentlyReady = r.ready[username];
+                
+                if (currentlyReady) {
+                    // Si déjà ready (vert), afficher "EN PAUSE" et attendre 2 secondes avant de mettre not ready
+                    btn.textContent = 'EN PAUSE';
+                    btn.style.backgroundColor = '#ff6b35';
+                    btn.style.color = '#fff';
+                    btn.disabled = true;
+                    const pausingMsg = currentLanguage === 'fr' ? 'Mise en pause...' : 'Going to pause...';
+                    showRoomStatus(`⏳ [DEV] ${pausingMsg}`, 'loading');
+                    
+                    // Après 2 secondes, passer vraiment en not ready (PAUSE)
+                    readyTimeout = setTimeout(() => {
+                        r.ready[username] = false;
+                        saveDevRooms(rooms);
+                        refreshRoomView();
+                        const msg = currentLanguage === 'fr' ? 'PAUSE - mode NOT READY!' : 'PAUSE - NOT READY!';
+                        showRoomStatus(`⏸️ [DEV] ${msg}`, 'success');
+                        btn.textContent = t('readyBtn');
+                        btn.dataset.ready = 'false';
+                        btn.style.backgroundColor = '#ff9800';
+                        btn.disabled = false;
+                        readyTimeout = null;
+                    }, 2000);
+                } else {
+                    // Si en PAUSE, afficher "EN LIGNE" et attendre 2 secondes avant de mettre ready
+                    btn.textContent = t('pauseBtn');
+                    btn.style.backgroundColor = '#ffa500';
+                    btn.style.color = '#fff';
+                    btn.disabled = true;
+                    const connectingMsg = currentLanguage === 'fr' ? 'Mise en ligne...' : 'Going online...';
+                    showRoomStatus(`⏳ [DEV] ${connectingMsg}`, 'loading');
+                    
+                    // Après 2 secondes, passer vraiment en ready
+                    readyTimeout = setTimeout(() => {
+                        r.ready[username] = true;
+                        saveDevRooms(rooms);
+                        refreshRoomView();
+                        const msg = currentLanguage === 'fr' ? 'EN LIGNE - mode READY!' : 'ONLINE - READY!';
+                        showRoomStatus(`✅ [DEV] ${msg}`, 'success');
+                        btn.dataset.ready = 'true';
+                        btn.style.backgroundColor = '#2ecc71';
+                        btn.disabled = false;
+                        readyTimeout = null;
+                    }, 2000);
+                }
+            } else {
+                // Backend mode: same logic as usite
+                const currentlyReady = btn.dataset.ready === 'true';
+                
+                if (currentlyReady) {
+                    // Si READY -> passage direct à NOT READY
+                    btn.dataset.ready = 'false';
+                    btn.textContent = t('readyBtn');
+                    btn.style.backgroundColor = '#ff9800';
+                    this.sendWSMessage({ type: 'TOGGLE_READY' });
+                    refreshRoomView();
+                } else {
+                    // Si NOT READY -> 2 secondes puis passage à READY
+                    btn.disabled = true;
+                    const connectingMsg = currentLanguage === 'fr' ? 'Mise en ligne...' : 'Going online...';
+                    btn.textContent = connectingMsg;
+                    btn.style.backgroundColor = '#ffa500';
+                    
+                    readyTimeout = setTimeout(() => {
+                        btn.dataset.ready = 'true';
+                        btn.textContent = t('pauseBtn');
+                        btn.style.backgroundColor = '#2ecc71';
+                        sendWSMessage({ type: 'TOGGLE_READY' });
+                        refreshRoomView();
+                        btn.disabled = false;
+                        readyTimeout = null;
+                    }, 2000);
+                }
+            }
+        }
+
+        function startGame() {
+            if (!currentRoomId) return;
+            if (devMode) {
+                const rooms = loadDevRooms();
+                const r = rooms[currentRoomId];
+                if (r.host !== username) {
+                    showRoomStatus('✗ Only host can start', 'error');
+                    return;
+                }
+                const allReady = r.players.every(p => r.ready && r.ready[p]);
+                if (!allReady) {
+                    showRoomStatus('✗ All players must be ready', 'error');
+                    return;
+                }
+                r.started = true;
+                saveDevRooms(rooms);
+                showRoomStatus('✓ [DEV] Game started!', 'success');
+            } else {
+                showRoomStatus('✓ Start requested (backend call omitted)', 'success');
+            }
+            refreshRoomView();
+            launchVideo();
+        }
+
+        function launchVideo() {
+            const videoWindow = document.getElementById('videoWindow');
+            const ytPlayerIframe = document.getElementById('ytPlayer');
+            
+            console.log('Launching video in fullscreen...');
+            
+            if (!videoWindow || !ytPlayerIframe) {
+                showRoomStatus('✗ Video elements not found', 'error');
+                console.error('Missing video elements');
+                return;
+            }
+            
+            // Show video window in fullscreen
+            videoWindow.style.display = 'block';
+            
+            // Load YouTube video with iframe API enabled
+            const videoUrl = `https://www.youtube.com/embed/${VIDEO_ID}?autoplay=1&controls=1&modestbranding=1&rel=0&enablejsapi=1&fs=1`;
+            console.log('Loading video URL:', videoUrl);
+            ytPlayerIframe.src = videoUrl;
+            
+            showRoomStatus('▶ Video launched in fullscreen! Auto-closing at end...', 'success');
+            
+            // Set timer to close video after duration
+            // Video Wgx6WvlOv_0 is approximately 8 minutes (480 seconds)
+            setTimeout(() => {
+                if (videoWindow && videoWindow.style.display !== 'none') {
+                    console.log('Video duration ended, auto-closing...');
+                    showRoomStatus('✓ Video ended. Returning to room in 3 seconds...', 'success');
+                    setTimeout(() => {
+                        closeVideo();
+                    }, 3000);
+                }
+            }, 485000); // 485 seconds = ~8 minutes 5 seconds
+        }
+
+        function closeVideo() {
+            const videoWindow = document.getElementById('videoWindow');
+            const ytPlayer = document.getElementById('ytPlayer');
+            
+            // Stop video by clearing src
+            ytPlayer.src = '';
+            
+            // Hide video window
+            videoWindow.style.display = 'none';
+            
+            showRoomStatus('✓ Video closed, returned to room', 'success');
+        }
+
+        function showRoomStatus(message, type) {
+            const el = document.getElementById('roomStatus');
+            el.textContent = message;
+            el.className = 'status-message show ' + (type || 'loading');
+        }
+
+        function showImagesStatus(message, type) {
+            const el = document.getElementById('imagesStatus');
+            if (!el) return;
+            el.textContent = message;
+            el.className = 'status-message show ' + (type || 'loading');
+        }
+
+        function clearImagesPanel() {
+            const list = document.getElementById('imagesList');
+            if (list) list.innerHTML = '';
+            // Revoke any object URLs
+            for (const name in imageObjectUrls) {
+                try { URL.revokeObjectURL(imageObjectUrls[name]); } catch (_) {}
+                delete imageObjectUrls[name];
+            }
+        }
+
+        function getAuthHeaders() {
+            return {
+                'Authorization': `Bearer ${token}`
+            };
+        }
+
+        function loadDevImages(user) {
+            try {
+                const raw = localStorage.getItem(`cmuc_images_dev_${user}`);
+                return raw ? JSON.parse(raw) : [];
+            } catch (_) {
+                return [];
+            }
+        }
+
+        function saveDevImages(user, images) {
+            localStorage.setItem(`cmuc_images_dev_${user}`, JSON.stringify(images));
+        }
+
+        function loadRoomImageShares() {
+            try {
+                if (!currentRoomId) return {};
+                const raw = localStorage.getItem(`cmuc_room_images_${currentRoomId}`);
+                return raw ? JSON.parse(raw) : {};
+            } catch (_) {
+                return {};
+            }
+        }
+
+        function saveRoomImageShares(shares) {
+            if (!currentRoomId) return;
+            localStorage.setItem(`cmuc_room_images_${currentRoomId}`, JSON.stringify(shares));
+        }
+
+        async function refreshImagesPanel() {
+            const input = document.getElementById('imageInput');
+            const meta = document.getElementById('imagesMeta');
+            const list = document.getElementById('imagesList');
+            if (!input || !meta || !list) return;
+
+            clearImagesPanel();
+            input.disabled = false;
+            showImagesStatus('Loading images...', 'loading');
+
+            let files = [];
+            if (devMode) {
+                // Dev mode: load own images + shared room images
+                files = loadDevImages(username);
+                const roomShares = currentRoomId ? loadRoomImageShares() : {};
+                let allShared = [];
+                for (const player in roomShares) {
+                    if (player !== username && roomShares[player]) {
+                        allShared.push(...roomShares[player]);
+                    }
+                }
+                
+                meta.textContent = `${files.length} / 5 images (+ ${allShared.length} shared)`;
+                
+                // Render own images
+                const ownSection = document.createElement('div');
+                ownSection.style.marginBottom = '16px';
+                ownSection.innerHTML = `<strong style="color:var(--accent);">${t('yourImages')}:</strong>`;
+                list.appendChild(ownSection);
+                
+                if (!files.length) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.style.color = 'var(--muted)';
+                    emptyDiv.textContent = t('noImages');
+                    list.appendChild(emptyDiv);
+                } else {
+                    for (const imgData of files) {
+                        const name = imgData.name || 'image';
+                        const idx = files.indexOf(imgData);
+                        const card = document.createElement('div');
+                        card.style.width = '140px';
+                        card.style.border = '1px solid var(--border)';
+                        card.style.borderRadius = '8px';
+                        card.style.overflow = 'hidden';
+                        card.style.background = 'rgba(255,255,255,0.03)';
+                        card.style.cursor = 'pointer';
+                        card.style.transition = 'transform 0.2s, border-color 0.2s';
+                        card.style.display = 'inline-block';
+                        card.style.marginRight = '8px';
+                        card.tabIndex = 0;
+                        card.onmouseover = () => card.style.transform = 'scale(1.05)';
+                        card.onmouseout = () => card.style.transform = 'scale(1)';
+                        card.onfocus = () => { card.style.borderColor = 'var(--accent)'; card.style.transform = 'scale(1.05)'; };
+                        card.onblur = () => { card.style.borderColor = 'var(--border)'; card.style.transform = 'scale(1)'; };
+                        card.onclick = () => { currentImageList = files; openImageViewer(idx); };
+                        card.onkeydown = (e) => { if (e.key === 'Enter') { currentImageList = files; openImageViewer(idx); } };
+                        card.onkeydown = (e) => { if (e.key === 'Enter') { currentImageList = files; openImageViewer(idx); } };
+                        card.title = name;
+                        card.innerHTML = `<div style="height:100px; display:flex; align-items:center; justify-content:center; background:#000;">
+                            <img alt="${name}" src="${imgData.dataUrl}" style="max-width:100%; max-height:100%;">
+                        </div>
+                        <div style="padding:8px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:12px; overflow:hidden; text-overflow:ellipsis; max-width:90px;">${name}</span>
+                            <button class="btn-logout" style="padding:4px 8px; font-size:12px;" onclick="deleteImage('${name}')">${t('delete')}</button>
+                        </div>`;
+                        list.appendChild(card);
+                    }
+                }
+                
+                // Render shared images
+                if (allShared.length > 0) {
+                    const sharedSection = document.createElement('div');
+                    sharedSection.style.marginTop = '24px';
+                    sharedSection.style.marginBottom = '16px';
+                    sharedSection.innerHTML = `<strong style="color:var(--accent);">${t('sharedByOthers')}:</strong>`;
+                    list.appendChild(sharedSection);
+                    
+                    for (const imgData of allShared) {
+                        const name = imgData.name || 'image';
+                        const idx = allShared.indexOf(imgData);
+                        const card = document.createElement('div');
+                        card.style.width = '140px';
+                        card.style.border = '2px solid var(--accent)';
+                        card.style.borderRadius = '8px';
+                        card.style.overflow = 'hidden';
+                        card.style.background = 'rgba(255,255,255,0.03)';
+                        card.style.cursor = 'pointer';
+                        card.style.transition = 'transform 0.2s, box-shadow 0.2s';
+                        card.style.display = 'inline-block';
+                        card.style.marginRight = '8px';
+                        card.tabIndex = 0;
+                        card.onmouseover = () => card.style.transform = 'scale(1.05)';
+                        card.onmouseout = () => card.style.transform = 'scale(1)';
+                        card.onfocus = () => { card.style.boxShadow = '0 0 10px var(--accent)'; card.style.transform = 'scale(1.05)'; };
+                        card.onblur = () => { card.style.boxShadow = 'none'; card.style.transform = 'scale(1)'; };
+                        card.onclick = () => { currentImageList = allShared; openImageViewer(idx); };
+                        card.onkeydown = (e) => { if (e.key === 'Enter') { currentImageList = allShared; openImageViewer(idx); } };
+                        card.title = name;
+                        card.innerHTML = `<div style="height:100px; display:flex; align-items:center; justify-content:center; background:#000;">
+                            <img alt="${name}" src="${imgData.dataUrl}" style="max-width:100%; max-height:100%;">
+                        </div>
+                        <div style="padding:8px; font-size:12px; overflow:hidden; text-overflow:ellipsis;">${name}</div>`;
+                        list.appendChild(card);
+                    }
+                }
+                
+                showImagesStatus('✓ Loaded (dev mode)', 'success');
+            } else {
+                // Backend mode
+                try {
+                    const res = await fetch(`${API_BASE}/users/${username}/images`, { headers: getAuthHeaders() });
+                    const data = await res.json();
+                    if (!data.ok) throw new Error(data.error || 'Failed to load');
+                    files = data.files || [];
+                    meta.textContent = `${files.length} / 5 images`;
+                    if (!files.length) {
+                        list.innerHTML = '<div style="color: var(--muted);">No images yet.</div>';
+                        showImagesStatus('✓ Loaded', 'success');
+                        return;
+                    }
+                    // Render thumbnails by fetching blobs with Authorization
+                    for (const name of files) {
+                        const idx = files.indexOf(name);
+                        const card = document.createElement('div');
+                        card.style.width = '140px';
+                        card.style.border = '1px solid var(--border)';
+                        card.style.borderRadius = '8px';
+                        card.style.overflow = 'hidden';
+                        card.style.background = 'rgba(255,255,255,0.03)';
+                        card.style.cursor = 'pointer';
+                        card.style.transition = 'transform 0.2s, border-color 0.2s';
+                        card.tabIndex = 0;
+                        card.onmouseover = () => card.style.transform = 'scale(1.05)';
+                        card.onmouseout = () => card.style.transform = 'scale(1)';
+                        card.onfocus = () => { card.style.borderColor = 'var(--accent)'; card.style.transform = 'scale(1.05)'; };
+                        card.onblur = () => { card.style.borderColor = 'var(--border)'; card.style.transform = 'scale(1)'; };
+                        card.onclick = () => { currentImageList = files; openImageViewer(idx); };
+                        card.onkeydown = (e) => { if (e.key === 'Enter') { currentImageList = files; openImageViewer(idx); } };
+                        card.title = name;
+                        card.innerHTML = `<div style="height:100px; display:flex; align-items:center; justify-content:center; background:#000;">
+                            <img alt="${name}" style="max-width:100%; max-height:100%; display:none;" id="img_${name}">
+                        </div>
+                        <div style="padding:8px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:12px; overflow:hidden; text-overflow:ellipsis; max-width:90px;">${name}</span>
+                            <button class="btn-logout" style="padding:4px 8px; font-size:12px;" onclick="deleteImage('${name}')">${t('delete')}</button>
+                        </div>`;
+                        list.appendChild(card);
+                        try {
+                            const imgRes = await fetch(`${API_BASE}/users/${username}/images/${encodeURIComponent(name)}`, { headers: getAuthHeaders() });
+                            if (imgRes.ok) {
+                                const blob = await imgRes.blob();
+                                const url = URL.createObjectURL(blob);
+                                imageObjectUrls[name] = url;
+                                const imgEl = document.getElementById(`img_${name}`);
+                                if (imgEl) { imgEl.src = url; imgEl.style.display = 'block'; }
+                            }
+                        } catch (_) { /* ignore */ }
+                    }
+                    currentImageList = files;
+                    showImagesStatus('✓ Loaded', 'success');
+                } catch (e) {
+                    showImagesStatus(`✗ ${e.message}`, 'error');
+                }
+            }
+        }
+
+        async function shareImages() {
+            const input = document.getElementById('imageInput');
+            if (!input || !input.files || !input.files.length) {
+                showImagesStatus(t('selectValidImage'), 'error');
+                return;
+            }
+
+            if (devMode) {
+                // Dev mode: store as data URIs in localStorage and share to room
+                showImagesStatus(currentLanguage === 'fr' ? 'Partage en cours...' : 'Sharing...', 'loading');
+                const images = loadDevImages(username);
+                const remaining = Math.max(0, 5 - images.length);
+                
+                const filesToProcess = Array.from(input.files).slice(0, remaining);
+                
+                try {
+                    const uploadedImages = await Promise.all(
+                        filesToProcess.map(file => {
+                            return new Promise((resolve, reject) => {
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    resolve({
+                                        name: file.name,
+                                        dataUrl: e.target.result,
+                                        size: file.size
+                                    });
+                                };
+                                reader.onerror = reject;
+                                reader.readAsDataURL(file);
+                            });
+                        })
+                    );
+                    
+                    images.push(...uploadedImages);
+                    saveDevImages(username, images);
+                    
+                    // Share images to room
+                    if (currentRoomId) {
+                        const shares = loadRoomImageShares();
+                        if (!shares[username]) shares[username] = [];
+                        shares[username].push(...uploadedImages);
+                        saveRoomImageShares(shares);
+                    }
+                    
+                    const added = uploadedImages.length;
+                    const msg = added < input.files.length 
+                        ? (currentLanguage === 'fr' ? `${added} partagées (limite atteinte)` : `${added} shared (limit reached)`) 
+                        : (currentLanguage === 'fr' ? '✓ Partagé avec succès' : '✓ Shared successfully');
+                    showImagesStatus(msg, 'success');
+                    input.value = '';
+                    refreshImagesPanel();
+                } catch (e) {
+                    showImagesStatus(`✗ ${e.message}`, 'error');
+                }
+            } else {
+                // Backend mode
+                showImagesStatus(currentLanguage === 'fr' ? 'Partage en cours...' : 'Sharing...', 'loading');
+                const form = new FormData();
+                for (const f of input.files) form.append('images', f);
+                try {
+                    const res = await fetch(`${API_BASE}/users/${username}/images`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: form
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.ok) {
+                        showImagesStatus(data.message || data.error || (currentLanguage === 'fr' ? 'Échec du partage' : 'Share failed'), 'error');
+                    } else {
+                        showImagesStatus(currentLanguage === 'fr' ? '✓ Partagé avec succès' : '✓ Shared successfully', 'success');
+                    }
+                    input.value = '';
+                    await refreshImagesPanel();
+                } catch (e) {
+                    showImagesStatus(`✗ ${e.message}`, 'error');
+                }
+            }
+        }
+
+        async function deleteImage(name) {
+            if (devMode) {
+                // Dev mode: remove from localStorage
+                showImagesStatus('Deleting...', 'loading');
+                const images = loadDevImages(username);
+                const filtered = images.filter(img => img.name !== name);
+                saveDevImages(username, filtered);
+                showImagesStatus('✓ Deleted', 'success');
+                await refreshImagesPanel();
+            } else {
+                // Backend mode
+                showImagesStatus('Deleting...', 'loading');
+                try {
+                    const res = await fetch(`${API_BASE}/users/${username}/images/${encodeURIComponent(name)}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeaders()
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.ok) {
+                        showImagesStatus(data.error || 'Delete failed', 'error');
+                    } else {
+                        showImagesStatus('✓ Deleted', 'success');
+                    }
+                    await refreshImagesPanel();
+                } catch (e) {
+                    showImagesStatus(`✗ ${e.message}`, 'error');
+                }
+            }
+        }
+
+        function openImageViewer(index) {
+            const viewer = document.getElementById('imageViewerWindow');
+            const imgElement = document.getElementById('imageViewerImg');
+            
+            if (!currentImageList || index < 0 || index >= currentImageList.length) {
+                console.warn('Invalid image index:', index, 'list length:', currentImageList?.length);
+                return;
+            }
+            
+            currentImageIndex = index;
+            
+            if (devMode) {
+                // Dev mode: use data URL directly
+                const imgData = currentImageList[index];
+                if (imgData && imgData.dataUrl) {
+                    imgElement.src = imgData.dataUrl;
+                    viewer.style.display = 'block';
+                    updateImageCounter();
+                    broadcastTVState({ type: 'image', imageUrl: imgData.dataUrl, imageName: imgData.name || 'Image', index: currentImageIndex, total: currentImageList.length });
+                } else {
+                    console.warn('No dataUrl in image:', imgData);
+                }
+            } else {
+                // Backend mode: use objectURL or fetch
+                const name = currentImageList[index];
+                if (imageObjectUrls[name]) {
+                    imgElement.src = imageObjectUrls[name];
+                    viewer.style.display = 'block';
+                    updateImageCounter();
+                    broadcastTVState({ type: 'image', imageUrl: imageObjectUrls[name], imageName: name, index: currentImageIndex, total: currentImageList.length });
+                } else {
+                    // Fallback: fetch and create object URL
+                    fetch(`${API_BASE}/users/${username}/images/${encodeURIComponent(name)}`, { headers: getAuthHeaders() })
+                        .then(r => r.blob())
+                        .then(blob => {
+                            const url = URL.createObjectURL(blob);
+                            imageObjectUrls[name] = url;
+                            imgElement.src = url;
+                            viewer.style.display = 'block';
+                            updateImageCounter();
+                            broadcastTVState({ type: 'image', imageUrl: url, imageName: name, index: currentImageIndex, total: currentImageList.length });
+                        })
+                        .catch(err => { 
+                            console.error('Failed to load image:', err);
+                        });
+                }
+            }
+        }
+
+        function closeImageViewer() {
+            document.getElementById('imageViewerWindow').style.display = 'none';
+            broadcastTVState({ type: 'idle', message: 'No content playing' });
+        }
+
+        function broadcastTVState(state) {
+            if (ws && ws.readyState === WebSocket.OPEN && currentRoomId) {
+                sendWSMessage({ type: 'ROOM_STATE', data: state });
+                console.log('[TV] Broadcasting state:', state);
+            }
+        }
+
+        function nextImage() {
+            if (currentImageList.length === 0) return;
+            currentImageIndex = (currentImageIndex + 1) % currentImageList.length;
+            openImageViewer(currentImageIndex);
+        }
+
+        function prevImage() {
+            if (currentImageList.length === 0) return;
+            currentImageIndex = (currentImageIndex - 1 + currentImageList.length) % currentImageList.length;
+            openImageViewer(currentImageIndex);
+        }
+
+        function updateImageCounter() {
+            const counter = document.getElementById('imageCounterDisplay');
+            if (counter) {
+                counter.textContent = `${currentImageIndex + 1} / ${currentImageList.length}`;
+            }
+        }
+        
+        // Système de contrôle JSON pour smartphone (futur)
+        // Cette fonction recevra les commandes du smartphone via WebSocket ou API
+        function handleRemoteControl(command) {
+            console.log('Remote control command:', command);
+            
+            if (typeof command === 'string') {
+                try {
+                    command = JSON.parse(command);
+                } catch (e) {
+                    console.error('Invalid JSON command:', e);
+                    return;
+                }
+            }
+            
+            const { action, direction, value } = command;
+            
+            switch(action) {
+                case 'navigate':
+                    // Joystick virtuel - directions
+                    if (direction === 'up') {
+                        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+                    } else if (direction === 'down') {
+                        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+                    } else if (direction === 'left') {
+                        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+                    } else if (direction === 'right') {
+                        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+                    }
+                    break;
+                    
+                case 'select':
+                    // Bouton de sélection (comme Enter)
+                    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+                    break;
+                    
+                case 'back':
+                    // Bouton retour (comme Escape)
+                    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+                    break;
+                    
+                case 'toggleReady':
+                    // Basculer l'état ready/pause
+                    toggleReady();
+                    break;
+                    
+                case 'openImage':
+                    // Ouvrir une image spécifique
+                    if (typeof value === 'number' && currentImageList) {
+                        openImageViewer(value);
+                    }
+                    break;
+                    
+                case 'closeImage':
+                    closeImageViewer();
+                    break;
+                    
+                case 'nextImage':
+                    nextImage();
+                    break;
+                    
+                case 'prevImage':
+                    prevImage();
+                    break;
+                    
+                default:
+                    console.warn('Unknown remote control action:', action);
+            }
+        }
+        
+        // Exposer la fonction pour les contrôles externes
+        window.handleRemoteControl = handleRemoteControl;
+
+        function refreshRoomView() {
+            if (!currentRoomId) return;
+            if (devMode) {
+                const rooms = loadDevRooms();
+                const r = rooms[currentRoomId];
+                if (!r) {
+                    showRoomStatus('✗ [DEV] Room not found', 'error');
+                    return;
+                }
+                const playerCount = (r.players || []).length;
+                const meta = `Host: ${r.host} • Players: ${playerCount} • Started: ${!!r.started}`;
+                document.getElementById('roomMeta').textContent = meta;
+                document.getElementById('roomTitle').textContent = `Room ${currentRoomId} • ${playerCount} player${playerCount === 1 ? '' : 's'}`;
+                const isHost = r.host === username;
+                document.getElementById('startGameBtn').style.display = isHost ? 'inline-block' : 'none';
+                
+                // Update role button
+                const roleBtn = document.getElementById('roleBtn');
+                if (roleBtn) {
+                    const hostType = r.host === 'tv' ? 'Guest' : 'Host';
+                    roleBtn.textContent = `🎬 ${hostType}`;
+                    roleBtn.style.borderColor = (r.host === 'web') ? '#ff6b6b' : '#ffa500';
+                    roleBtn.style.color = (r.host === 'web') ? '#ff6b6b' : '#ffa500';
+                }
+
+                const list = r.players.map(p => {
+                    const ready = r.ready && r.ready[p];
+                    const me = p === username ? ' (you)' : '';
+                    const badge = ready ? '<span style="color: var(--ok)">READY</span>' : '<span style="color: var(--danger)">NOT READY</span>';
+                    return `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid var(--border)">
+                        <div><strong>${p}${me}</strong></div>
+                        <div>${badge}</div>
+                    </div>`;
+                }).join('');
+                document.getElementById('playersList').innerHTML = list;
+            } else {
+                // Backend polling result would populate here
+                document.getElementById('roomMeta').textContent = 'Loading from backend...';
+                document.getElementById('roomTitle').textContent = `Room ${currentRoomId}`;
+                document.getElementById('playersList').innerHTML = '<div style="color: var(--muted);">Fetching room status...</div>';
+                
+                // Update role button for backend mode
+                const roleBtn = document.getElementById('roleBtn');
+                if (roleBtn && currentRoomHost) {
+                    const hostType = currentRoomHost === 'tv' ? 'Guest' : 'Host';
+                    roleBtn.textContent = `🎬 ${hostType}`;
+                    roleBtn.style.borderColor = (currentRoomHost === 'web') ? '#ff6b6b' : '#ffa500';
+                    roleBtn.style.color = (currentRoomHost === 'web') ? '#ff6b6b' : '#ffa500';
+                }
+            }
+        }
+
+        function startPolling() {
+            stopPolling();
+            pollTimer = setInterval(async () => {
+                if (!currentRoomId) return;
+                if (devMode) {
+                    refreshRoomView();
+                } else {
+                    try {
+                        const res = await fetch(`${API_BASE}/rooms/${currentRoomId}/status`);
+                        const data = await res.json();
+                        // Render minimal info from backend status
+                        const playerCount = (data.players || []).length;
+                        document.getElementById('roomMeta').textContent = `Host: ${data.host} • Players: ${playerCount} • Started: ${!!data.started}`;
+                        document.getElementById('roomTitle').textContent = `Room ${currentRoomId} • ${playerCount} player${playerCount === 1 ? '' : 's'}`;
+                        document.getElementById('startGameBtn').style.display = (data.host === username) ? 'inline-block' : 'none';
+                        const list = (data.players || []).map(p => {
+                            const me = p === username ? ' (you)' : '';
+                            return `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid var(--border)">
+                                <div><strong>${p}${me}</strong></div>
+                                <div><span style="color: var(--muted)">status via backend</span></div>
+                            </div>`;
+                        }).join('');
+                        document.getElementById('playersList').innerHTML = list || '<div style="color: var(--muted);">No players yet</div>';
+                    } catch (e) {
+                        document.getElementById('roomMeta').textContent = 'Backend status unavailable';
+                    }
+                }
+            }, 1500);
+        }
+
+        function stopPolling() {
+            if (pollTimer) {
+                clearInterval(pollTimer);
+                pollTimer = null;
+            }
+        }
+
+        // ===== Dev rooms (localStorage) =====
+        function toggleDevPanel(show) {
+            document.getElementById('devPanel').style.display = show ? 'block' : 'none';
+        }
+
+        function loadDevRooms() {
+            try {
+                const raw = localStorage.getItem('cmuc_rooms_dev');
+                return raw ? JSON.parse(raw) : {};
+            } catch (_) {
+                return {};
+            }
+        }
+
+        function saveDevRooms(rooms) {
+            localStorage.setItem('cmuc_rooms_dev', JSON.stringify(rooms));
+        }
+
+        function devCreateRoom(roomId, user) {
+            const rooms = loadDevRooms();
+            console.log('[DEV] Attempting to create room:', roomId, 'Existing rooms:', Object.keys(rooms));
+            if (rooms[roomId]) {
+                console.log('[DEV] Room already exists:', rooms[roomId]);
+                return { success: false, message: 'Room already exists' };
+            }
+            rooms[roomId] = {
+                host: user,
+                players: [user],
+                createdAt: Date.now()
+            };
+            saveDevRooms(rooms);
+            console.log('[DEV] Room created successfully');
+            return { success: true, host: user, players: rooms[roomId].players };
+        }
+
+        function devJoinRoom(roomId, user) {
+            const rooms = loadDevRooms();
+            const room = rooms[roomId];
+            if (!room) {
+                return { success: false, message: 'Room not found' };
+            }
+            if (!room.players.includes(user)) {
+                room.players.push(user);
+                saveDevRooms(rooms);
+            }
+            return { success: true, host: room.host, players: room.players };
+        }
+
+        function devDeleteRoom(roomId) {
+            const rooms = loadDevRooms();
+            if (rooms[roomId]) {
+                delete rooms[roomId];
+                saveDevRooms(rooms);
+                return { success: true };
+            }
+            return { success: false, message: 'Room not found' };
+        }
+
+        function renderDevRooms() {
+            const list = document.getElementById('devRoomsList');
+            const rooms = loadDevRooms();
+            const ids = Object.keys(rooms);
+            if (!ids.length) {
+                list.innerHTML = '<div style="color: var(--muted);">No rooms yet.</div>';
+                return;
+            }
+            const rows = ids.map(id => {
+                const r = rooms[id];
+                const date = new Date(r.createdAt).toLocaleString();
+                return `
+                    <div style="display:flex; align-items:center; gap:8px; padding:8px; border-bottom:1px solid var(--border)">
+                        <div style="flex:0 0 70px; font-weight:800; color: var(--accent)">${id}</div>
+                        <div style="flex:1">Host: ${r.host} • Players: ${r.players.length} • ${date}</div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-join" onclick="document.getElementById('roomIdInput').value='${id}'; joinRoom()">Join</button>
+                            <button class="btn-logout" onclick="(function(){ const res=devDeleteRoom('${id}'); if(res.success){ renderDevRooms(); showStatus('✓ [DEV] Room ${id} deleted','success'); } else { showStatus('✗ [DEV] '+res.message,'error'); } })()">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            list.innerHTML = rows;
+        }
+    </script>
+</body>
+</html>

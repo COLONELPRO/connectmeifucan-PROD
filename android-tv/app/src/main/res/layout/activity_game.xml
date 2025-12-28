@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg">
+
+    <TextView
+        android:id="@+id/room_info_text"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Room: XXXX"
+        android:textSize="20sp"
+        android:textColor="@color/accent"
+        android:background="@color/surfaceLow"
+        android:padding="15dp"
+        android:gravity="center_vertical" />
+
+    <WebView
+        android:id="@+id/game_webview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

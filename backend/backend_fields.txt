@@ -1,0 +1,47 @@
+Champs sauvegardés du backend (Node/Express)
+
+1) Fichier: data/rooms.json
+- id: Code de salle (4 lettres A-Z)
+- host: Pseudo de l'hôte
+- players: Liste des pseudos présents dans la salle
+- createdAt: Date/heure ISO de création
+- status: Statut de la salle (ex: "active")
+- maxPlayers: Nombre maximum de joueurs (défaut 8) — ajouté lors de la création de salle
+
+2) Fichier: data/access_codes.json
+- <clé du code>: Chaque code est une clé d'objet (ex: "DEMO2025")
+  - description: Texte descriptif du code
+  - createdAt: Date/heure ISO de création
+  - expiresAt: Date/heure d'expiration (ou null si non défini)
+  - usedBy: Tableau des usernames ayant utilisé le code
+
+3) Fichier: data/users.json (créé à l'usage)
+- <clé username en minuscules>: Chaque utilisateur est stocké sous sa clé en minuscules
+  - username: Pseudo tel que fourni
+  - createdAt: Date/heure ISO de création du compte
+  - hasAccess: Booléen indiquant l'accès accordé
+  - token: Jeton d'accès généré
+  - settings: Objet de préférences/utilisateur (clé/valeur libre)
+  - lastVerified: Date/heure ISO de la dernière vérification d'accès (définie par /auth/verify)
+  - updatedAt: Date/heure ISO de la dernière mise à jour (définie par /settings)
+  - accessCode: (optionnel) Code d'accès associé à l'utilisateur si stocké manuellement
+
+4) Réponses API (pour référence)
+- GET /rooms/:roomId/status → room: { id, host, players, status, createdAt }
+- POST /rooms/create → crée et persiste: { id, host, players, createdAt, status, maxPlayers }
+- POST /rooms/join → met à jour "players" de la salle
+
+Notes:
+- Les fichiers sont sérialisés en JSON avec indentations; la persistance s'effectue via writeRooms(), writeAccessCodes(), writeUsers().
+- Les chemins physiques: backend/data/rooms.json, backend/data/access_codes.json, backend/data/users.json.
+
+5) Images par utilisateur (stockage disque)
+- Emplacement: backend/data/images/<username>/
+- Format accepté: JPEG (.jpg), PNG (.png), WEBP (.webp)
+- Limites: 5 images maximum par utilisateur, taille max ~5MB par image
+- Endpoints:
+  - GET /users/:username/images → liste des fichiers
+  - POST /users/:username/images (multipart, champ "images") → upload (cap à 5 total)
+  - GET /users/:username/images/:name → sert une image spécifique
+  - DELETE /users/:username/images/:name → supprime l'image
+- Sécurité: usernames et filenames nettoyés, MIME filtré, aucun accès aux fichiers sensibles hors du dossier images.

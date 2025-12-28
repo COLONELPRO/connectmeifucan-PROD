@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core palette matching .com theme -->
+    <color name="bg">#0b0b0b</color>
+    <color name="textPrimary">#f5f5f5</color>
+    <color name="textMuted">#9aa0a6</color>
+    <color name="accent">#ffcc00</color>
+    <color name="accentHover">#ffd84a</color>
+    <color name="border">#1EFFFFFF</color> <!-- rgba(255,255,255,0.12) approximated -->
+    <color name="danger">#ff5463</color>
+    <color name="ok">#2ecc71</color>
+
+    <!-- Surfaces -->
+    <color name="surface">#222222</color>
+    <color name="surfaceLow">#141414</color>
+
+    <!-- Standard colors -->
+    <color name="black">#000000</color>
+    <color name="white">#ffffff</color>
+</resources>
