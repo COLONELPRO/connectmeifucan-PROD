@@ -2431,20 +2431,20 @@ loadCart();
         // Players list
         const listEl = document.getElementById('room-players-list');
         listEl.innerHTML = '';
-        this.currentRoom.players.forEach(player => {
+        participants.forEach(participant => {
           const playerEl = document.createElement('div');
           playerEl.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:8px; background:rgba(0,0,0,0.3); border-radius:4px;';
           
-          const icon = player.type === 'tv' ? '📺' : '📱';
-          const statusDot = player.ready ? 
+          const icon = participant.clientType === 'tv' ? '📺' : '📱';
+          const statusDot = participant.isReady ? 
             '<span style="color:#2ecc71;">●</span>' : 
             '<span style="color:#ff9800;">●</span>';
           
           playerEl.innerHTML = `
             <div style="display:flex; align-items:center; gap:8px; flex:1;">
-              ${statusDot} <strong>${icon} ${player.name}</strong>
+              ${statusDot} <strong>${icon} ${participant.clientName || 'Guest'}</strong>
             </div>
-            <span style="color:var(--muted); font-size:0.85rem;">${player.ready ? (lang === 'fr' ? 'EN LIGNE' : 'ONLINE') : (lang === 'fr' ? 'PAUSE' : 'PAUSE')}</span>
+            <span style="color:var(--muted); font-size:0.85rem;">${participant.isReady ? (lang === 'fr' ? 'EN LIGNE' : 'ONLINE') : (lang === 'fr' ? 'PAUSE' : 'PAUSE')}</span>
           `;
           listEl.appendChild(playerEl);
         });
@@ -2452,22 +2452,22 @@ loadCart();
         // TV Display - Devices list
         const tvDevicesList = document.getElementById('tv-devices-list');
         tvDevicesList.innerHTML = '';
-        this.currentRoom.players.forEach(player => {
+        participants.forEach(participant => {
           const deviceEl = document.createElement('div');
-          const icon = player.type === 'tv' ? '📺' : '📱';
-          const statusDot = player.ready ? 
+          const icon = participant.clientType === 'tv' ? '📺' : '📱';
+          const statusDot = participant.isReady ? 
             '<span style="color:#2ecc71;">●</span>' : 
             '<span style="color:#ff9800;">●</span>';
-          const statusText = player.ready ? 
+          const statusText = participant.isReady ? 
             (lang === 'fr' ? 'EN LIGNE' : 'ONLINE') : 
             (lang === 'fr' ? 'PAUSE' : 'PAUSE');
           
-          deviceEl.innerHTML = `${statusDot} ${icon} ${player.name} <span style="color:var(--muted);">${statusText}</span>`;
+          deviceEl.innerHTML = `${statusDot} ${icon} ${participant.clientName || 'Guest'} <span style="color:var(--muted);">${statusText}</span>`;
           tvDevicesList.appendChild(deviceEl);
         });
         
         // TV Global status
-        const allReady = this.currentRoom.players.length > 0 && this.currentRoom.players.every(p => p.ready);
+        const allReady = participants.length > 0 && participants.every(p => p.isReady);
         const tvGlobalStatus = document.getElementById('tv-global-status');
         if (tvGlobalStatus) {
           if (allReady) {
