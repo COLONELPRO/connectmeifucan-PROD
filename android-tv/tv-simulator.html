@@ -878,60 +878,32 @@
             localStorage.setItem('cmuc_last_room', roomId);
             showStatus(`Creating room ${roomId}...`, 'loading');
             
-            // Try WebSocket first (backend), fallback to dev mode
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                sendWSMessage({
-                    type: 'CREATE_ROOM',
-                    roomCode: roomId,
-                    clientType: 'tv',
-                    clientName: username
-                });
-                currentRoomId = roomId;
-                enterRoom(roomId);
-                return;
-            }
+            // Connect to WebSocket with room code first
+            currentRoomId = roomId;
+            connectWebSocket(roomId);
             
-            if (devMode) {
-                const res = devCreateRoom(roomId, username);
-                if (res.success) {
-                    showStatus(`✓ [DEV] Room ${roomId} created. Host: ${res.host}`, 'success');
-                    renderDevRooms();
+            // Wait for WebSocket to connect, then send CREATE_ROOM
+            const checkInterval = setInterval(() => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    clearInterval(checkInterval);
+                    sendWSMessage({
+                        type: 'CREATE_ROOM',
+                        roomCode: roomId,
+                        clientType: 'tv',
+                        clientName: username
+                    });
                     enterRoom(roomId);
-                } else {
-                    showStatus(`✗ [DEV] ${res.message} - Try joining instead or use a different code`, 'error');
-                    setTimeout(() => {
-                        const input = document.getElementById('roomIdInput');
-                        input.select();
-                        input.focus();
-                    }, 100);
+                    showStatus(`✓ Room ${roomId} created!`, 'success');
                 }
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/rooms/create`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        roomId: roomId,
-                        username: username,
-                        host: true
-                    })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    showStatus(`✓ Room ${roomId} created successfully! You are the host.`, 'success');
-                    enterRoom(roomId);
-                } else {
-                    showStatus(`✗ ${data.message}`, 'error');
+            }, 100);
+            
+            // Timeout after 5 seconds
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                if (!ws || ws.readyState !== WebSocket.OPEN) {
+                    showStatus(`✗ Could not connect to create room`, 'error');
                 }
-            } catch (error) {
-                showStatus(`✗ Connection error: ${error.message}`, 'error');
-                console.error('Create room error:', error);
-            }
+            }, 5000);
         }
         
         async function joinRoom() {
@@ -1013,15 +985,10 @@
                 btn.dataset.ready = isReady ? 'true' : 'false';
                 btn.style.backgroundColor = isReady ? '#2ecc71' : '#ff9800';
                 btn.style.color = '#fff';
-            } else {
-                btn.textContent = t('readyBtn');
-                btn.dataset.ready = 'false';
-                btn.style.backgroundColor = '#ff9800';
-                btn.style.color = '#fff';
             }
 
-            console.log('Starting polling and refreshing view...');
-            startPolling();
+            console.log('WebSocket connected, refreshing view...');
+            // Polling removed - using WebSocket for real-time updates
             refreshRoomView();
             refreshImagesPanel();
         }
@@ -1778,6 +1745,10 @@
         }
 
         function startPolling() {
+            // Polling disabled - using WebSocket for real-time updates
+            console.log('⚠️ Polling disabled - using WebSocket instead');
+            return;
+            
             stopPolling();
             pollTimer = setInterval(async () => {
                 if (!currentRoomId) return;
