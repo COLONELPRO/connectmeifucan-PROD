@@ -9,9 +9,13 @@ export class RoomDurableObject {
 
   async fetch(request) {
     const url = new URL(request.url);
+    const upgradeHeader = request.headers.get('Upgrade');
+    
+    console.log('[DurableObject] fetch() called, path:', url.pathname, 'Upgrade:', upgradeHeader);
     
     // Handle WebSocket upgrade
-    if (request.headers.get('Upgrade') === 'websocket') {
+    if (upgradeHeader && upgradeHeader.toLowerCase() === 'websocket') {
+      console.log('[DurableObject] Handling WebSocket upgrade');
       return this.handleWebSocket(request);
     }
 
@@ -23,6 +27,7 @@ export class RoomDurableObject {
       });
     }
 
+    console.log('[DurableObject] No handler found, returning 404');
     return new Response('Not found', { status: 404 });
   }
 
@@ -120,6 +125,17 @@ export class RoomDurableObject {
       case 'CREATE_ROOM':
         session.clientType = message.clientType || 'web';
         session.clientName = message.clientName || 'Host';
+        
+        // If room already exists (has data), don't recreate
+        if (this.roomData) {
+          this.sendToSession(sessionId, {
+            type: 'ROOM_CREATED',
+            roomCode: this.roomData.roomCode,
+            participants: this.getParticipants(),
+            host: this.roomData.host
+          });
+          break;
+        }
         
         const roomCode = message.roomCode || this.generateRoomCode();
         this.roomData = {
