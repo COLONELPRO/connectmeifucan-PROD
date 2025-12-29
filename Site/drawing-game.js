@@ -154,8 +154,15 @@ class DrawingGameClient {
   async connectWebSocket(roomCode) {
     return new Promise((resolve, reject) => {
       // Get WebSocket URL from room system or use default
-      const wsUrl = localStorage.getItem('room-ws-url') || 'ws://localhost:3000';
+      // Check if we're in production or development
+      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      const defaultWsUrl = isProduction 
+        ? 'wss://api.connectmeifucan.com/ws'
+        : 'ws://localhost:3000';
       
+      const wsUrl = localStorage.getItem('room-ws-url') || defaultWsUrl;
+      
+      console.log('[DrawingGame] Connecting to WebSocket:', wsUrl);
       this.ws = new WebSocket(wsUrl);
       
       this.ws.onopen = () => {
