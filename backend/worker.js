@@ -37,6 +37,26 @@ export default {
     const upgradeHeader = request.headers.get('Upgrade');
     console.log('[Worker] Path:', url.pathname, 'Upgrade header:', upgradeHeader);
     
+    // Handle WebSocket upgrade on /ws endpoint (for drawing game)
+    if (url.pathname === '/ws' && upgradeHeader && upgradeHeader.toLowerCase() === 'websocket') {
+      console.log('[Worker] WebSocket request on /ws endpoint');
+      
+      // Use a default room or create one from query params
+      const roomCode = url.searchParams.get('room') || 'TEMP';
+      
+      if (!isValidRoomId(roomCode)) {
+        console.log('[Worker] Invalid room code:', roomCode);
+        return new Response('Invalid room code', { status: 400 });
+      }
+      
+      // Get Durable Object instance for this room
+      const id = env.ROOM_DO.idFromName(roomCode);
+      const room = env.ROOM_DO.get(id);
+      
+      console.log('[Worker] Forwarding /ws to Durable Object for room:', roomCode);
+      return room.fetch(request);
+    }
+    
     if (url.pathname.startsWith('/room/')) {
       if (upgradeHeader && upgradeHeader.toLowerCase() === 'websocket') {
         const roomCode = url.pathname.split('/')[2];

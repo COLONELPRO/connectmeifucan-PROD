@@ -157,10 +157,12 @@ class DrawingGameClient {
       // Check if we're in production or development
       const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
       const defaultWsUrl = isProduction 
-        ? 'wss://api.connectmeifucan.com/ws'
-        : 'ws://localhost:3000';
+        ? `wss://api.connectmeifucan.com/ws?room=${roomCode}`
+        : `ws://localhost:3000/ws?room=${roomCode}`;
       
-      const wsUrl = localStorage.getItem('room-ws-url') || defaultWsUrl;
+      const wsUrl = localStorage.getItem('room-ws-url') 
+        ? localStorage.getItem('room-ws-url') + `?room=${roomCode}`
+        : defaultWsUrl;
       
       console.log('[DrawingGame] Connecting to WebSocket:', wsUrl);
       this.ws = new WebSocket(wsUrl);
