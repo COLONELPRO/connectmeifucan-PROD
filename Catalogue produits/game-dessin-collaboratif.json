@@ -1,0 +1,76 @@
+{
+  "id": "game-drawing-chain",
+  "name": {
+    "fr": "Chaîne de Dessin",
+    "en": "Drawing Chain"
+  },
+  "category": "collaborative-drawing",
+  "description": {
+    "fr": "Jeu de dessin collaboratif ultra-rapide où chaque joueur complète le dessin du voisin en 15 secondes. Analyse automatique des contributions sans vote humain.",
+    "en": "Ultra-fast collaborative drawing game where each player completes their neighbor's drawing in 15 seconds. Automatic contribution analysis without human voting."
+  },
+  "gameMode": {
+    "players": "3-8",
+    "duration": "3-5 minutes",
+    "rounds": 3,
+    "turnDuration": 15
+  },
+  "features": [
+    "Analyse automatique des contributions",
+    "Scoring basé sur l'IA",
+    "Détection de fluidité du trait",
+    "Analyse de cohérence visuelle",
+    "Détection de fidélité au thème",
+    "Titres fun automatiques",
+    "Affichage final sur écran principal"
+  ],
+  "techStack": {
+    "canvas": "HTML5 Canvas / Native Canvas",
+    "analysis": "Computer Vision + Machine Learning",
+    "storage": "Base64 image snapshots",
+    "sync": "WebSocket real-time"
+  },
+  "scoring": {
+    "fluidite": {
+      "max": 1,
+      "criteria": ["vitesse", "pauses", "coherence"]
+    },
+    "coherence": {
+      "max": 1,
+      "criteria": ["destruction", "ajout", "harmonie"]
+    },
+    "theme": {
+      "max": 1,
+      "criteria": ["similarite", "pertinence"]
+    },
+    "creativite": {
+      "max": 1,
+      "criteria": ["originalite", "transformation"]
+    },
+    "totalPerRound": 4,
+    "totalPerGame": 12
+  },
+  "titles": [
+    {
+      "id": "chainon-or",
+      "name": "Chaînon d'Or",
+      "condition": "meilleur score total"
+    },
+    {
+      "id": "maitre-swipe",
+      "name": "Maître du Swipe",
+      "condition": "meilleure fluidité moyenne"
+    },
+    {
+      "id": "seigneur-chaos",
+      "name": "Seigneur du Chaos",
+      "condition": "transformations les plus absurdes"
+    },
+    {
+      "id": "genie-theme",
+      "name": "Génie du Thème",
+      "condition": "meilleure fidélité au thème"
+    }
+  ],
+  "implementation": "game-dessin-collaboratif-spec.js"
+}
