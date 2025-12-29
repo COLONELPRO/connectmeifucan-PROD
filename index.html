@@ -598,7 +598,7 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   <div class="menu-subtitle" id="menu-subtitle">Sélectionnez une catégorie</div>
 
   <button class="menu-btn" data-target="page1">🌿 Comfort & Well‑Being at Home</button>
-  <button class="menu-btn" data-target="page2">👨‍👩‍👧‍👦 Connect Me to My Circle</button>
+  <button class="menu-btn" data-target="page2">🎨 Drawing Chain Game</button>
   <button class="menu-btn" data-target="page3">🌌 Connect Me to New Realities</button>
 </div>
 
@@ -678,15 +678,182 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 </div>
 
 <!-- ========================= -->
-<!-- PAGE 2 - CONNECTER À MON CERCLE (ROOM)  -->
+<!-- PAGE 2 - JEU DESSIN       -->
 <!-- ========================= -->
 <div id="page2" class="page">
   <main>
-    <h2>👨‍👩‍👧‍👦 <span id="page2-title">Connect Me to My Circle</span></h2>
+    <img src="connectmeifucan-logo-Noel.jpg" alt="Connect Me If U Can Logo" class="logo">
+
+    <h2 id="game2-title">🎨 Chaîne de Dessin</h2>
+ <h3 id="game2-subtitle">Jeu collaboratif ultra-rapide</h3>
+   
+    <div id="fr" class="lang">
+      <div style="max-width:800px; margin:0 auto; text-align:left;">
+        <div style="background:rgba(255,204,0,0.1); border:2px solid var(--accent); border-radius:12px; padding:20px; margin-bottom:20px;">
+          <h4 style="color:var(--accent); margin:0 0 12px 0;">🎮 Comment jouer ?</h4>
+          <p style="margin:8px 0;">👉 <strong>15 secondes</strong> pour compléter le dessin du voisin</p>
+          <p style="margin:8px 0;">👉 <strong>Swipe à droite</strong> pour envoyer au joueur suivant</p>
+          <p style="margin:8px 0;">👉 <strong>3 tours</strong> puis affichage des résultats sur écran principal</p>
+          <p style="margin:8px 0;">👉 <strong>Scoring automatique</strong> par IA (pas de vote)</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin:20px 0;">
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">✍️</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Fluidité du trait</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Vitesse, pauses, cohérence du tracé</p>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">🎨</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Cohérence visuelle</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Amélioration vs destruction du dessin</p>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">🎯</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Fidélité au thème</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Respect du sujet initial</p>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">⚡</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Créativité</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Twist amusant et originalité</p>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05); border-radius:8px; padding:20px; margin:20px 0; border:1px solid var(--border);">
+          <h4 style="color:var(--accent); margin:0 0 12px 0;">🏆 Titres automatiques</h4>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="padding:8px; background:rgba(255,204,0,0.1); border-radius:6px;">
+              <strong style="color:#FFD700;">👑 Chaînon d'Or</strong> — Meilleur score total (0-12 points)
+            </div>
+            <div style="padding:8px; background:rgba(100,149,237,0.1); border-radius:6px;">
+              <strong style="color:#6495ED;">⚡ Maître du Swipe</strong> — Meilleure fluidité moyenne
+            </div>
+            <div style="padding:8px; background:rgba(255,69,0,0.1); border-radius:6px;">
+              <strong style="color:#FF4500;">🌪️ Seigneur du Chaos</strong> — Transformations les plus absurdes
+            </div>
+            <div style="padding:8px; background:rgba(50,205,50,0.1); border-radius:6px;">
+              <strong style="color:#32CD32;">🎯 Génie du Thème</strong> — Meilleure fidélité au sujet
+            </div>
+          </div>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:20px; margin:20px 0; border:1px solid var(--border);">
+          <h4 style="color:var(--text); margin:0 0 12px 0;">📊 Système de scoring</h4>
+          <div style="font-size:0.9rem; color:var(--muted);">
+            <p style="margin:8px 0;">• <strong>Fluidité :</strong> 0 à 1 point par contribution</p>
+            <p style="margin:8px 0;">• <strong>Cohérence :</strong> 0 à 1 point par contribution</p>
+            <p style="margin:8px 0;">• <strong>Thème :</strong> 0 à 1 point par contribution</p>
+            <p style="margin:8px 0;">• <strong>Créativité :</strong> 0 à 1 point par contribution</p>
+            <p style="margin:12px 0; color:var(--accent); font-weight:bold;">→ Total par joueur après 3 tours : 0 à 12 points</p>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,204,0,0.05); border-radius:8px; padding:20px; margin:20px 0; border:1px solid rgba(255,204,0,0.3);">
+          <h4 style="color:var(--accent); margin:0 0 12px 0;">🔧 Technologie</h4>
+          <div style="font-size:0.9rem; color:var(--muted); line-height:1.6;">
+            <p style="margin:8px 0;">✅ Analyse automatique des contributions (Computer Vision)</p>
+            <p style="margin:8px 0;">✅ Détection de fluidité de trait (vitesse, pauses, cohérence)</p>
+            <p style="margin:8px 0;">✅ Comparaison pixel par pixel (avant/après)</p>
+            <p style="margin:8px 0;">✅ Détection de similarité au thème (couleurs, formes)</p>
+            <p style="margin:8px 0;">✅ Évaluation de créativité (twist, chaos amusant)</p>
+            <p style="margin:8px 0;">✅ Synchronisation temps réel via WebSocket</p>
+          </div>
+        </div>
+
+        <div style="text-align:center; margin:30px 0;">
+          <a class="cta" href="#" id="btn-view-game-spec" style="display:inline-block; margin:0 8px;">📖 Voir la spécification</a>
+          <a class="cta" href="#" id="btn-demo-drawing" style="display:inline-block; margin:0 8px; background:rgba(100,149,237,0.3); color:#6495ED; border:1px solid #6495ED;">🎨 Démo (bientôt)</a>
+        </div>
+
+        <div class="note" style="margin-top:20px;">
+          💡 Jeu en développement — Architecture modulaire prête à intégrer
+        </div>
+      </div>
+    </div>
+
+    <div id="en" class="lang">
+      <div style="max-width:800px; margin:0 auto; text-align:left;">
+        <div style="background:rgba(255,204,0,0.1); border:2px solid var(--accent); border-radius:12px; padding:20px; margin-bottom:20px;">
+          <h4 style="color:var(--accent); margin:0 0 12px 0;">🎮 How to play?</h4>
+          <p style="margin:8px 0;">👉 <strong>15 seconds</strong> to complete your neighbor's drawing</p>
+          <p style="margin:8px 0;">👉 <strong>Swipe right</strong> to send to next player</p>
+          <p style="margin:8px 0;">👉 <strong>3 rounds</strong> then results displayed on main screen</p>
+          <p style="margin:8px 0;">👉 <strong>Automatic AI scoring</strong> (no voting)</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin:20px 0;">
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">✍️</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Stroke Fluidity</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Speed, pauses, stroke coherence</p>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">🎨</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Visual Coherence</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Enhancement vs destruction</p>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">🎯</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Theme Fidelity</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Adherence to initial theme</p>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">⚡</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Creativity</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Fun twists and originality</p>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05); border-radius:8px; padding:20px; margin:20px 0; border:1px solid var(--border);">
+          <h4 style="color:var(--accent); margin:0 0 12px 0;">🏆 Automatic Titles</h4>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="padding:8px; background:rgba(255,204,0,0.1); border-radius:6px;">
+              <strong style="color:#FFD700;">👑 Golden Link</strong> — Highest total score (0-12 points)
+            </div>
+            <div style="padding:8px; background:rgba(100,149,237,0.1); border-radius:6px;">
+              <strong style="color:#6495ED;">⚡ Swipe Master</strong> — Best average fluidity
+            </div>
+            <div style="padding:8px; background:rgba(255,69,0,0.1); border-radius:6px;">
+              <strong style="color:#FF4500;">🌪️ Chaos Lord</strong> — Most absurd transformations
+            </div>
+            <div style="padding:8px; background:rgba(50,205,50,0.1); border-radius:6px;">
+              <strong style="color:#32CD32;">🎯 Theme Genius</strong> — Best theme adherence
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center; margin:30px 0;">
+          <a class="cta" href="#" id="btn-view-game-spec-en" style="display:inline-block; margin:0 8px;">📖 View Specification</a>
+          <a class="cta" href="#" id="btn-demo-drawing-en" style="display:inline-block; margin:0 8px; background:rgba(100,149,237,0.3); color:#6495ED; border:1px solid #6495ED;">🎨 Demo (soon)</a>
+        </div>
+
+        <div class="note" style="margin-top:20px;">
+          💡 Game in development — Modular architecture ready to integrate
+        </div>
+      </div>
+    </div>
+    
+    <button class="back-btn" data-back>⬅ Retour au menu</button>
+  </main>
+</div>
+
+<!-- ========================= -->
+<!-- PAGE 3 - CONNECTER À MON CERCLE (ROOM)  -->
+<!-- ========================= -->
+<div id="page3" class="page">
+  <main>
+    <h2>🌌 <span id="page3-title">Connect Me to New Realities</span></h2>
     
     <!-- État: Not connected -->
     <div id="room-not-connected" style="display:flex; flex-direction:column; align-items:center; gap:16px; width:100%; max-width:500px;">
-      <p id="page2-subtitle" style="color:var(--muted);">Entrez le code de la salle</p>
+      <p id="page3-subtitle" style="color:var(--muted);">Entrez le code de la salle</p>
       
       <div style="display:flex; gap:8px; width:100%; max-width:300px;">
         <input type="text" id="room-code-input" placeholder="CODE" maxlength="4" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.02); color:var(--text); font-weight:bold; text-transform:uppercase; text-align:center; font-size:1.2rem;">
@@ -791,17 +958,181 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 </div>
 
 <!-- ========================= -->
+<!-- PAGE 3 - JEU DESSIN       -->
+<!-- ========================= -->
+<div id="page3" class="page">
+  <main>
+    <img src="connectmeifucan-logo-Noel.jpg" alt="Connect Me If U Can Logo" class="logo">
+
+    <h2 id="game3-title">🎨 Chaîne de Dessin</h2>
+ <h3 id="game3-subtitle">Jeu collaboratif ultra-rapide</h3>
+   
+    <div id="fr" class="lang">
+      <div style="max-width:800px; margin:0 auto; text-align:left;">
+        <div style="background:rgba(255,204,0,0.1); border:2px solid var(--accent); border-radius:12px; padding:20px; margin-bottom:20px;">
+          <h4 style="color:var(--accent); margin:0 0 12px 0;">🎮 Comment jouer ?</h4>
+          <p style="margin:8px 0;">👉 <strong>15 secondes</strong> pour compléter le dessin du voisin</p>
+          <p style="margin:8px 0;">👉 <strong>Swipe à droite</strong> pour envoyer au joueur suivant</p>
+          <p style="margin:8px 0;">👉 <strong>3 tours</strong> puis affichage des résultats sur écran principal</p>
+          <p style="margin:8px 0;">👉 <strong>Scoring automatique</strong> par IA (pas de vote)</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin:20px 0;">
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">✍️</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Fluidité du trait</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Vitesse, pauses, cohérence du tracé</p>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">🎨</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Cohérence visuelle</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Amélioration vs destruction du dessin</p>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">🎯</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Fidélité au thème</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Respect du sujet initial</p>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">⚡</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Créativité</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Twist amusant et originalité</p>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05); border-radius:8px; padding:20px; margin:20px 0; border:1px solid var(--border);">
+          <h4 style="color:var(--accent); margin:0 0 12px 0;">🏆 Titres automatiques</h4>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="padding:8px; background:rgba(255,204,0,0.1); border-radius:6px;">
+              <strong style="color:#FFD700;">👑 Chaînon d'Or</strong> — Meilleur score total (0-12 points)
+            </div>
+            <div style="padding:8px; background:rgba(100,149,237,0.1); border-radius:6px;">
+              <strong style="color:#6495ED;">⚡ Maître du Swipe</strong> — Meilleure fluidité moyenne
+            </div>
+            <div style="padding:8px; background:rgba(255,69,0,0.1); border-radius:6px;">
+              <strong style="color:#FF4500;">🌪️ Seigneur du Chaos</strong> — Transformations les plus absurdes
+            </div>
+            <div style="padding:8px; background:rgba(50,205,50,0.1); border-radius:6px;">
+              <strong style="color:#32CD32;">🎯 Génie du Thème</strong> — Meilleure fidélité au sujet
+            </div>
+          </div>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:20px; margin:20px 0; border:1px solid var(--border);">
+          <h4 style="color:var(--text); margin:0 0 12px 0;">📊 Système de scoring</h4>
+          <div style="font-size:0.9rem; color:var(--muted);">
+            <p style="margin:8px 0;">• <strong>Fluidité :</strong> 0 à 1 point par contribution</p>
+            <p style="margin:8px 0;">• <strong>Cohérence :</strong> 0 à 1 point par contribution</p>
+            <p style="margin:8px 0;">• <strong>Thème :</strong> 0 à 1 point par contribution</p>
+            <p style="margin:8px 0;">• <strong>Créativité :</strong> 0 à 1 point par contribution</p>
+            <p style="margin:12px 0; color:var(--accent); font-weight:bold;">→ Total par joueur après 3 tours : 0 à 12 points</p>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,204,0,0.05); border-radius:8px; padding:20px; margin:20px 0; border:1px solid rgba(255,204,0,0.3);">
+          <h4 style="color:var(--accent); margin:0 0 12px 0;">🔧 Technologie</h4>
+          <div style="font-size:0.9rem; color:var(--muted); line-height:1.6;">
+            <p style="margin:8px 0;">✅ Analyse automatique des contributions (Computer Vision)</p>
+            <p style="margin:8px 0;">✅ Détection de fluidité de trait (vitesse, pauses, cohérence)</p>
+            <p style="margin:8px 0;">✅ Comparaison pixel par pixel (avant/après)</p>
+            <p style="margin:8px 0;">✅ Détection de similarité au thème (couleurs, formes)</p>
+            <p style="margin:8px 0;">✅ Évaluation de créativité (twist, chaos amusant)</p>
+            <p style="margin:8px 0;">✅ Synchronisation temps réel via WebSocket</p>
+          </div>
+        </div>
+
+        <div style="text-align:center; margin:30px 0;">
+          <a class="cta" href="#" id="btn-view-game-spec" style="display:inline-block; margin:0 8px;">📖 Voir la spécification</a>
+          <a class="cta" href="#" id="btn-demo-drawing" style="display:inline-block; margin:0 8px; background:rgba(100,149,237,0.3); color:#6495ED; border:1px solid #6495ED;">🎨 Démo (bientôt)</a>
+        </div>
+
+        <div class="note" style="margin-top:20px;">
+          💡 Jeu en développement — Architecture modulaire prête à intégrer
+        </div>
+      </div>
+    </div>
+
+    <div id="en" class="lang">
+      <div style="max-width:800px; margin:0 auto; text-align:left;">
+        <div style="background:rgba(255,204,0,0.1); border:2px solid var(--accent); border-radius:12px; padding:20px; margin-bottom:20px;">
+          <h4 style="color:var(--accent); margin:0 0 12px 0;">🎮 How to play?</h4>
+          <p style="margin:8px 0;">👉 <strong>15 seconds</strong> to complete your neighbor's drawing</p>
+          <p style="margin:8px 0;">👉 <strong>Swipe right</strong> to send to next player</p>
+          <p style="margin:8px 0;">👉 <strong>3 rounds</strong> then results displayed on main screen</p>
+          <p style="margin:8px 0;">👉 <strong>Automatic AI scoring</strong> (no voting)</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin:20px 0;">
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">✍️</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Stroke Fluidity</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Speed, pauses, stroke coherence</p>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">🎨</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Visual Coherence</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Enhancement vs destruction</p>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">🎯</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Theme Fidelity</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Adherence to initial theme</p>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:16px; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:8px;">⚡</div>
+            <h5 style="color:var(--accent); margin:0 0 8px 0;">Creativity</h5>
+            <p style="font-size:0.9rem; color:var(--muted); margin:0;">Fun twists and originality</p>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05); border-radius:8px; padding:20px; margin:20px 0; border:1px solid var(--border);">
+          <h4 style="color:var(--accent); margin:0 0 12px 0;">🏆 Automatic Titles</h4>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="padding:8px; background:rgba(255,204,0,0.1); border-radius:6px;">
+              <strong style="color:#FFD700;">👑 Golden Link</strong> — Highest total score (0-12 points)
+            </div>
+            <div style="padding:8px; background:rgba(100,149,237,0.1); border-radius:6px;">
+              <strong style="color:#6495ED;">⚡ Swipe Master</strong> — Best average fluidity
+            </div>
+            <div style="padding:8px; background:rgba(255,69,0,0.1); border-radius:6px;">
+              <strong style="color:#FF4500;">🌪️ Chaos Lord</strong> — Most absurd transformations
+            </div>
+            <div style="padding:8px; background:rgba(50,205,50,0.1); border-radius:6px;">
+              <strong style="color:#32CD32;">🎯 Theme Genius</strong> — Best theme adherence
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center; margin:30px 0;">
+          <a class="cta" href="#" id="btn-view-game-spec-en" style="display:inline-block; margin:0 8px;">📖 View Specification</a>
+          <a class="cta" href="#" id="btn-demo-drawing-en" style="display:inline-block; margin:0 8px; background:rgba(100,149,237,0.3); color:#6495ED; border:1px solid #6495ED;">🎨 Demo (soon)</a>
+        </div>
+
+        <div class="note" style="margin-top:20px;">
+          💡 Game in development — Modular architecture ready to integrate
+        </div>
+      </div>
+    </div>
+    
+    <button class="back-btn" data-back>⬅ Retour au menu</button>
+  </main>
+</div>
+
+<!-- ========================= -->
 <!-- PAGE 3                    -->
 <!-- ========================= -->
 <div id="page3" class="page">
   <main>
-
-  
-  <main>
     <img src="connectmeifucan-logo-Noel.jpg" alt="Connect Me If U Can Logo" class="logo">
 
     <h2>Connect Me to New Realities</h2>
- <h3>🎮 Connect Me If U Can (under construction)</h3>
+    <h3>🎮 Connect Me If U Can (under construction)</h3>
    
     <div id="fr" class="lang">
       ✨ 1. Déplace-toi sereinement la nuit, en toute simplicité.<br>
@@ -2824,6 +3155,44 @@ loadCart();
     
     // Make roomManager global for debugging
     window.roomManager = roomManager;
+  })();
+
+  // ========================= 
+  // PAGE 3 - JEU DESSIN - HANDLERS
+  // =========================
+  (function() {
+    const btnViewSpec = document.getElementById('btn-view-game-spec');
+    const btnViewSpecEn = document.getElementById('btn-view-game-spec-en');
+    const btnDemo = document.getElementById('btn-demo-drawing');
+    const btnDemoEn = document.getElementById('btn-demo-drawing-en');
+    
+    if (btnViewSpec) {
+      btnViewSpec.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.open('Catalogue produits/game-dessin-collaboratif-spec.js', '_blank');
+      });
+    }
+    
+    if (btnViewSpecEn) {
+      btnViewSpecEn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.open('Catalogue produits/game-dessin-collaboratif-spec.js', '_blank');
+      });
+    }
+    
+    if (btnDemo) {
+      btnDemo.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('🎨 Démo en cours de développement\n\nFonctionnalités prévues :\n• Canvas de dessin interactif\n• Système de swipe\n• Timer 15 secondes\n• Analyse en temps réel\n• Affichage des scores');
+      });
+    }
+    
+    if (btnDemoEn) {
+      btnDemoEn.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('🎨 Demo under development\n\nPlanned features:\n• Interactive drawing canvas\n• Swipe system\n• 15-second timer\n• Real-time analysis\n• Score display');
+      });
+    }
   })();
 </script>
 
