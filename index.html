@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<!-- <title>Site avec Splash + Menu + Pages</title> -->
-<title>Expérience Immersive</title>
+<title>Contrôles Globaux - Démo Simplifiée</title>
 <style>
 /* ========================= */
 /* VARIABLES GLOBALES        */
@@ -50,9 +49,52 @@ body {
   align-items: center;
   color: #000;
   z-index: 9999;
- transition: transform 2s ease-in-out, opacity 1s ease-in-out;
+  transition: transform 2s ease-in-out, opacity 1s ease-in-out;
+  overflow: hidden;
 }
 #splash.hidden { opacity: 0; pointer-events: none; }
+#splash.zooming { transform: scale(1.5); opacity: 0; transition: transform .9s ease, opacity .9s ease; pointer-events: none; }
+
+/* VIDEO BACKGROUND */
+#splash-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  z-index: 1;
+  opacity: 0.8;
+  will-change: auto;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* OVERLAY POUR LISIBILITÉ */
+#splash-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(255,204,0,0.2), rgba(13,13,13,0.5));
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* CONTENU AU-DESSUS DE LA VIDÉO */
+#splash > h1,
+#splash > p,
+#splash .enter-sides,
+#splash #press-progress-bar {
+  position: relative;
+  z-index: 3;
+}
+
+#splash > h1,
+#splash > p {
+  transition: opacity .3s ease, transform .3s ease;
+}
 
 /* ========================= */
 /* SPLASH: ENTER SIDES + PROGRESS */
@@ -62,21 +104,19 @@ body {
   left: 0;
   right: 0;
   bottom: 28%;
-  /* keep as a positioning container for absolute buttons */
   display: block;
   padding: 0 24px;
   width: 100%;
   max-width: 1200px;
-  pointer-events: none; /* children manage pointer-events */
+  margin: 0 auto;
+  pointer-events: none;
 }
 .enter-sides .enter-side {
   pointer-events: auto;
 }
 .enter-side {
-  position: absolute; /* place each button explicitly */
+  position: absolute;
   top: 50%;
-  left: auto;
-  right: auto;
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -88,17 +128,17 @@ body {
   color: #000;
   border: 3px solid rgba(0,0,0,0.12);
   cursor: pointer;
-  /* vertically center while preserving any manual snap via --enter-ty */
   transform: translateY(calc(-50% + var(--enter-ty, 0)));
-  transition: transform .12s ease, box-shadow .12s ease;
+  transition: transform .12s ease, box-shadow .12s ease, opacity .3s ease;
   user-select: none;
-  touch-action: none; /* avoid double-tap/context issues on touch */
+  touch-action: none;
 }
-/* fixed horizontal offsets for symmetry */
 #enter-left { left: 24px; }
 #enter-right { right: 24px; }
-/* keep pressing transform while preserving translate */
-.enter-side.pressing { transform: translateY(calc(-50% + var(--enter-ty, 0))) scale(.94); box-shadow: 0 10px 28px rgba(0,0,0,.35); }
+.enter-side.pressing { 
+  transform: translateY(calc(-50% + var(--enter-ty, 0))) scale(.94); 
+  box-shadow: 0 10px 28px rgba(0,0,0,.35); 
+}
 
 .enter-side .enter-label {
   display: inline-block;
@@ -109,14 +149,12 @@ body {
   padding: 6px 6px;
   color: #000;
 }
-.enter-side.pressing .enter-label { filter: brightness(.95); }
-.enter-side.pressing { transform: scale(.94); box-shadow: 0 10px 28px rgba(0,0,0,.35); }
 
 #press-progress-bar {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 40%;
+  bottom: 5%;
   width: 60%;
   max-width: 640px;
   height: 14px;
@@ -131,7 +169,8 @@ body {
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, var(--accent), var(--accent-hover));
-  transition: width .05s linear;
+  transition: none;
+  will-change: width;
 }
 #press-progress-text {
   position: absolute;
@@ -141,273 +180,59 @@ body {
   font-size: 0.85rem;
 }
 
-/* ZOOM TRANSITION TO MENU */
-#splash.zooming { transform: scale(1.12); opacity: 0; transition: transform .7s ease, opacity .7s ease; pointer-events: none; }
-/* Center the menu overlay so buttons are centered on screen/mobile */
-#menu {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  transform: scale(.98);
-  transition: transform .7s ease, opacity .4s ease;
-  opacity: 0;
-  z-index: 9000;
-  pointer-events: none;
-}
-#menu.active.scale-in { transform: scale(1); opacity: 1; pointer-events: auto; }
-
+/* ========================= */
 /* GLOBAL CONTROL (persistent) */
-.global { position: fixed !important; bottom: 18%; z-index: 10001; display: none; align-items: center; justify-content: center; width:64px; height:64px; transform: none !important; pointer-events: auto; transition: opacity .18s ease, transform .18s ease; }
+/* ========================= */
+.global { 
+  position: fixed !important; 
+  bottom: 18%; 
+  z-index: 10001; 
+  display: none; 
+  align-items: center; 
+  justify-content: center; 
+  width:64px; 
+  height:64px; 
+  transform: none !important; 
+  pointer-events: auto; 
+  transition: opacity .18s ease, transform .18s ease; 
+}
 .global.show { display: inline-flex; }
 body.hand-left .global { left: 18px; right: auto; }
 body.hand-right .global { right: 18px; left: auto; }
-/* Back control positions - opposite side of the chosen hand */
 body.hand-left .global.back { right: 18px; left: auto; }
 body.hand-right .global.back { left: 18px; right: auto; }
-/* Hide the other splash disc if a hand is selected */
-body.hand-left #enter-right, body.hand-right #enter-left { display: none !important; }
-/* Auto-hide state for controls when a page is active */
-.global.auto-hidden { opacity: 0; transform: translateY(8px) scale(.98); pointer-events: none; }
+body.hand-left #enter-right, 
+body.hand-right #enter-left { 
+  display: none !important; 
+}
+.global.auto-hidden { 
+  opacity: 0; 
+  transform: translateY(8px) scale(.98); 
+  pointer-events: none; 
+}
 .global.show.auto-hidden { display: inline-flex; }
 
-/* menu selection style */
-.menu-btn.selected { box-shadow: 0 8px 24px rgba(0,0,0,0.35); transform: translateY(-2px) scale(1.02); border: 2px solid rgba(255,204,0,0.95); }
-.menu-btn:focus { outline: none; }
-
 /* ========================= */
-/* BOUTONS LANGUE            */
-/* ========================= */
-.lang-switch {
-  position: fixed;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  gap: 8px;
-  z-index: 10000;
-}
-
-/* language content blocks: hide by default; show the active language */
-.lang { display: none; }
-.lang.active { display: block; }
-
-.lang-btn {
-  padding: 6px 12px;
-  background: var(--accent);
-  color: #000;
-  font-weight: bold;
-  border-radius: 6px;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  transition: transform .2s ease, background .2s ease;
-}
-.lang-btn:hover {
-  background: var(--accent-hover);
-  transform: scale(1.05);
-}
-.lang-btn.active {
-  background: var(--accent-hover);
-  transform: scale(1.03);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-}
-
-/* ========================= */
-/* ECRAN INTERMEDIAIRE       */
-/* ========================= */
-
-/* 📱 Mobile : 0 → 767px */
-@media (max-width: calc(var(--mobile) - 1px)) {
-    #menu {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;   /* centré */
-        gap: 18px;
-        text-align: center;
-        z-index: 9000;
-    }
-
-    /* On small screens, move the yellow discs lower so they don't overlap centered buttons
-       and place them at equal distances from the left/right edges */
-    .enter-sides { bottom: 6%; padding: 0 6%; transition: bottom .18s ease; }
-    #enter-left { left: 6%; }
-    #enter-right { right: 6%; }
-
-    /* Make persistent global controls sit at the same lower vertical position on mobile */
-    .global { bottom: 6%; }
-    body.hand-left .global { left: 6%; }
-    body.hand-right .global { right: 6%; }
-    body.hand-left .global.back { right: 6%; }
-    body.hand-right .global.back { left: 6%; }
-
-    /* slightly reduce the size of the discs on mobile to avoid covering content */
-    .enter-side { width: 56px; height: 56px; font-size: 1.4rem; }
-
-    /* When a category page is open, position the persistent controls where the splash discs are */
-    body.page-open .enter-sides { bottom: 28%; padding: 0 24%; }
-    body.page-open .global { bottom: 28%; }
-    body.hand-left.page-open .global { left: 24px; right: auto; }
-    body.hand-right.page-open .global { right: 24px; left: auto; }
-    body.hand-left.page-open .global.back { right: 24px; left: auto; }
-    body.hand-right.page-open .global.back { left: 24px; right: auto; }
-    /* restore bigger discs on page to match splash size */
-    body.page-open .enter-side { width: 64px; height: 64px; font-size: 1.6rem; }
-}
-
-/* 📲 Tablette : 768px → 1023px */
-@media (min-width: var(--mobile)) and (max-width: calc(var(--tablet) - 1px)) {
-    #menu {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;   /* centré */
-        gap: 18px;
-        text-align: center;
-    }
-}
-
-/* 💻 Desktop : 1024px → ∞ */
-@media (min-width: var(--tablet)) {
-    #menu {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;   /* centered like mobile */
-        gap: 18px;
-        text-align: center;
-        z-index: 9000;
-        position: static;
-        padding-left: 0; /* remove left offset so buttons are centered */
-    }
-}
-/*
-#menu.active { display: flex; }
-*/
-.menu-title {
-  font-size: 2rem;
-  font-weight: bold;
-}
-.menu-subtitle {
-  font-size: 1.1rem;
-  color: var(--muted);
-  margin-bottom: 20px;
-}
-
-/* ========================= */
-/* BOUTONS CATEGORIES        */
-/* ========================= */
-.menu-btn {
-  width: min(92%, 260px); /* responsive: up to 260px or 92% on small screens */
-  max-width: 520px;
-  margin: 8px 0;
-  text-align: center; /* centre le texte */
-  padding: 14px 32px;
-  background: var(--accent);
-  color: #000;
-  font-weight: 700;
-  border-radius: 10px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform .2s ease, background .2s ease;
-}
-.menu-btn:hover {
-  background: var(--accent-hover);
-  transform: translateY(-2px) scale(1.05);
-}
-
-/* ========================= */
-/* CATALOGUE PRODUITS (Vitrine) */
-.catalogue {
-  margin-top: 18px;
-  width: 100%;
-  box-sizing: border-box;
-}
-.catalogue .catalogue-controls {
-  display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;
-}
-.catalogue .catalogue-controls .left { display:flex; gap:8px; align-items:center; }
-.catalogue .catalogue-controls .right { display:flex; gap:8px; align-items:center; }
-.catalogue .toggle-selector { padding:6px 10px; background: rgba(255,255,255,0.03); border-radius:6px; border:1px solid var(--border); cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
-.catalogue .selector-filter .filter-input { padding:8px 10px; height:36px; }
-.catalogue .selector-filter .btn-clear-filter { height:36px; padding:0 8px; }
-.selector-actions button { height:36px; padding:6px 12px; }
-.catalogue .product-card .card-actions button { min-width: 110px; }
-
-/* wrapper: sidebar + main grid */
-.catalogue-wrap { display: grid; grid-template-columns: 220px 1fr; gap: 16px; align-items:start; }
-.catalogue-selector { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.03); padding: 8px; border-radius:8px; max-height:60vh; overflow:auto; }
-.catalogue-selector ul { list-style:none; margin:0; padding:0; }
-.catalogue-selector li { padding:8px; border-radius:6px; cursor:pointer; display:flex; gap:8px; align-items:center; }
-.catalogue-selector li img { width:46px; height:46px; object-fit:cover; border-radius:6px; background: rgba(255,255,255,0.02); }
-.catalogue-selector li .meta { display:flex; flex-direction:column; text-align:left; }
-.catalogue-selector li .meta .muted { font-size:0.86rem; color:var(--muted); }
-.catalogue-selector li .meta .desc { font-size:0.86rem; color:var(--muted); margin-top:4px; }
-.catalogue-selector .selector-filter { display:flex; gap:6px; align-items:center; margin-bottom:8px; }
-.catalogue-selector .selector-filter .filter-input { flex:1; padding:6px 8px; border-radius:6px; border:1px solid var(--border); background:rgba(255,255,255,0.02); color:var(--text); }
-.catalogue-selector .selector-filter .btn-clear-filter { padding:6px 8px; border-radius:6px; background:transparent; border:1px solid var(--border); color:var(--text); cursor:pointer; }
-.catalogue-selector li .tags { margin-top:6px; }
-.catalogue-selector .tag { display:inline-block; padding:2px 6px; border-radius:4px; background:rgba(255,255,255,0.03); color:var(--muted); font-size:0.75rem; margin-right:6px; }
-
-/* when selector hidden, use single column for main content */
-.catalogue-wrap.selector-hidden { grid-template-columns: 0 1fr; }
-.catalogue-wrap.selector-hidden .catalogue-selector { display:none; }
-
-/* when selector is shown as a floating overlay, let the main area occupy full width of the page content */
-.catalogue-wrap.selector-floating { grid-template-columns: 0 1fr; }
-
-.catalogue .catalogue-main { min-width: 0; }
-.catalogue .catalogue-grid { display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:12px; }
-.catalogue .product-card { background: rgba(255,255,255,0.03); border-radius:8px; padding:10px; text-align:center; box-shadow: 0 6px 18px rgba(0,0,0,0.3); width:100%; }
-.catalogue .product-card img { width:100%; height:auto; max-height:200px; object-fit:contain; margin-bottom:8px; border-radius:6px; background: rgba(255,255,255,0.02); }
-.catalogue .product-card h4 { margin:6px 0 4px; font-size:1rem; }
-.catalogue .product-card .price { font-weight:800; color:var(--accent); margin-bottom:8px; }
-.catalogue .product-card button { padding:8px 10px; background:var(--accent); border-radius:8px; border:1px solid var(--border); color:#000; cursor:pointer; }
-.catalogue .product-card.selected { box-shadow: 0 12px 28px rgba(255,204,0,0.08); border:1px solid rgba(255,204,0,0.14); }
-.catalogue .pagination { display:flex; gap:8px; justify-content:center; margin-top:12px; }
-.catalogue .pagination button { padding:6px 10px; background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--text); border-radius:6px; cursor:pointer; }
-
-/* responsive: on small screens hide selector by default and stack */
-@media (max-width: calc(var(--mobile) - 1px)) {
-  .catalogue-wrap { grid-template-columns: 0 1fr; }
-  .catalogue-wrap .catalogue-selector { display:none; }
-  .catalogue .catalogue-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-/* simple modal for order form */
-.catalogue-modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:10010; }
-.catalogue-modal.active { display:flex; }
-.catalogue-modal .modal-inner { background: #0b0b0b; padding:18px; border-radius:10px; width: min(92%, 520px); box-shadow: 0 24px 64px rgba(0,0,0,0.7); }
-.catalogue-modal label { display:block; font-size:0.9rem; margin-top:8px; }
-.catalogue-modal input, .catalogue-modal textarea, .catalogue-modal select { width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid var(--border); background:rgba(255,255,255,0.02); color:var(--text); }
-.catalogue-modal .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
-.catalogue-modal .modal-actions button { padding:8px 12px; border-radius:6px; border: none; cursor:pointer; }
-.catalogue .update-prices { padding:6px 10px; border-radius:6px; background:rgba(255,255,255,0.03); border:1px solid var(--border); cursor:pointer; }
-
-/* ========================= */
-/* PAGES PRINCIPALES         */
+/* PAGES                     */
 /* ========================= */
 .page {
   display: none;
   opacity: 0;
-  transition: transform .7s ease, opacity .4s ease;
-  transform: scale(.98);
+  transition: transform .9s ease, opacity .6s ease;
+  transform: scale(0.7);
   pointer-events: none;
   padding: 24px;
   text-align: center;
 }
 
-/* page frame: subtle radial highlight + box to mimic splash background */
 .page.frame {
   background: radial-gradient(circle at top, rgba(255,204,0,0.06), rgba(0,0,0,0.02) 40%);
   border-radius: 12px;
   width: calc(100% - 48px);
   max-width: 1200px;
   box-shadow: 0 8px 40px rgba(0,0,0,0.45);
-  margin: 0 auto; /* center the frame horizontally */
-  padding: 18px 24px; /* add breathing room inside the framed block */
+  margin: 0 auto;
+  padding: 18px 24px;
 }
 
 .page.active {
@@ -419,54 +244,7 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   opacity: 1;
   pointer-events: auto;
   transform: scale(1);
-  text-align: center; /* ensure centered text on mobile and desktop */
-}
-
-/* Center the content blocks horizontally on each page and make responsive */
-.page > * {
-  width: 92%;
-  max-width: 1000px; /* comfortable reading width on desktop */
-  margin: 0 auto;
-  text-align: center; /* ensure inner text is centered by default */
-}
-/* Make images and logo centered within pages */
-.page img, .page .logo { display: block; margin: 0 auto; }
-/* Ensure language blocks center their content */
-.page .lang { width: 100%; text-align: center; }
-/* Mobile: slightly narrower max-width for better fit */
-@media (max-width: calc(var(--mobile) - 1px)) {
-  .page > * { width: 92%; max-width: 760px; padding: 0 12px; }
-}
-/* Tablet and up: allow more width and padding */
-@media (min-width: var(--mobile)) and (max-width: calc(var(--tablet) - 1px)) {
-  .page > * { width: min(96%, 900px); padding: 0 20px; }
-}
-@media (min-width: var(--tablet)) {
-  .page > * { width: min(100%, 1000px); padding: 0 24px; }
-}
-
-/* Ensure main content inside each page is laid out vertically; back button stays after content */
-.page main,
-.page .page-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; /* start at top so back button sits after content */
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 12px;
-}
-/* helper class to center a page if desired */
-.page.centered main { justify-content: center; }
-
-/* take available vertical space so content can be perfectly centered */
-.page main {
-  min-height: calc(100dvh - 120px);
-}
-
-@media (max-width: calc(var(--mobile) - 1px)) {
-  .page main { min-height: calc(100dvh - 80px); padding: 12px; }
+  text-align: center;
 }
 
 .page.scale-in {
@@ -485,65 +263,46 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   font-size: 2rem;
   margin-bottom: 10px;
 }
+
 .page p {
   font-size: 1.1rem;
   color: var(--muted);
 }
 
-/* Logo sizing + entrance animation */
-.logo {
-  display: block;
-  margin: 0 auto 18px;
-  width: 48%;
-  max-width: 420px;
-  height: auto;
-  opacity: 0;
-  transform: translateY(12px) scale(1.03);
-  transition: transform .7s cubic-bezier(.2,.9,.25,1), opacity .45s ease;
-}
-
-/* when page finishes scaling in, the logo animates into place */
-.page.scale-in .logo {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-/* also allow toggling via a dedicated class for timing control */
-.page.logo-in .logo {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
+/* Mobile adjustments */
 @media (max-width: calc(var(--mobile) - 1px)) {
-  .page.logo-in .logo { transform: translateY(0) scale(0.88); }
-}
-
-/* On narrow screens, reduce logo so it visually matches splash zoom */
-@media (max-width: calc(var(--mobile) - 1px)) {
-  .logo {
-    width: 60%;
-    max-width: 320px;
-  }
-  /* mobile final scale during page reveal to visually match splash */
-  .page.scale-in .logo {
-    transform: translateY(0) scale(0.88);
-  }
-}
-
-/* on tablet and up, slightly smaller logo to keep layout balanced */
-@media (min-width: var(--mobile)) and (max-width: calc(var(--tablet) - 1px)) {
-  .logo { width: 44%; max-width: 360px; }
-}
-@media (min-width: var(--tablet)) {
-  .logo { width: 36%; max-width: 420px; }
+  .enter-sides { bottom: 6%; padding: 0 6%; }
+  #enter-left { left: 6%; }
+  #enter-right { right: 6%; }
+  .global { bottom: 6%; }
+  body.hand-left .global { left: 6%; }
+  body.hand-right .global { right: 6%; }
+  body.hand-left .global.back { right: 6%; }
+  body.hand-right .global.back { left: 6%; }
+  .enter-side { width: 56px; height: 56px; font-size: 1.4rem; }
+  
+  body.page-open .enter-sides { bottom: 28%; padding: 0 24%; }
+  body.page-open .global { bottom: 28%; }
+  body.hand-left.page-open .global { left: 24px; right: auto; }
+  body.hand-right.page-open .global { right: 24px; left: auto; }
+  body.hand-left.page-open .global.back { right: 24px; left: auto; }
+  body.hand-right.page-open .global.back { left: 24px; right: auto; }
+  body.page-open .enter-side { width: 64px; height: 64px; font-size: 1.6rem; }
 }
 
 /* ========================= */
-/* BOUTON RETOUR AU MENU     */
+/* BOUTONS NAVIGATION PAGES  */
 /* ========================= */
-.back-btn {
-  margin: 20px auto 0; /* center horizontally */
-  display: block;
-  padding: 10px 24px;
+.nav-buttons {
+  margin-top: 40px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.nav-btn {
+  padding: 12px 24px;
   background: var(--accent);
   color: #000;
   font-weight: bold;
@@ -551,37 +310,238 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
   cursor: pointer;
   border: 1px solid var(--border);
   transition: transform .2s ease, background .2s ease;
+  text-decoration: none;
+  display: inline-block;
 }
-.back-btn:hover {
+
+.nav-btn:hover {
   background: var(--accent-hover);
   transform: translateY(-2px) scale(1.05);
 }
-.btn-remove { padding:6px 10px; background:transparent; border:1px solid var(--border); color:var(--text); border-radius:6px; cursor:pointer; }
-.btn-remove:hover { background: rgba(255,255,255,0.02); }
+
+/* ========================= */
+/* MENU (pas de widget ici)  */
+/* ========================= */
+#menu {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  transform: scale(0.7);
+  transition: transform .9s ease, opacity .6s ease;
+  opacity: 0;
+  z-index: 9000;
+  pointer-events: none;
+}
+
+#menu.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.menu-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.menu-subtitle {
+  font-size: 1.1rem;
+  color: var(--muted);
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.menu-widgets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  width: 100%;
+  max-width: 1000px;
+  padding: 0;
+}
+
+.menu-widget {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background: linear-gradient(135deg, rgba(255,204,0,0.08), rgba(255,204,0,0.02));
+  border: 2px solid rgba(255,204,0,0.2);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all .3s ease;
+  text-align: center;
+  min-height: 200px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.menu-widget::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255,204,0,0.15), transparent);
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+
+.menu-widget:hover::before {
+  opacity: 1;
+}
+
+.menu-widget:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--accent);
+  box-shadow: 0 12px 32px rgba(255,204,0,0.3), 0 0 40px rgba(255,204,0,0.1);
+}
+
+.menu-widget-icon {
+  font-size: 3.5rem;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 2px 8px rgba(255,204,0,0.3));
+}
+
+.menu-widget-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.menu-widget-desc {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Mobile adjustments - Widgets verticaux optimisés */
+@media (max-width: calc(var(--mobile) - 1px)) {
+  #menu {
+    padding: 16px;
+    justify-content: flex-start;
+    padding-top: 80px;
+  }
+  
+  .menu-title {
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+  }
+  
+  .menu-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+  }
+  
+  .menu-widgets {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    max-width: 100%;
+    padding: 0 8px;
+  }
+  
+  .menu-widget {
+    min-height: auto;
+    padding: 20px 16px;
+    border-radius: 12px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .menu-widget-icon {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+  }
+  
+  .menu-widget-title {
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+  }
+  
+  .menu-widget-desc {
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+  
+  .menu-widget:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+}
+
+/* Très petits écrans - widgets encore plus compacts */
+@media (max-width: 480px) {
+  #menu {
+    padding: 12px;
+    padding-top: 60px;
+  }
+  
+  .menu-title {
+    font-size: 1.4rem;
+  }
+  
+  .menu-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+  }
+  
+  .menu-widgets {
+    gap: 10px;
+    padding: 0 4px;
+  }
+  
+  .menu-widget {
+    padding: 18px 14px;
+    border-radius: 10px;
+  }
+  
+  .menu-widget-icon {
+    font-size: 2.2rem;
+    margin-bottom: 6px;
+  }
+  
+  .menu-widget-title {
+    font-size: 1rem;
+  }
+  
+  .menu-widget-desc {
+    font-size: 0.8rem;
+  }
+}
 </style>
 </head>
 
 <body>
 
 <!-- ========================= -->
-<!-- BOUTONS LANGUE            -->
-<!-- ========================= -->
-<div class="lang-switch">
-  <button class="lang-btn" id="cmuc-user-btn">Invité</button>
-  <button class="lang-btn" id="btn-fr">FR</button>
-  <button class="lang-btn" id="btn-en">EN</button>
-</div>
-
-<!-- ========================= -->
 <!-- SPLASH SCREEN             -->
 <!-- ========================= -->
 <div id="splash">
+  <!-- VIDEO BACKGROUND SYNCHRONISÉE -->
+  <video id="splash-video" muted playsinline preload="auto">
+    <source src="TEST_MP4.mp4" type="video/mp4">
+  </video>
+  
+  <!-- OVERLAY POUR AMÉLIORER LA LISIBILITÉ -->
+  <div id="splash-overlay"></div>
+  
   <h1>Bienvenue</h1>
-  <p>Chargement...</p>
+  <p>Choisissez votre main pour commencer</p>
 
   <div class="enter-sides">
-    <button id="enter-left" class="enter-side" aria-label="Entrer - main gauche" title="Entrer — Main gauche"><span class="enter-label">Appuyer pour entrer</span></button>
-    <button id="enter-right" class="enter-side" aria-label="Entrer - main droite" title="Entrer — Main droite"><span class="enter-label">Appuyer pour entrer</span></button>
+    <button id="enter-left" class="enter-side" aria-label="Entrer - main gauche" title="Entrer — Main gauche">
+      <span class="enter-label">Appuyer pour entrer</span>
+    </button>
+    <button id="enter-right" class="enter-side" aria-label="Entrer - main droite" title="Entrer — Main droite">
+      <span class="enter-label">Appuyer pour entrer</span>
+    </button>
   </div>
 
   <div id="press-progress-bar" aria-hidden="true">
@@ -591,448 +551,284 @@ body.hand-left #enter-right, body.hand-right #enter-left { display: none !import
 </div>
 
 <!-- ========================= -->
-<!-- ECRAN INTERMEDIAIRE       -->
+<!-- MENU AVEC WIDGETS         -->
 <!-- ========================= -->
 <div id="menu">
-  <div class="menu-title" id="menu-title">Choose a category</div>
-  <div class="menu-subtitle" id="menu-subtitle">Sélectionnez une catégorie</div>
+  <div class="menu-title">Choisissez une catégorie</div>
+  <div class="menu-subtitle">Sélectionnez votre expérience</div>
 
-  <button class="menu-btn" data-target="page1">🌿 Comfort & Well‑Being at Home</button>
-  <button class="menu-btn" data-target="page2">👨‍👩‍👧‍👦 Connect Me to My Circle</button>
-  <button class="menu-btn" data-target="page3">🌌 Connect Me to New Realities</button>
+  <div class="menu-widgets">
+    <button class="menu-widget" data-nav="page1">
+      <div class="menu-widget-icon">🌿</div>
+      <div class="menu-widget-title">Comfort & Well-Being</div>
+      <div class="menu-widget-desc">Create your perfect home environment</div>
+    </button>
+    
+    <button class="menu-widget" data-nav="page2">
+      <div class="menu-widget-icon">🎨</div>
+      <div class="menu-widget-title">Drawing Chain Game</div>
+      <div class="menu-widget-desc">Collaborative creative experience</div>
+    </button>
+    
+    <button class="menu-widget" data-nav="page3">
+      <div class="menu-widget-icon">🌌</div>
+      <div class="menu-widget-title">New Realities</div>
+      <div class="menu-widget-desc">Explore immersive connections</div>
+    </button>
+  </div>
 </div>
 
-<button id="global-control" class="enter-side global" aria-hidden="true"><span class="enter-label">Appuyer pour entrer</span></button>
-<button id="global-back" class="enter-side global back" aria-hidden="true"><span class="enter-label">Retour</span></button>
+<!-- ========================= -->
+<!-- CONTRÔLES GLOBAUX         -->
+<!-- ========================= -->
+<button id="global-control" class="enter-side global" aria-hidden="true">
+  <span class="enter-label">Pages</span>
+</button>
+<button id="global-back" class="enter-side global back" aria-hidden="true">
+  <span class="enter-label">Retour</span>
+</button>
 
 <!-- ========================= -->
-<!-- PAGE 1 (TON ANCIEN MAIN)  -->
+<!-- PAGE 1 (VIDE)             -->
 <!-- ========================= -->
 <div id="page1" class="page">
-  <h2>🌿 Comfort & Well‑Being at Home</h2>
-
-  <!-- 🔥 INSÈRE ICI TON ANCIEN MAIN COMPLET 🔥 -->
-  <!-- Exemple : -->
-  <main>
-    <img src="connectmeifucan-logo-Noel.jpg" alt="Connect Me If U Can Logo" class="logo">
-
-    <h3>🎮 Connect Me If U Can (under construction)</h3>
-
-    <div id="fr" class="lang">
-      ✨ 1. Déplace-toi sereinement la nuit, en toute simplicité.<br>
-      ✨ 2. Transforme ton salon en expérience immersive à domicile :<br>
-      🔦 Lumières • Sons • Objets connectés.<br>
-      ⏳ Voyage dans le temps entre 1850 et 2050.<br><br>
-
-      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Découvrir</a>
-      <div class="note">💡 Projects personnels en cours de développement</div>
-    </div>
-
-    <div id="en" class="lang">
-      ✨ 1. Move around at night with ease and peace of mind<br>
-      ✨ 2. Turn your living room into an immersive home experience.<br>
-      🔦 Lights • Sounds • Smart objects.<br>
-      ⏳ Time travel between 1850 and 2050.<br><br>
-
-      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Discover</a>
-      <div class="note">💡 Personal projects under development</div>
-    </div>
-
-    <!-- Catalogue vitrine -->
-    <section id="catalogue" class="catalogue" aria-label="Catalogue produits">
-      <div class="catalogue-controls">
-        <div class="left">
-          <strong id="catalogue-count">0 produits</strong>
-          <small style="margin-left:8px;color:var(--muted);">Prix depuis fichiers .txt</small>
-        </div>
-        <div class="right">
-          <button id="btn-open-cart" class="toggle-selector" title="Panier">🧺 <span id="basket-count" class="basket-badge">0</span></button>
-          <button id="btn-toggle-selector" class="toggle-selector" aria-pressed="false" title="Afficher / Masquer la sélection">☰</button>
-          <span id="catalogue-pages">Page 1</span>
-        </div>
-      </div>
-
-
-
-      <div class="catalogue-wrap" id="catalogue-wrap">
-        <aside class="catalogue-selector" id="catalogue-selector" aria-label="Sélecteur de produits">
-          <button id="btn-hide-selector" class="hide-selector">Masquer</button>
-          <div class="selector-filter">
-            <input id="catalogue-filter" class="filter-input" placeholder="Filtrer par mot‑clé" aria-label="Filtrer les produits">
-            <button id="btn-clear-filter" class="btn-clear-filter" title="Effacer">✕</button>
-          </div>
-          <div class="selector-actions">
-            <button id="btn-validate" class="btn-validate" disabled>Valider</button>
-            <button id="btn-add-selection" class="btn-add-to-cart" disabled>Ajouter sélection</button>
-          </div>
-          <ul id="catalogue-list" role="listbox" aria-label="Liste des produits"></ul>
-        </aside> 
-        <div class="catalogue-main">
-          <div class="catalogue-grid" id="catalogue-grid" aria-live="polite"></div>
-          <div class="pagination" id="catalogue-pagination"></div>
-        </div>
-      </div>
-    </section>
-    <button class="back-btn" data-back>⬅ Retour au menu</button>
-  </main>
+  <h2>📄 Page 1</h2>
+  <p>Contenu de la page 1</p>
+  
+  <div class="nav-buttons">
+    <button class="nav-btn" data-nav="page2">→ Page 2</button>
+    <button class="nav-btn" data-nav="page3">→ Page 3</button>
+  </div>
 </div>
 
 <!-- ========================= -->
-<!-- PAGE 2 - CONNECTER À MON CERCLE (ROOM)  -->
+<!-- PAGE 2 (VIDE)             -->
 <!-- ========================= -->
 <div id="page2" class="page">
-  <main>
-    <h2>👨‍👩‍👧‍👦 <span id="page2-title">Connect Me to My Circle</span></h2>
-    
-    <!-- État: Not connected -->
-    <div id="room-not-connected" style="display:flex; flex-direction:column; align-items:center; gap:16px; width:100%; max-width:500px;">
-      <p id="page2-subtitle" style="color:var(--muted);">Entrez le code de la salle</p>
-      
-      <div style="display:flex; gap:8px; width:100%; max-width:300px;">
-        <input type="text" id="room-code-input" placeholder="CODE" maxlength="4" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.02); color:var(--text); font-weight:bold; text-transform:uppercase; text-align:center; font-size:1.2rem;">
-        <button id="btn-join-room" style="padding:12px 24px; background:var(--accent); color:#000; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">Rejoindre</button>
-      </div>
-      
-      <button id="btn-create-room" style="padding:10px 20px; background:rgba(255,204,0,0.2); color:var(--accent); font-weight:bold; border-radius:8px; border:1px solid var(--accent); cursor:pointer;">+ Créer une salle</button>
-      
-      <div id="room-error" style="color:#ff6b6b; font-size:0.9rem; display:none;"></div>
-      <div id="room-ws-status" style="color:var(--muted); font-size:0.85rem; padding-top:4px;"></div>
-      <div style="display:flex; gap:8px; width:100%; max-width:300px; align-items:center;">
-        <input type="text" id="room-ws-input" placeholder="ws://host:3000" style="flex:1; padding:8px; border-radius:6px; border:1px solid var(--border); background:rgba(255,255,255,0.02); color:var(--text); font-size:0.85rem;">
-        <button id="btn-save-ws" style="padding:8px 10px; background:rgba(255,255,255,0.08); color:var(--text); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:0.8rem;">💾 WS</button>
-      </div>
-      <button id="btn-reset-ws" style="margin-top:4px; padding:6px 10px; background:rgba(255,255,255,0.08); color:var(--text); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:0.8rem;">↺ Réinitialiser le serveur WS</button>
-    </div>
-    
-    <!-- État: Connected to room -->
-    <div id="room-connected" style="display:none; flex-direction:column; align-items:center; gap:16px; width:100%; max-width:900px;">
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; width:100%; max-width:900px;">
-        <!-- Panel gauche: Contrôles -->
-        <div style="display:flex; flex-direction:column; gap:16px;">
-          <!-- Code room -->
-          <div style="background:rgba(255,204,0,0.1); border:2px solid var(--accent); border-radius:12px; padding:20px; text-align:center;">
-            <div style="font-size:0.9rem; color:var(--muted);">Code de salle</div>
-            <div id="room-id-display" style="font-size:2rem; font-weight:bold; color:var(--accent); letter-spacing:4px; margin:10px 0;">XXXX</div>
-          </div>
-          
-          <!-- Infos room -->
-          <div style="background:rgba(255,255,255,0.02); border-radius:8px; padding:16px; border:1px solid var(--border);">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-              <div>
-                <div style="font-size:0.85rem; color:var(--muted);">Joueurs</div>
-                <div id="room-players-count" style="font-size:1.5rem; font-weight:bold;">0/4</div>
-              </div>
-              <div>
-                <div style="font-size:0.85rem; color:var(--muted);">État</div>
-                <div id="room-status" style="font-size:1.5rem; font-weight:bold; color:#2ecc71;">EN LIGNE</div>
-              </div>
-            </div>
-            <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
-              <div style="font-size:0.85rem; color:var(--muted);">Hôte</div>
-              <div id="room-host-display" style="font-size:1rem; font-weight:bold; color:var(--text); margin-top:4px;">📺 TV</div>
-            </div>
-          </div>
-          
-          <!-- Boutons actions -->
-          <div style="display:flex; gap:8px; flex-direction:column; width:100%;">
-            <button id="btn-toggle-ready" style="padding:10px 20px; background:#ff9800; color:#000; font-weight:bold; border-radius:8px; border:none; cursor:pointer; width:100%;">⏸️ PAUSE</button>
-            <button id="btn-toggle-role" style="padding:10px 20px; background:rgba(255,165,0,0.3); color:#ffa500; font-weight:bold; border-radius:8px; border:1px solid #ffa500; cursor:pointer; width:100%;">🎬 Guest</button>
-            <button id="btn-open-shared-tv" style="padding:10px 20px; background:rgba(100,149,237,0.3); color:#6495ed; font-weight:bold; border-radius:8px; border:1px solid #6495ed; cursor:pointer; width:100%;">📺 Affichage partagé</button>
-            <button id="btn-room-settings" style="padding:10px 20px; background:rgba(255,255,255,0.1); color:var(--text); font-weight:bold; border-radius:8px; border:1px solid var(--border); cursor:pointer; width:100%;">⚙️ Paramètres</button>
-          </div>
-          
-          <!-- Status message -->
-          <div id="room-message" style="padding:10px; border-radius:8px; text-align:center; font-size:0.9rem; min-height:20px;"></div>
-        </div>
-        
-        <!-- Panel droit: Affichage TV simulé -->
-        <div style="background:rgba(0,0,0,0.5); border:3px solid var(--accent); border-radius:12px; padding:16px; min-height:400px; display:flex; flex-direction:column;">
-          <div style="text-align:center; margin-bottom:12px; font-size:0.9rem; color:var(--muted); font-weight:bold;">📺 État de la TV</div>
-          
-          <!-- Affichage simulé de la TV -->
-          <div id="tv-display" style="flex:1; background:rgba(0,0,0,0.7); border-radius:8px; padding:12px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; transition:all 0.2s;" onmouseenter="this.style.background='rgba(0,0,0,0.85)'" onmouseleave="this.style.background='rgba(0,0,0,0.7)'">
-            <!-- Haut: Titre et statut -->
-            <div>
-              <div id="tv-title" style="font-size:1.2rem; font-weight:bold; color:var(--accent); text-align:center; margin-bottom:12px;">Room XXXX</div>
-              <div id="tv-room-info" style="background:rgba(255,255,255,0.05); border-radius:6px; padding:8px; font-size:0.85rem; color:var(--muted);">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; text-align:center;">
-                  <div>📱 <span id="tv-web-count">0</span> web</div>
-                  <div>📺 <span id="tv-tv-count">0</span> TV</div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Milieu: Liste des appareils -->
-            <div style="flex:1; margin:12px 0;">
-              <div style="font-size:0.85rem; font-weight:bold; color:var(--text); margin-bottom:8px;">Appareils connectés:</div>
-              <div id="tv-devices-list" style="display:flex; flex-direction:column; gap:6px; font-size:0.8rem;">
-                <!-- Devices will be populated here -->
-              </div>
-            </div>
-            
-            <!-- Bas: Statut global -->
-            <div style="border-top:1px solid var(--border); padding-top:12px;">
-              <div id="tv-global-status" style="text-align:center; font-weight:bold; color:#2ecc71;">✅ Tous prêts</div>
-              <div id="tv-game-status" style="text-align:center; font-size:0.85rem; color:var(--muted); margin-top:6px;"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Liste des joueurs (mobile friendly) -->
-      <div style="width:100%; border-radius:8px; background:rgba(255,255,255,0.02); border:1px solid var(--border); padding:12px;">
-        <div style="font-weight:bold; margin-bottom:12px;">Joueurs connectés</div>
-        <div id="room-players-list" style="display:flex; flex-direction:column; gap:8px; max-height:150px; overflow:auto;"></div>
-      </div>
-    </div>
-    
-    <button class="back-btn" data-back>⬅ <span id="back-label">Retour au menu</span></button>
-  </main>
+  <h2>📄 Page 2</h2>
+  <p>Contenu de la page 2</p>
+  
+  <div class="nav-buttons">
+    <button class="nav-btn" data-nav="page1">→ Page 1</button>
+    <button class="nav-btn" data-nav="page3">→ Page 3</button>
+  </div>
 </div>
 
 <!-- ========================= -->
-<!-- PAGE 3                    -->
+<!-- PAGE 3 (VIDE)             -->
 <!-- ========================= -->
 <div id="page3" class="page">
-  <main>
-
+  <h2>📄 Page 3</h2>
+  <p>Contenu de la page 3</p>
   
-  <main>
-    <img src="connectmeifucan-logo-Noel.jpg" alt="Connect Me If U Can Logo" class="logo">
-
-    <h2>Connect Me to New Realities</h2>
- <h3>🎮 Connect Me If U Can (under construction)</h3>
-   
-    <div id="fr" class="lang">
-      ✨ 1. Déplace-toi sereinement la nuit, en toute simplicité.<br>
-      ✨ 2. Transforme ton salon en expérience immersive à domicile :<br>
-      🔦 Lumières • Sons • Objets connectés.<br>
-      ⏳ Voyage dans le temps entre 1850 et 2050.<br><br>
-
-      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Découvrir</a>
-      <div class="note">💡 Projects personnels en cours de développement</div>
-    </div>
-
-    <div id="en" class="lang">
-      ✨ 1. Move around at night with ease and peace of mind<br>
-      ✨ 2. Turn your living room into an immersive home experience.<br>
-      🔦 Lights • Sounds • Smart objects.<br>
-      ⏳ Time travel between 1850 and 2050.<br><br>
-
-      <a class="cta" href="https://linktr.ee/connectmeifucan" target="_blank" rel="noopener">Discover</a>
-      <div class="note">💡 Personal projects under development</div>
-    </div>    
-    <button class="back-btn" data-back>⬅ Retour au menu</button>
-  </main>
+  <div class="nav-buttons">
+    <button class="nav-btn" data-nav="page1">→ Page 1</button>
+    <button class="nav-btn" data-nav="page2">→ Page 2</button>
+  </div>
 </div>
 
 <!-- ========================= -->
-<!-- CART PAGE                 -->
-<!-- ========================= -->
-<div id="page-cart" class="page">
-  <main>
-    <h2>🧺 Panier</h2>
-    <div id="cart-list" style="width:100%; max-width:720px; margin:0 auto; text-align:left;"></div>
-    <div id="cart-total" style="margin-top:12px; font-weight:800; color:var(--accent);">Total: —</div>
-    <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
-      <button id="btn-cart-order" class="menu-btn">Passer commande</button>
-      <button class="back-btn" data-back>⬅ Retour au menu</button>
-    </div>
-  </main>
-</div>
-
-<!-- ========================= -->
-<!-- SCRIPT GLOBAL             -->
+<!-- SCRIPT                    -->
 <!-- ========================= -->
 <script>
-/* SPLASH → MENU (long-press left/right with progress + auto-enter fallback) */
-console.debug('Splash script loaded');
-window.addEventListener('error', (e) => { console.error('Global error:', e.error || e.message); });
-const splash = document.getElementById("splash");
-const menu = document.getElementById("menu");
+console.debug('Script loaded');
 
+const splash = document.getElementById("splash");
 const btnLeft = document.getElementById('enter-left');
 const btnRight = document.getElementById('enter-right');
 const progressBar = document.getElementById('press-progress-bar');
 const progressFill = document.getElementById('press-progress-fill');
 const progressText = document.getElementById('press-progress-text');
+const globalControl = document.getElementById('global-control');
+const globalBack = document.getElementById('global-back');
 
-const PRESS_MS = 2000; // ms required to reach 100%
+const PRESS_MS = 2000;
 let pressRaf = null;
 let pressStart = 0;
 let currentHand = null;
-// Auto-enter fallback enabled: auto-complete after 3s
-let autoEnterTimer = null;
-autoEnterTimer = setTimeout(() => {
-  if (splash && !splash.classList.contains('zooming')) {
-    // fallback: auto-complete after 3s
-    doComplete('auto');
-  }
-}, 3000);
+
+// ========================= 
+// PROGRESS BAR (CONTROLLED BY VIDEO)
+// =========================
+const splashVideo = document.getElementById('splash-video');
 
 function updateProgressUI(percent) {
   if (progressFill) progressFill.style.width = percent + '%';
-  const lang = document.body.dataset.lang || document.documentElement.lang || 'fr';
-  const prefix = lang === 'fr' ? 'Chargement ' : 'Loading ';
-  if (progressText) progressText.textContent = prefix + Math.round(percent) + '%';
-} 
+  if (progressText) progressText.textContent = 'Chargement ' + Math.round(percent) + '%';
+}
 
 function resetProgress() {
-  console.debug('resetProgress');
   if (pressRaf) { cancelAnimationFrame(pressRaf); pressRaf = null; }
   if (progressBar) progressBar.classList.remove('visible');
   updateProgressUI(0);
   currentHand = null;
 }
 
-function startPress(hand) {
-  clearTimeout(autoEnterTimer);
-  if (!progressBar || !progressFill) return;
-  currentHand = hand;
-  progressBar.classList.add('visible');
-  pressStart = performance.now();
-
-  function step(t) {
-    const elapsed = t - pressStart;
-    const p = Math.min(1, elapsed / PRESS_MS);
-    updateProgressUI(p * 100);
-    // Use rounded percent to ensure displayed "100%" triggers the action
-    if (Math.round(p * 100) >= 100) {
-      if (pressRaf) { cancelAnimationFrame(pressRaf); pressRaf = null; }
-      // Completed: record hand and start zoom transition
-      doComplete(hand);
-    } else {
-      pressRaf = requestAnimationFrame(step);
-    }
-  }
-
-  pressRaf = requestAnimationFrame(step);
-}
-
+// ========================= 
+// SPLASH → PAGES
+// =========================
 function doComplete(hand) {
   console.debug('doComplete', hand);
-  // clear fallback timer
-  clearTimeout(autoEnterTimer);
-
-  // Store detected hand and show global control
+  
   if (hand && hand !== 'auto') showGlobalControl(hand);
-
-  // start zoom-out on splash
+  
   if (splash) splash.classList.add('zooming');
-
-  // after transition, remove splash and show menu with scale-in
+  
   setTimeout(() => {
     if (splash && splash.parentNode) splash.remove();
+    
+    // Afficher le menu
+    const menu = document.getElementById('menu');
     if (menu) {
-      menu.classList.add('active', 'scale-in');
-      // initialize menu selection
-      menuSelectedIndex = 0;
-      highlightMenuSelection(menuSelectedIndex);
-      // menu is active: update global control label to long-press text
-      updateGlobalLabel();
+      menu.classList.add('active');
     }
-
-    // If a stored hand was deferred during splash, apply it now to show the persistent control
-    if (window._deferredHand && !(document.body.classList.contains('hand-left') || document.body.classList.contains('hand-right'))) {
-      console.debug('Applying deferred stored hand after splash:', window._deferredHand);
-      showGlobalControl(window._deferredHand);
-      delete window._deferredHand;
-    }
-
+    
     resetProgress();
-  }, 700);
-} 
+  }, 900);
+}
 
-// attach pointer handlers to left/right buttons (works for mouse & touch)
+// ========================= 
+// SPLASH BUTTON HANDLERS
+// =========================
 [btnLeft, btnRight].forEach(btn => {
   if (!btn) return;
   const hand = btn.id === 'enter-left' ? 'left' : 'right';
-
-  // per-button RAF and timers to avoid interference between buttons
-  btn._pressRaf = null;
-  btn._pressStart = 0;
-
+  
+  btn._videoTimeHandler = null;
+  btn._videoEndedHandler = null;
+  
   function localStartPress() {
-    console.debug('localStartPress', hand);
-    clearTimeout(autoEnterTimer);
-    if (!progressBar || !progressFill) { console.warn('Progress elements missing', {progressBar, progressFill}); return; }
+    if (!progressBar || !splashVideo) return;
     currentHand = hand;
     progressBar.classList.add('visible');
-    btn._pressStart = performance.now();
-
-    function step(t) {
-      const elapsed = t - btn._pressStart;
-      const p = Math.min(1, elapsed / PRESS_MS);
-      updateProgressUI(p * 100);
-      if (Math.round(p * 100) >= 100) {
-        if (btn._pressRaf) { cancelAnimationFrame(btn._pressRaf); btn._pressRaf = null; }
-        // Completed: record hand and start zoom transition
-        console.debug('localStartPress completed', hand);
-        doComplete(hand);
-      } else {
-        btn._pressRaf = requestAnimationFrame(step);
-      }
+    
+    // Masquer les deux disques
+    if (btnLeft) {
+      btnLeft.style.opacity = '0';
+      btnLeft.style.pointerEvents = 'none';
     }
-
-    btn._pressRaf = requestAnimationFrame(step);
+    if (btnRight) {
+      btnRight.style.opacity = '0';
+      btnRight.style.pointerEvents = 'none';
+    }
+    
+    // Masquer les titres et texte
+    const splashTitle = splash.querySelector('h1');
+    const splashText = splash.querySelector('p');
+    if (splashTitle) {
+      splashTitle.style.opacity = '0';
+      splashTitle.style.transform = 'translateY(-10px)';
+    }
+    if (splashText) {
+      splashText.style.opacity = '0';
+      splashText.style.transform = 'translateY(-10px)';
+    }
+    
+    // Réinitialiser la vidéo au début
+    splashVideo.currentTime = 0;
+    
+    // Écouter la progression de la vidéo
+    btn._videoTimeHandler = () => {
+      if (splashVideo.duration) {
+        const percent = (splashVideo.currentTime / splashVideo.duration) * 100;
+        updateProgressUI(percent);
+        
+        // Vérifier si on atteint 100%
+        if (percent >= 99.5) {
+          localComplete();
+        }
+      }
+    };
+    
+    btn._videoEndedHandler = () => {
+      localComplete();
+    };
+    
+    splashVideo.addEventListener('timeupdate', btn._videoTimeHandler);
+    splashVideo.addEventListener('ended', btn._videoEndedHandler);
+    
+    // Démarrer la lecture
+    splashVideo.play().catch(err => console.warn('Autoplay error:', err));
   }
-
+  
+  function localComplete() {
+    if (btn._videoTimeHandler) {
+      splashVideo.removeEventListener('timeupdate', btn._videoTimeHandler);
+      btn._videoTimeHandler = null;
+    }
+    if (btn._videoEndedHandler) {
+      splashVideo.removeEventListener('ended', btn._videoEndedHandler);
+      btn._videoEndedHandler = null;
+    }
+    splashVideo.pause();
+    doComplete(hand);
+  }
+  
   function localReset() {
-    if (btn._pressRaf) { cancelAnimationFrame(btn._pressRaf); btn._pressRaf = null; }
+    if (btn._videoTimeHandler) {
+      splashVideo.removeEventListener('timeupdate', btn._videoTimeHandler);
+      btn._videoTimeHandler = null;
+    }
+    if (btn._videoEndedHandler) {
+      splashVideo.removeEventListener('ended', btn._videoEndedHandler);
+      btn._videoEndedHandler = null;
+    }
+    splashVideo.pause();
+    splashVideo.currentTime = 0;
     progressBar.classList.remove('visible');
     updateProgressUI(0);
     currentHand = null;
+    
+    // Réafficher les deux disques
+    if (btnLeft) {
+      btnLeft.style.opacity = '1';
+      btnLeft.style.pointerEvents = 'auto';
+    }
+    if (btnRight) {
+      btnRight.style.opacity = '1';
+      btnRight.style.pointerEvents = 'auto';
+    }
+    
+    // Réafficher les titres et texte
+    const splashTitle = splash.querySelector('h1');
+    const splashText = splash.querySelector('p');
+    if (splashTitle) {
+      splashTitle.style.opacity = '1';
+      splashTitle.style.transform = 'translateY(0)';
+    }
+    if (splashText) {
+      splashText.style.opacity = '1';
+      splashText.style.transform = 'translateY(0)';
+    }
   }
-
+  
   btn.addEventListener('pointerdown', e => {
-    console.debug('pointerdown', btn.id, e.pointerId);
     e.preventDefault();
-    try { btn.setPointerCapture && btn.setPointerCapture(e.pointerId); } catch (err) { console.warn('setPointerCapture failed', err); }
+    try { btn.setPointerCapture && btn.setPointerCapture(e.pointerId); } catch (err) {}
     btn.classList.add('pressing');
     localStartPress();
   });
-
+  
   btn.addEventListener('pointerup', e => {
-    console.debug('pointerup', btn.id, e.pointerId);
-    try { btn.releasePointerCapture && btn.releasePointerCapture(e.pointerId); } catch (err) { console.warn('releasePointerCapture failed', err); }
+    try { btn.releasePointerCapture && btn.releasePointerCapture(e.pointerId); } catch (err) {}
     btn.classList.remove('pressing');
-    // if not completed yet, cancel
     if (btn._pressRaf) localReset();
   });
-
-  btn.addEventListener('pointercancel', e => { console.debug('pointercancel', btn.id); btn.classList.remove('pressing'); localReset(); });
-  btn.addEventListener('pointerleave', e => { if (btn._pressRaf) localReset(); btn.classList.remove('pressing'); });
-
-  // keyboard support
-  btn.addEventListener('keydown', e => {
-    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); btn.classList.add('pressing'); localStartPress(); }
+  
+  btn.addEventListener('pointercancel', e => { 
+    btn.classList.remove('pressing'); 
+    localReset(); 
   });
-  btn.addEventListener('keyup', e => {
-    if (e.key === ' ' || e.key === 'Enter') { btn.classList.remove('pressing'); if (btn._pressRaf) localReset(); }
+  
+  btn.addEventListener('pointerleave', e => { 
+    if (btn._pressRaf) localReset(); 
+    btn.classList.remove('pressing'); 
   });
 });
 
-// -------------------------
-// GLOBAL CONTROL & MENU NAV
-// -------------------------
-const globalControl = document.getElementById('global-control');
-let globalPressRaf = null;
-let globalPressStart = 0;
-const TAP_THRESHOLD = 300; // ms for tap vs long-press
-let menuButtons = Array.from(document.querySelectorAll('#menu .menu-btn[data-target]'));
-let menuSelectedIndex = 0;
-
-function updateGlobalLabel() {
-  if (!globalControl) return;
-  const lang = document.body.dataset.lang || document.documentElement.lang || 'fr';
-  // on menu -> long-press message; otherwise short press hint
-  const isMenu = menu && menu.classList.contains('active');
-  const label = (lang === 'fr')
-    ? (isMenu ? 'Appui long pour entrer' : 'Appuyer pour entrer')
-    : (isMenu ? 'Long press to enter' : 'Press to enter');
-  const lbl = globalControl.querySelector('.enter-label'); if (lbl) lbl.textContent = label;
-}
-
+// ========================= 
+// GLOBAL CONTROLS
+// =========================
 function showGlobalControl(hand) {
   if (!globalControl) return;
   document.body.dataset.hand = hand;
@@ -1042,166 +838,45 @@ function showGlobalControl(hand) {
   globalControl.style.display = 'inline-flex';
   globalControl.classList.add('show');
   globalControl.setAttribute('aria-hidden', 'false');
-  // set correct label for current state
-  updateGlobalLabel();
-}
-
-function initGlobalFromStorage() {
-  const hand = localStorage.getItem('cmuc_hand');
-  if (hand === 'left' || hand === 'right') {
-    // If the splash is still present, don't hide the opposite enter button yet.
-    // Defer showing the persistent global control until after the splash transition.
-    if (splash && !splash.classList.contains('zooming')) {
-      console.debug('initGlobalFromStorage: deferring stored hand until after splash', hand);
-      window._deferredHand = hand;
-    } else {
-      showGlobalControl(hand);
-    }
-  }
-}
-
-function highlightMenuSelection(i) {
-  menuButtons = Array.from(document.querySelectorAll('#menu .menu-btn[data-target]'));
-  if (!menuButtons.length) return;
-  menuButtons.forEach((b, idx) => b.classList.toggle('selected', idx === i));
-  // ensure it is in view
-  try { menuButtons[i].scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
-}
-
-function advanceMenuSelection() {
-  if (!menu.classList.contains('active')) return;
-  menuButtons = Array.from(document.querySelectorAll('#menu .menu-btn[data-target]'));
-  if (!menuButtons.length) return;
-  menuSelectedIndex = (menuSelectedIndex + 1) % menuButtons.length;
-  highlightMenuSelection(menuSelectedIndex);
-}
-
-function confirmMenuSelection() {
-  if (!menu || !menu.classList.contains('active')) { console.debug('confirmMenuSelection: menu not active or missing'); return; }
-  menuButtons = Array.from(document.querySelectorAll('#menu .menu-btn[data-target]'));
-  if (!menuButtons.length) { console.debug('confirmMenuSelection: no menu buttons found'); return; }
-  const btn = menuButtons[menuSelectedIndex];
-  console.debug('confirmMenuSelection', { menuSelectedIndex, btnId: btn && btn.id, target: btn && btn.dataset && btn.dataset.target });
-  if (btn) {
-    try {
-      btn.click();
-    } catch (err) {
-      console.warn('confirmMenuSelection: btn.click() threw', err);
-    }
-
-    // Fallback: if click didn't navigate (no page became active), use navigateToPage
-    const pageActive = !!document.querySelector('.page.active');
-    const target = btn.dataset.target;
-    if (!pageActive && target) {
-      console.debug('confirmMenuSelection fallback navigation to', target);
-      navigateToPage(target);
-      menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
-    }
-  }
-}
-
-function startGlobalPress() {
-  console.debug('startGlobalPress');
-  if (!progressBar) { console.warn('startGlobalPress: missing progressBar'); return; }
-  globalPressStart = performance.now();
-  progressBar.classList.add('visible');
-
-  function step(t) {
-    const elapsed = t - globalPressStart;
-    const p = Math.min(1, elapsed / PRESS_MS);
-    updateProgressUI(p * 100);
-    // Use rounded percent so visible 100% reliably confirms selection
-    if (Math.round(p * 100) >= 100) {
-      if (globalPressRaf) { cancelAnimationFrame(globalPressRaf); globalPressRaf = null; }
-      console.debug('startGlobalPress completed');
-      confirmMenuSelection();
-      resetGlobalProgress();
-    } else {
-      globalPressRaf = requestAnimationFrame(step);
-    }
-  }
-
-  globalPressRaf = requestAnimationFrame(step);
-}
-
-function resetGlobalProgress() {
-  if (globalPressRaf) { cancelAnimationFrame(globalPressRaf); globalPressRaf = null; }
-  if (progressBar) progressBar.classList.remove('visible');
-  updateProgressUI(0);
-}
-
-if (globalControl) {
-  globalControl.addEventListener('pointerdown', e => {
-    console.debug('global pointerdown');
-    e.preventDefault();
-    try { globalControl.setPointerCapture && globalControl.setPointerCapture(e.pointerId); } catch (err) { console.warn('global setPointerCapture failed', err); }
-    globalControl.classList.add('pressing');
-    startGlobalPress();
-  });
-
-  globalControl.addEventListener('pointerup', e => {
-    console.debug('global pointerup');
-    try { globalControl.releasePointerCapture && globalControl.releasePointerCapture(e.pointerId); } catch (err) { console.warn('global releasePointerCapture failed', err); }
-    globalControl.classList.remove('pressing');
-    const elapsed = performance.now() - globalPressStart;
-    if (globalPressRaf) {
-      // not completed: determine tap vs short press
-      if (elapsed < TAP_THRESHOLD) {
-        resetGlobalProgress();
-        advanceMenuSelection();
-      } else {
-        resetGlobalProgress();
-      }
-    }
-  });
-
-  globalControl.addEventListener('pointercancel', e => { console.debug('global pointercancel'); globalControl.classList.remove('pressing'); resetGlobalProgress(); });
-  globalControl.addEventListener('pointerleave', e => { if (globalPressRaf) resetGlobalProgress(); globalControl.classList.remove('pressing'); });
-
-  globalControl.addEventListener('keydown', e => {
-    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); globalControl.classList.add('pressing'); startGlobalPress(); }
-  });
-  globalControl.addEventListener('keyup', e => {
-    if (e.key === ' ' || e.key === 'Enter') {
-      globalControl.classList.remove('pressing');
-      if (globalPressRaf) {
-        const elapsed = performance.now() - globalPressStart;
-        if (elapsed < TAP_THRESHOLD) { resetGlobalProgress(); advanceMenuSelection(); } else { resetGlobalProgress(); }
-      }
-    }
-  });
-}
-
-// initialize persistent control if user already chose a hand
-initGlobalFromStorage();
-
-// Global back control (opposite side)
-const globalBack = document.getElementById('global-back');
-
-function updateGlobalBackLabel() {
-  if (!globalBack) return;
-  const lang = document.body.dataset.lang || document.documentElement.lang || 'fr';
-  const label = lang === 'fr' ? 'Retour' : 'Back';
-  const lbl = globalBack.querySelector('.enter-label'); if (lbl) lbl.textContent = label;
 }
 
 function updateGlobalVisibility() {
-  // show back control only when a page is active (not menu)
   const pageActive = !!document.querySelector('.page.active');
-  if (globalBack) {
-    if (pageActive) { globalBack.style.display = 'inline-flex'; globalBack.classList.add('show'); globalBack.setAttribute('aria-hidden', 'false'); }
-    else { globalBack.style.display = 'none'; globalBack.classList.remove('show'); globalBack.setAttribute('aria-hidden', 'true'); }
+  
+  if (globalControl) {
+    if (pageActive) { 
+      globalControl.style.display = 'inline-flex'; 
+      globalControl.classList.add('show'); 
+      globalControl.setAttribute('aria-hidden', 'false'); 
+    }
+    else { 
+      globalControl.style.display = 'none'; 
+      globalControl.classList.remove('show'); 
+      globalControl.setAttribute('aria-hidden', 'true'); 
+    }
   }
-  // update labels
-  updateGlobalLabel();
-  updateGlobalBackLabel();
+  
+  if (globalBack) {
+    if (pageActive) { 
+      globalBack.style.display = 'inline-flex'; 
+      globalBack.classList.add('show'); 
+      globalBack.setAttribute('aria-hidden', 'false'); 
+    }
+    else { 
+      globalBack.style.display = 'none'; 
+      globalBack.classList.remove('show'); 
+      globalBack.setAttribute('aria-hidden', 'true'); 
+    }
+  }
 }
 
-// --- Auto-hide global controls on sub-pages and show on touch ---
+// ========================= 
+// AUTO-HIDE CONTROLS
+// =========================
 let hideControlsTimer = null;
+
 function scheduleAutoHideControls(delay = 1000) {
   clearTimeout(hideControlsTimer);
-  // only hide when on a page (not on menu)
   hideControlsTimer = setTimeout(() => {
     if (document.querySelector('.page.active')) {
       globalControl && globalControl.classList.add('auto-hidden');
@@ -1216,1579 +891,123 @@ function cancelAutoHideControls() {
 }
 
 function showControlsOnTouch() {
-  // only relevant when a page is active
   if (!document.querySelector('.page.active')) return;
   globalControl && globalControl.classList.remove('auto-hidden');
   globalBack && globalBack.classList.remove('auto-hidden');
-  // re-schedule hide
   cancelAutoHideControls();
   scheduleAutoHideControls(1000);
 }
 
-// touch and mouse events (pointerdown / pointermove for modern browsers, touchstart as fallback)
 document.addEventListener('pointerdown', (e) => {
-  // Show controls on touch or mouse pointer activation
   if (e.pointerType === 'touch' || e.pointerType === 'mouse') showControlsOnTouch();
 });
-// also listen for mouse movement (hover) to reveal controls when user moves the cursor
+
 document.addEventListener('pointermove', (e) => {
   if (e.pointerType === 'mouse') showControlsOnTouch();
 }, { passive: true });
-// fallback for older touch-only browsers
-document.addEventListener('touchstart', (e) => { showControlsOnTouch(); }, { passive: true });
-// fallback for older mouse-only browsers
-document.addEventListener('mousemove', () => { showControlsOnTouch(); }, { passive: true });
 
-
-function goBackToMenu() {
-  const activePage = document.querySelector('.page.active');
-  if (activePage) {
-    // animate page out with a subtle zoom & fade
-    activePage.classList.add('zooming');
-    // remove logo animation immediately so it scales with the page zoom
-    activePage.classList.remove('logo-in');
-    setTimeout(() => {
-      activePage.classList.remove('active','scale-in','frame','zooming');
-      // ensure controls are visible again and cancel auto-hide
-      cancelAutoHideControls();
-      globalControl && globalControl.classList.remove('auto-hidden');
-      globalBack && globalBack.classList.remove('auto-hidden');
-      // remove page-open flag so controls return to mobile default position
-      document.body.classList.remove('page-open');
-      menu.classList.add('active');
-      menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
-      updateGlobalVisibility();
-    }, 700);
-  } else {
-    // fallback immediate show menu
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active','scale-in','frame','zooming','logo-in'));
-    setTimeout(() => {
-      // remove page-open flag in fallback as well
-      document.body.classList.remove('page-open');
-      menu.classList.add('active');
-      menuSelectedIndex = 0; highlightMenuSelection(menuSelectedIndex);
-      updateGlobalVisibility();
-    }, 20);
-  }
-}
-
-if (globalBack) {
-  globalBack.addEventListener('click', e => {
-    e.preventDefault();
-    const modal = document.getElementById('shared-tv-modal');
-    if (modal && modal.style.display !== 'none') {
-      if (typeof closeSharedTV === 'function') closeSharedTV();
-      return;
-    }
-    goBackToMenu();
-  });
-}
-
-// Ensure visibility is updated when navigating to a page
+// ========================= 
+// PAGE NAVIGATION
+// =========================
 function navigateToPage(target) {
   const page = document.getElementById(target);
   if (!page) return;
-  // mark that a page is open so we can adjust control positions on mobile
+  
   document.body.classList.add('page-open');
-  // hide menu and clear selection
-  menu.classList.remove('active');
-  document.querySelectorAll('#menu .menu-btn').forEach(b => b.classList.remove('selected'));
-  // remove classes from other pages
-  document.querySelectorAll('.page').forEach(p => { if (p !== page) { p.classList.remove('active','scale-in','frame','zooming'); } });
-  // prepare and show page
+  
+  document.querySelectorAll('.page').forEach(p => { 
+    if (p !== page) { 
+      p.classList.remove('active','scale-in','frame','zooming'); 
+    } 
+  });
+  
   page.classList.add('frame');
   page.classList.add('active');
+  
   setTimeout(() => {
     page.classList.add('scale-in');
-    // add 'logo-in' as a separate hook for fine-grained animation (small delay)
-    setTimeout(() => page.classList.add('logo-in'), 30);
-    // update back control visibility when on page
     updateGlobalVisibility();
-    // schedule auto-hide of persistent controls on sub-pages
     scheduleAutoHideControls(1000);
   }, 20);
 }
 
-// Attach handlers that use navigateToPage
-document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const target = btn.dataset.target;
-    console.debug('menu button clicked', { id: btn.id, target });
-    navigateToPage(target);
-  });
-});
-
-// update visibility when returning to menu via back buttons
-document.querySelectorAll("[data-back]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    // If shared TV fullscreen is open, close it instead of navigating
-    const modal = document.getElementById('shared-tv-modal');
-    if (modal && modal.style.display !== 'none') {
-      if (typeof closeSharedTV === 'function') closeSharedTV();
-      return;
-    }
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-
-    setTimeout(() => {
-      menu.classList.add("active");
-      // reset & highlight first option
-      menuSelectedIndex = 0;
-      highlightMenuSelection(menuSelectedIndex);
-      // update global label to long-press when returning to menu
-      updateGlobalLabel();
-      // update visibility
-      updateGlobalVisibility();
-    }, 20);
-  });
-});
-
-/* CATEGORIES → PAGES */
-document.querySelectorAll(".menu-btn[data-target]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const target = btn.dataset.target;
-    console.debug('menu button clicked (categories)', { id: btn.id, target });
-    navigateToPage(target);
-  });
-});
-
-
-
-// ---------------------------
-// Catalogue / Vitrine produit (JS)
-// ---------------------------
-(function(){
-  const CATALOG_DIR = 'Catalogue produits';
-  let catalogueProducts = [];
-  const PAGE_SIZE = 8; // changed to 8 items per page
-  let currentPage = 0;
-  let selectedProductId = null; // current selected product from selector
-  let filterSaveTimer = null; // debounce timer for storing filter in localStorage
-
-  function imageExists(url) {
-    return new Promise(resolve => {
-      const img = new Image(); img.onload = () => resolve(true); img.onerror = () => resolve(false); img.src = encodeURI(url);
-    });
-  }
-
-  async function fetchPrice(p) {
-    p.tags = p.tags || [];
-    if (!p.priceFile) { p.price = '—'; p.tags = p.tags || []; return; }
-    try {
-      const r = await fetch(encodeURI(p.priceFile));
-      if (!r.ok) { p.price = '—'; p.tags = p.tags || []; return; }
-      const txt = (await r.text()).trim(); p._rawMeta = txt;
-      const lines = txt.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
-      // price detection: first line containing a number (with optional currency)
-      let priceLine = lines.find(l => /[0-9]+(?:[.,][0-9]+)?\s*(€|eur|euro)?/i.test(l));
-      if (!priceLine && lines.length) priceLine = lines[0];
-      p.price = priceLine || '—';
-
-      // tags detection: look for lines starting with tags: or mots: or hashtags
-      let tags = [];
-      const tagLine = lines.find(l => /^(tags?|mots?)[:=]/i.test(l));
-      if (tagLine) {
-        const after = tagLine.replace(/^(tags?|mots?)[:=]\s*/i,'');
-        tags = after.split(/[;,|]+/).map(s=>s.trim()).filter(Boolean);
-      }
-      // also capture #hashtag tokens anywhere
-      try {
-        const matches = [...txt.matchAll(/#([\p{L}\w-]+)/gu)].map(m=>m[1]);
-        tags = tags.concat(matches);
-      } catch (err) { /* Unicode regex may fail in some engines; ignore */ }
-      p.tags = Array.from(new Set(tags.map(t => t.toLowerCase())));
-    } catch (e) { p.price = '—'; p.tags = p.tags || []; }
-  }
-
-  async function loadFromManifest() {
-    try {
-      const resp = await fetch(encodeURI(CATALOG_DIR + '/products.json'));
-      if (!resp.ok) return null;
-      return await resp.json();
-    } catch (e) { return null; }
-  }
-
-  async function discoverFallback() {
-    const items = [];
-    for (let i=1;i<=48;i++) {
-      const img = `${CATALOG_DIR}/product-${i}.jpg`;
-      // sequential check keeps network reasonable
-      // eslint-disable-next-line no-await-in-loop
-      if (await imageExists(img)) {
-        items.push({ id: i, image: img, nameFr: `Produit ${i}`, nameEn: `Product ${i}`, priceFile: `${CATALOG_DIR}/product-${i}.txt`, price: '—' });
-      }
-    }
-    return items;
-  }
-
-  function renderSelector() {
-    const list = document.getElementById('catalogue-list');
-    const countEl = document.querySelector('#catalogue-selector .selector-count');
-    if (!list) return;
-    const filterInput = document.getElementById('catalogue-filter');
-    const filter = (filterInput && filterInput.value) ? filterInput.value.trim().toLowerCase() : '';
-    list.innerHTML = '';
-    let count = 0;
-    const compact = !!filter; // compact mode when filtering
-
-    catalogueProducts.forEach((p, idx) => {
-      const nameText = ((p.nameFr||'') + ' ' + (p.nameEn||'')).toLowerCase();
-      const tagMatch = p.tags && p.tags.some(t => t.includes(filter));
-      const nameMatch = nameText.includes(filter);
-      if (filter && !(nameMatch || tagMatch)) return; // skip non-matching
-
-      const li = document.createElement('li'); li.dataset.id = p.id; li.role = 'option';
-      const lang = document.body.dataset.lang || document.documentElement.lang || 'fr';
-      const localizedDesc = (lang === 'fr') ? (p.descFr || p.descEn || '') : (p.descEn || p.descFr || '');
-
-      if (compact) {
-        li.classList.add('compact');
-        const checked = p._selectedInSelector ? 'checked' : '';
-        li.innerHTML = `<input type="checkbox" class="sel-checkbox" ${checked} aria-label="Sélectionner ${localizedName(p)}"> <img src="${encodeURI(p.image)}" alt=""> <div class="meta"><strong>${(p.nameFr||p.nameEn)||''}</strong><div class="muted">${p.price}</div></div>`;
-        li.addEventListener('click', (e) => {
-          // if user clicked the checkbox directly, use its checked state (avoid double toggle)
-          if (e.target && e.target.tagName && e.target.tagName.toLowerCase() === 'input') {
-            p._selectedInSelector = e.target.checked;
-            updateSelectorActions();
-            return;
-          }
-          // toggle checkbox selection
-          p._selectedInSelector = !p._selectedInSelector;
-          renderSelector();
-          updateSelectorActions();
-        });
-      } else {
-        const tagsHtml = (p.tags || []).map(t=>`<span class="tag">${t}</span>`).join('');
-        li.innerHTML = `<img src="${encodeURI(p.image)}" alt=""> <div class="meta"><strong>${(p.nameFr||p.nameEn)||''}</strong><div class="muted">${p.price}</div><div class="desc">${localizedDesc}</div><div class="tags">${tagsHtml}</div></div>`;
-        li.addEventListener('click', () => {
-          selectedProductId = p.id;
-          // show the page where this product is located
-          const index = catalogueProducts.findIndex(x=>String(x.id)===String(p.id));
-          if (index >= 0) { currentPage = Math.floor(index / PAGE_SIZE); renderCatalogue(); }
-          // update selector highlight
-          renderSelector();
-          // ensure the selected card is visible
-          setTimeout(()=>{
-            const card = document.querySelector(`.product-card[data-id="${p.id}"]`);
-            card && card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 50);
-        });
-      }
-
-      if (String(p.id) === String(selectedProductId)) li.classList.add('selected');
-      list.appendChild(li);
-      count++;
-    });
-
-    // show count
-    if (!countEl && document.getElementById('catalogue-selector')) {
-      const el = document.getElementById('catalogue-selector');
-      const span = document.createElement('div'); span.className='selector-count'; span.textContent = `${count} produit${count>1?'s':''}`; el.insertBefore(span, el.querySelector('#catalogue-list'));
-    } else if (countEl) { countEl.textContent = `${count} produit${count>1?'s':''}`; }
-
-    updateSelectorActions();
-
-    if (count === 0) { const li = document.createElement('li'); li.className='muted'; li.textContent = 'Aucun produit correspondant.'; list.appendChild(li); }
-
-    function updateSelectorActions() {
-      const btnVal = document.getElementById('btn-validate');
-      const btnAdd = document.getElementById('btn-add-selection');
-      const anySelected = catalogueProducts.some(p=>p._selectedInSelector);
-      if (btnVal) btnVal.disabled = !anySelected;
-      if (btnAdd) btnAdd.disabled = !anySelected;
-    }
-  }
-
-  function toggleSelector(hidden) {
-    const wrap = document.getElementById('catalogue-wrap');
-    const btn = document.getElementById('btn-toggle-selector');
-    const selector = document.getElementById('catalogue-selector');
-    if (!wrap || !btn || !selector) return;
-    if (hidden === undefined) hidden = wrap.classList.contains('selector-hidden');
-    // when showing selector on small screens, use overlay mode
-    const isMobile = window.matchMedia && window.matchMedia(`(max-width: calc(var(--mobile) - 1px))`).matches;
-    if (hidden) {
-      wrap.classList.remove('selector-hidden');
-      btn.setAttribute('aria-pressed','false');
-      // clear mobile-specific open state
-      selector.classList.remove('open-mobile');
-    } else {
-      wrap.classList.add('selector-hidden');
-      btn.setAttribute('aria-pressed','true');
-      if (isMobile) selector.classList.remove('open-mobile');
-    }
-    // when explicitly showing (not hidden), make selector float on top for better visibility on small screens
-    if (!wrap.classList.contains('selector-hidden')) {
-      selector.classList.add('floating');
-    } else {
-      selector.classList.remove('floating');
-    }
-
-    // update wrap floating state so main grid resizes when selector floats
-    try { updateSelectorFloatingState(); } catch(e){}
-
-    // manage backdrop overlay on mobile
-    try {
-      let backdrop = document.getElementById('catalogue-backdrop');
-      const createBackdrop = ()=>{
-        backdrop = document.createElement('div'); backdrop.id = 'catalogue-backdrop'; backdrop.className = 'catalogue-backdrop';
-        backdrop.addEventListener('click', ()=>{ toggleSelector(true); });
-        document.body.appendChild(backdrop);
-      };
-      if (!backdrop) createBackdrop();
-      if (isMobile && !wrap.classList.contains('selector-hidden')) {
-        backdrop.classList.add('active');
-        if (!backdrop._escHandler) { backdrop._escHandler = function(e){ if (e.key === 'Escape') toggleSelector(true); }; document.addEventListener('keydown', backdrop._escHandler); }
-      } else {
-        backdrop.classList.remove('active');
-        if (backdrop && backdrop._escHandler) { document.removeEventListener('keydown', backdrop._escHandler); backdrop._escHandler = null; }
-      }
-    } catch(e){}
-
-    // persist choice
-    try { localStorage.setItem('cmuc_selector_hidden', wrap.classList.contains('selector-hidden') ? '1' : '0'); } catch (e) { }
-  }
-
-  function debounce(fn, wait=120){ let t=null; return (...args)=>{ if (t) clearTimeout(t); t = setTimeout(()=>fn(...args), wait); }; }
-
-  function updateSelectorFloatingState(){
-    const wrap = document.getElementById('catalogue-wrap');
-    const selector = document.getElementById('catalogue-selector');
-    if (!wrap || !selector) return;
-    const isHidden = wrap.classList.contains('selector-hidden');
-    const isOverlayPreferred = window.matchMedia && window.matchMedia(`(max-width: calc(var(--tablet) - 1px))`).matches; // overlay on tablet or smaller
-    const isMobile = window.matchMedia && window.matchMedia(`(max-width: calc(var(--mobile) - 1px))`).matches;
-    if (!isHidden && isOverlayPreferred) {
-      selector.classList.add('floating');
-      wrap.classList.add('selector-floating');
-      // on true mobile view use open-mobile class as well
-      if (isMobile) selector.classList.add('open-mobile'); else selector.classList.remove('open-mobile');
-    } else {
-      selector.classList.remove('floating');
-      selector.classList.remove('open-mobile');
-      wrap.classList.remove('selector-floating');
-    }
-  }
-
-  // keep state in sync on viewport resize
-  window.addEventListener('resize', debounce(()=>{ try{ updateSelectorFloatingState(); }catch(e){} }));
-
-  async function loadCatalogue() {
-    catalogueProducts = [];
-    const manifest = await loadFromManifest();
-    if (manifest && Array.isArray(manifest)) {
-      for (const it of manifest) {
-        const p = {
-          id: it.id || it.sku || Math.random().toString(36).slice(2,8),
-          image: it.image ? `${CATALOG_DIR}/${it.image}` : (it.imageAbsolute || ''),
-          nameFr: it.nameFr || it.name || `Produit ${it.id || ''}`,
-          nameEn: it.nameEn || it.name || `Product ${it.id || ''}`,
-          descFr: it.shortDescFr || it.descFr || it.shortDesc || it.description || '',
-          descEn: it.shortDescEn || it.descEn || it.shortDesc || it.description || '',
-          priceFile: it.priceFile ? `${CATALOG_DIR}/${it.priceFile}` : (it.priceFileAbsolute || `${CATALOG_DIR}/product-${it.id}.txt`),
-          price: '—'
-        };
-        catalogueProducts.push(p);
-      }
-    } else {
-      const fallback = await discoverFallback();
-      catalogueProducts = fallback;
-    }
-
-    // fetch prices in parallel
-    await Promise.all(catalogueProducts.map(p => fetchPrice(p)));
-    currentPage = 0;
-    renderSelector();
-    renderCatalogue();
-  }
-
-  function localizedName(p) { const lang = document.body.dataset.lang || document.documentElement.lang || 'fr'; return (lang === 'fr') ? (p.nameFr || p.nameEn) : (p.nameEn || p.nameFr); }
-
-  function renderCatalogue() {
-    const grid = document.getElementById('catalogue-grid');
-    const count = document.getElementById('catalogue-count');
-    const pagesEl = document.getElementById('catalogue-pages');
-    const pagination = document.getElementById('catalogue-pagination');
-    if (!grid || !count || !pagesEl || !pagination) return;
-
-    const total = activeFilterIds ? catalogueProducts.filter(p => activeFilterIds.includes(String(p.id))).length : catalogueProducts.length;
-    count.textContent = `${total} produit${total>1? 's':''}`;
-    const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
-    currentPage = Math.min(currentPage, pageCount - 1);
-    pagesEl.textContent = `Page ${currentPage + 1} / ${pageCount}`;
-
-    // apply filter by ids if set
-    const sourceList = activeFilterIds ? catalogueProducts.filter(p => activeFilterIds.includes(String(p.id))) : catalogueProducts;
-    const slice = sourceList.slice(currentPage*PAGE_SIZE, currentPage*PAGE_SIZE + PAGE_SIZE);
-    grid.innerHTML = '';
-    for (const p of slice) {
-      const card = document.createElement('article'); card.className = 'product-card'; card.dataset.id = p.id; card.setAttribute('tabindex','0'); card.setAttribute('role','article');
-      card.innerHTML = `<img src="${encodeURI(p.image)}" alt="${(p.nameFr||p.nameEn)||''}"><h4>${localizedName(p)}</h4><div class="price">${p.price}</div><div class="card-actions"><button class="btn-order">${document.body.dataset.lang === 'fr' ? 'Commander' : 'Order'}</button><button class="btn-addcart">${document.body.dataset.lang === 'fr' ? 'Ajouter au panier' : 'Add to cart'}</button></div>`;
-      if (String(p.id) === String(selectedProductId)) card.classList.add('selected');
-      grid.appendChild(card);
-    }
-    // attach order button handlers
-    grid.querySelectorAll('.btn-order').forEach(btn => btn.addEventListener('click', (e)=>{
-      const id = e.currentTarget.closest('.product-card').dataset.id;
-      const p = catalogueProducts.find(x => String(x.id) === String(id)); if (p) openOrderModal(p);
-    }));
-    // attach add-to-cart handlers
-    grid.querySelectorAll('.btn-addcart').forEach(btn => btn.addEventListener('click', (e)=>{
-      const id = e.currentTarget.closest('.product-card').dataset.id;
-      addToCart(id,1); renderCartPage();
-    }));
-    // if a selected product is on the current page, ensure it is visible
-    if (selectedProductId) {
-      setTimeout(()=>{
-        const sel = document.querySelector(`.product-card[data-id="${selectedProductId}"]`);
-        if (sel) sel.scrollIntoView({behavior:'smooth', block:'center'});
-      }, 10);
-    }
-
-    pagination.innerHTML = '';
-    if (pageCount > 1) {
-      const prev = document.createElement('button'); prev.textContent = '<'; prev.disabled = (currentPage===0); prev.addEventListener('click', ()=>{ currentPage = Math.max(0,currentPage-1); renderCatalogue(); });
-      const next = document.createElement('button'); next.textContent = '>'; next.disabled = (currentPage >= pageCount-1); next.addEventListener('click', ()=>{ currentPage = Math.min(pageCount-1,currentPage+1); renderCatalogue(); });
-      pagination.appendChild(prev);
-      for (let i=0;i<pageCount;i++){ const b=document.createElement('button'); b.textContent = (i+1); b.disabled = (i===currentPage); b.addEventListener('click', ()=>{ currentPage = i; renderCatalogue(); }); pagination.appendChild(b); }
-      pagination.appendChild(next);
-    }
-
-    // attach order button handlers
-    grid.querySelectorAll('.btn-order').forEach(btn => btn.addEventListener('click', (e)=>{
-      const id = e.currentTarget.closest('.product-card').dataset.id;
-      const p = catalogueProducts.find(x => String(x.id) === String(id)); if (p) openOrderModal(p);
-    }));
-  }
-
-  function openOrderModal(product) {
-    let modal = document.getElementById('catalogue-modal');
-    if (!modal) {
-      modal = document.createElement('div'); modal.id = 'catalogue-modal'; modal.className = 'catalogue-modal';
-      modal.innerHTML = `<div class="modal-inner" role="dialog" aria-modal="true"><h3 id="order-title"></h3><div id="order-product-info"></div><label>Quantité<input type="number" id="order-qty" value="1" min="1"></label><label>Nom<input type="text" id="order-name" placeholder="Votre nom"></label><label>Email<input type="email" id="order-email" placeholder="Votre email"></label><label>Message<textarea id="order-msg" rows="3" placeholder="Informations supplémentaires (optionnel)"></textarea></label><div class="modal-actions"><button id="order-download">Télécharger commande</button><button id="order-mail">Envoyer par mail</button><button id="order-close">Fermer</button></div></div>`;
-      document.body.appendChild(modal);
-      document.getElementById('order-close').addEventListener('click', ()=> modal.classList.remove('active'));
-      document.getElementById('order-download').addEventListener('click', ()=>{ const data=collectOrderData(); const blob=new Blob([data.text],{type:'text/plain;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`commande_${data.product.id}.txt`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
-      document.getElementById('order-mail').addEventListener('click', ()=>{ const data=collectOrderData(); const subject = encodeURIComponent(`Commande: ${data.product.name}`); const body = encodeURIComponent(data.text); window.location.href = `mailto:?subject=${subject}&body=${body}`; });
-    }
-    modal.classList.add('active'); modal.dataset.productId = product.id; document.getElementById('order-title').textContent = localizedName(product); document.getElementById('order-product-info').innerHTML = `<div>Prix: ${product.price}</div><div>ID: ${product.id}</div>`;
-  }
-
-  // Cart order modal (for whole basket)
-  function openCartOrderModal() {
-    let modal = document.getElementById('catalogue-modal-cart');
-    if (!modal) {
-      modal = document.createElement('div'); modal.id = 'catalogue-modal-cart'; modal.className = 'catalogue-modal';
-      modal.innerHTML = `<div class="modal-inner" role="dialog" aria-modal="true"><h3 id="order-cart-title">Commande — Panier</h3><div id="order-cart-info"></div><label>Nom<input type="text" id="order-name-cart" placeholder="Votre nom"></label><label>Email<input type="email" id="order-email-cart" placeholder="Votre email"></label><label>Message<textarea id="order-msg-cart" rows="4" placeholder="Informations supplémentaires (optionnel)"></textarea></label><div class="modal-actions"><button id="order-cart-download">Télécharger commande</button><button id="order-cart-mail">Envoyer par mail</button><button id="order-cart-close">Fermer</button></div></div>`;
-      document.body.appendChild(modal);
-      document.getElementById('order-cart-close').addEventListener('click', ()=> modal.classList.remove('active'));
-      document.getElementById('order-cart-download').addEventListener('click', ()=>{
-        const data = collectCartOrderData(); const blob=new Blob([data.text],{type:'text/plain;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`commande_panier.txt`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-      });
-      document.getElementById('order-cart-mail').addEventListener('click', ()=>{
-        const data = collectCartOrderData(); const subject = encodeURIComponent(`Commande Panier`); const body = encodeURIComponent(data.text); window.location.href = `mailto:?subject=${subject}&body=${body}`;
-      });
-    }
-    // populate cart info
-    const info = document.getElementById('order-cart-info'); info.innerHTML = '';
-    let sum = 0;
-    cart.forEach(item => {
-      const p = catalogueProducts.find(pp=>String(pp.id)===String(item.id)); const n = parseFloat((p.price||'').replace(/[^0-9.,]/g,'').replace(',', '.')) || 0; sum += n * (item.qty||1);
-      const r = document.createElement('div'); r.style.marginBottom='6px'; r.textContent = `${localizedName(p)} — ${item.qty} × ${p.price}`; info.appendChild(r);
-    });
-    const tot = document.createElement('div'); tot.style.fontWeight='800'; tot.style.marginTop='8px'; tot.textContent = `Total: ${sum? (sum.toFixed(2) + ' €') : '—'}`; info.appendChild(tot);
-    modal.classList.add('active');
-  }
-
-  function collectCartOrderData() {
-    let text = `Commande (Panier)\n`;
-    let sum = 0;
-    cart.forEach(item => {
-      const p = catalogueProducts.find(pp=>String(pp.id)===String(item.id)); const n = parseFloat((p.price||'').replace(/[^0-9.,]/g,'').replace(',', '.')) || 0; sum += n * (item.qty||1);
-      text += `Produit: ${localizedName(p)}\nID: ${p.id}\nQuantité: ${item.qty}\nPrix unitaire: ${p.price}\n\n`;
-    });
-    text += `Total: ${sum? (sum.toFixed(2) + ' €') : '—'}\n`;
-    const name = (document.getElementById('order-name-cart')||{}).value || '';
-    const email = (document.getElementById('order-email-cart')||{}).value || '';
-    const msg = (document.getElementById('order-msg-cart')||{}).value || '';
-    text += `Nom: ${name}\nEmail: ${email}\nMessage: ${msg}`;
-    return { text };
-  }
-
-  function collectOrderData() {
-    const modal = document.getElementById('catalogue-modal'); const product = catalogueProducts.find(p => String(p.id) === String(modal.dataset.productId)); const qty = document.getElementById('order-qty').value || 1; const name = document.getElementById('order-name').value || ''; const email = document.getElementById('order-email').value || ''; const msg = document.getElementById('order-msg').value || '';
-    const text = `Commande\nProduit: ${localizedName(product)}\nID: ${product.id}\nQuantité: ${qty}\nPrix unitaire: ${product.price}\nNom: ${name}\nEmail: ${email}\nMessage: ${msg}`;
-    return { product, qty, name, email, msg, text };
-  }
-
-  async function refreshPrices() { await Promise.all(catalogueProducts.map(p=>fetchPrice(p))); renderCatalogue(); }
-
-  // bind update button (removed manual refresh — prices update via .txt files)
-  const bindRefresh = ()=>{ /* no-op: manual price button removed */ };
-
-  // Selector toggle / hide bindings
-  let activeFilterIds = null; // when set, renderCatalogue will show only these ids
-  const CART_KEY = 'cmuc_cart_v1';
-  let cart = [];
-
-  function loadCart() { try { cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch (e) { cart = []; } updateBasketBadge(); }
-  function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); updateBasketBadge(); }
-  function updateBasketBadge() { const b = document.getElementById('basket-count'); const total = cart.reduce((s,it)=>s+ (it.qty||1),0); if (b) b.textContent = total; }
-  function addToCart(id, qty=1) { const existing = cart.find(x=>String(x.id)===String(id)); if (existing) existing.qty = (existing.qty||1) + qty; else cart.push({ id: String(id), qty }); saveCart(); }
-  function setCartItem(id, qty) { cart = cart.filter(x=>String(x.id)!==String(id)); if (qty>0) cart.push({ id: String(id), qty }); saveCart(); }
-  function removeFromCart(id) { cart = cart.filter(x=>String(x.id)!==String(id)); saveCart(); }
-
-  function applyFilterByIds(ids) { activeFilterIds = (ids && ids.length) ? ids.map(i=>String(i)) : null; currentPage = 0; renderCatalogue(); toggleSelector(true); }
-  function clearSelectorSelection() { catalogueProducts.forEach(p=>{ delete p._selectedInSelector; }); renderSelector(); }
-
-  const bindSelectorUI = ()=>{
-    const toggle = document.getElementById('btn-toggle-selector');
-    const hide = document.getElementById('btn-hide-selector');
-    const wrap = document.getElementById('catalogue-wrap');
-    const filter = document.getElementById('catalogue-filter');
-    const clearBtn = document.getElementById('btn-clear-filter');
-    const btnVal = document.getElementById('btn-validate');
-    const btnAdd = document.getElementById('btn-add-selection');
-    const btnOpenCart = document.getElementById('btn-open-cart');
-
-    if (toggle && wrap) {
-      toggle.addEventListener('click', ()=>{ toggleSelector(); });
-    }
-    if (hide && wrap) {
-      hide.addEventListener('click', ()=>{ wrap.classList.add('selector-hidden'); const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed','true'); try{ localStorage.setItem('cmuc_selector_hidden','1'); }catch(e){} try{ updateSelectorFloatingState(); }catch(e){} });
-    }
-    
-    // restore stored selector visibility if present
-    try {
-      const storedSel = localStorage.getItem('cmuc_selector_hidden');
-      if (storedSel !== null) {
-        const hidden = storedSel === '1';
-        wrap.classList.toggle('selector-hidden', hidden);
-        const t = document.getElementById('btn-toggle-selector'); if (t) t.setAttribute('aria-pressed', hidden ? 'true' : 'false');
-        const sel = document.getElementById('catalogue-selector'); if (sel) {
-          if (!hidden && window.matchMedia && window.matchMedia(`(max-width: calc(var(--mobile) - 1px))`).matches) sel.classList.add('open-mobile'); else sel.classList.remove('open-mobile');
-        }
-        try{ updateSelectorFloatingState(); }catch(e){}
-      }
-    } catch(e){}
-
-    if (filter) {
-      filter.addEventListener('input', ()=>{
-        renderSelector();
-        // debounce save filter
-        try { if (filterSaveTimer) clearTimeout(filterSaveTimer); filterSaveTimer = setTimeout(()=>{ localStorage.setItem('cmuc_catalogue_filter', filter.value || ''); }, 300); } catch(e){}
-      });
-      filter.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); // treat Enter as Valider
-        const ids = catalogueProducts.filter(p=>p._selectedInSelector).map(p=>String(p.id)); if (ids.length) { applyFilterByIds(ids); clearSelectorSelection(); } } });
-      // if no URL tag param, restore stored filter
-      try {
-        const params = new URLSearchParams(window.location.search);
-        let tagParam = params.get('tag');
-        if (!tagParam && location.hash) {
-          const m = location.hash.match(/tag=([^&]+)/);
-          if (m) tagParam = decodeURIComponent(m[1]);
-        }
-        if (!tagParam) {
-          const stored = localStorage.getItem('cmuc_catalogue_filter');
-          if (stored && stored.trim().length) { filter.value = stored; renderSelector(); }
-        }
-      } catch (err) { /* ignore */ }
-    }
-
-    if (clearBtn) { clearBtn.addEventListener('click', ()=>{ if (filter) { filter.value=''; filter.focus(); try{ localStorage.setItem('cmuc_catalogue_filter',''); }catch(e){} } // clear applied filter too
-        applyFilterByIds(null); clearSelectorSelection(); renderSelector(); renderCatalogue(); }); }
-    if (btnVal) { btnVal.addEventListener('click', ()=>{ const ids = catalogueProducts.filter(p=>p._selectedInSelector).map(p=>String(p.id)); if (ids.length) { applyFilterByIds(ids); clearSelectorSelection(); } }); }
-    if (btnAdd) { btnAdd.addEventListener('click', ()=>{ const ids = catalogueProducts.filter(p=>p._selectedInSelector).map(p=>String(p.id)); ids.forEach(id=>addToCart(id,1)); clearSelectorSelection(); renderSelector(); renderCartPage(); }); }
-    if (btnOpenCart) { btnOpenCart.addEventListener('click', ()=>{ // navigate to cart page
-      // ensure page exists
-      navigateToPage('page-cart'); renderCartPage(); }); }
-    // cart order button
-    const btnCartOrder = document.getElementById('btn-cart-order'); if (btnCartOrder) { btnCartOrder.addEventListener('click', ()=>{ openCartOrderModal(); }); }
-
-    // apply initial filter from URL if present (?tag=xxx or #tag=xxx)
-    try {
-      const params = new URLSearchParams(window.location.search);
-      let tagParam = params.get('tag');
-      if (!tagParam && location.hash) {
-        const m = location.hash.match(/tag=([^&]+)/);
-        if (m) tagParam = decodeURIComponent(m[1]);
-      }
-      if (tagParam && document.getElementById('catalogue-filter')) {
-        document.getElementById('catalogue-filter').value = tagParam;
-        renderSelector();
-      }
-    } catch (err) { /* ignore */ }
-  };
-
-  function renderCartPage() {
-    const container = document.getElementById('cart-list');
-    const totalEl = document.getElementById('cart-total');
-    if (!container) return;
-    container.innerHTML = '';
-    let sum = 0;
-    cart.forEach(item => {
-      const p = catalogueProducts.find(pp=>String(pp.id)===String(item.id));
-      const row = document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.style.padding='8px 0';
-      const left = document.createElement('div'); left.innerHTML = `<strong>${localizedName(p)}</strong><div class="muted">${p.price}</div>`;
-      const right = document.createElement('div'); right.style.display='flex'; right.style.gap='8px';
-      const qty = document.createElement('input'); qty.type='number'; qty.value=item.qty; qty.min=1; qty.style.width='64px'; qty.addEventListener('change', ()=>{ setCartItem(item.id, Math.max(1, parseInt(qty.value)||1)); renderCartPage(); });
-      const remove = document.createElement('button'); remove.textContent = (document.body.dataset.lang === 'fr') ? 'Retirer' : 'Remove'; remove.className='btn-remove'; remove.addEventListener('click', ()=>{ removeFromCart(item.id); renderCartPage(); });
-      right.appendChild(qty); right.appendChild(remove);
-      row.appendChild(left); row.appendChild(right);
-      container.appendChild(row);
-      // try to parse price number
-      const n = parseFloat((p.price||'').replace(/[^0-9.,]/g,'').replace(',', '.')) || 0;
-      sum += n * (item.qty||1);
-    });
-    totalEl.textContent = `Total: ${sum? (sum.toFixed(2) + ' €') : '—'}`;
-  }
-
-  // detect when page1 becomes active and init
-  const page1 = document.getElementById('page1'); if (page1) {
-    const obs = new MutationObserver(() => { if (page1.classList.contains('active') && !window._catalogueInit) { window._catalogueInit = true; loadCatalogue().then(()=>{ bindRefresh(); bindSelectorUI(); }); } });
-    obs.observe(page1,{attributes:true,attributeFilter:['class']});
-  }
-
-  // expose minor helpers for language switching
-  window._refreshCatalogueAfterLang = ()=>{ try{ renderCatalogue(); renderSelector(); }catch(e){} };
-  window.loadCart = loadCart; // expose loadCart globally
-})();
-
-/* LANGUE FR / EN */
-const btnFR = document.getElementById("btn-fr");
-const btnEN = document.getElementById("btn-en");
-
-const menuTitle = document.getElementById("menu-title");
-const menuSubtitle = document.getElementById("menu-subtitle");
-
-function setFR() {
-  document.body.dataset.lang = 'fr';
-  localStorage.setItem('cmuc_lang', 'fr');
-  menuTitle.textContent = "Choisissez une catégorie";
-  menuSubtitle.textContent = "Sélectionnez une catégorie";
-
-  // splash texts (FR)
-  const splashH1 = document.querySelector('#splash h1');
-  const splashP = document.querySelector('#splash p');
-  if (splashH1) splashH1.textContent = "Bienvenue";
-  if (splashP) splashP.textContent = "Chargement...";
-  const leftBtn = document.getElementById('enter-left');
-  const rightBtn = document.getElementById('enter-right');
-  if (leftBtn) leftBtn.title = "Entrer — Main gauche";
-  if (rightBtn) rightBtn.title = "Entrer — Main droite";
-  // enter labels (update; final label may change when in menu)
-  document.querySelectorAll('.enter-label').forEach(el => el.textContent = 'Appuyer pour entrer');
-  const progressTextElFr = document.getElementById('press-progress-text');
-  if (progressTextElFr) progressTextElFr.textContent = 'Chargement 0%';
-  // if global control exists and menu already active, set the menu-specific text
-  if (globalControl && menu && menu.classList.contains('active')) updateGlobalLabel();
-
-  document.querySelector('[data-target="page1"]').textContent =
-    "🌿 Confort & Bien‑Être at Home";
-  document.querySelector('[data-target="page2"]').textContent =
-    "👨‍👩‍👧‍👦 Connecte‑Moi à Mon Cercle";
-  document.querySelector('[data-target="page3"]').textContent =
-    "🌌 Connecte‑Moi aux Nouvelles Réalités";
-
-  document.querySelector("#page1 h2").textContent =
-    "🌿 Confort & Bien‑Être at Home";
-  document.querySelector("#page2 h2").textContent =
-    "👨‍👩‍👧‍👦 Connecte‑Moi à Mon Cercle";
-  document.querySelector("#page3 h2").textContent =
-    "🌌 Connecte‑Moi aux Nouvelles Réalités";
-  document.querySelectorAll("[data-back]").forEach(btn => { btn.textContent = "⬅ Retour au menu"; });
-
-  // show/hide language content blocks
-  document.querySelectorAll('.lang').forEach(el => el.classList.toggle('active', el.id === 'fr'));
-
-  // update global control/back labels and visibility
-  updateGlobalLabel();
-  updateGlobalBackLabel();
-  updateGlobalVisibility();
-  if (window._refreshCatalogueAfterLang) window._refreshCatalogueAfterLang();
-  // mark active language on buttons
-  btnFR && btnFR.classList.add('active');
-  btnEN && btnEN.classList.remove('active');
-  // localize selector/cart labels
-  try { document.getElementById('btn-validate').textContent = 'Valider'; document.getElementById('btn-add-selection').textContent = 'Ajouter sélection'; document.getElementById('btn-open-cart').title = 'Panier'; document.getElementById('btn-cart-order') && (document.getElementById('btn-cart-order').textContent = 'Passer commande'); const f = document.getElementById('catalogue-filter'); if (f) f.placeholder = 'Filtrer par mot‑clé'; const hide = document.getElementById('btn-hide-selector'); if (hide) hide.textContent = 'Masquer'; const cartH = document.querySelector('#page-cart h2'); if (cartH) cartH.textContent = '🧺 Panier'; } catch (e) {}
-}
-
-function setEN() {
-  document.body.dataset.lang = 'en';
-  menuTitle.textContent = "Choose a category";
-  menuSubtitle.textContent = "Select a category";
-
-  // splash texts (EN)
-  const splashH1En = document.querySelector('#splash h1');
-  const splashPEn = document.querySelector('#splash p');
-  if (splashH1En) splashH1En.textContent = "Welcome";
-  if (splashPEn) splashPEn.textContent = "Loading...";
-  const leftBtnEn = document.getElementById('enter-left');
-  const rightBtnEn = document.getElementById('enter-right');
-  if (leftBtnEn) leftBtnEn.title = "Enter — Left hand";
-  if (rightBtnEn) rightBtnEn.title = "Enter — Right hand";
-  // enter labels (update; final label may change when in menu)
-  document.querySelectorAll('.enter-label').forEach(el => el.textContent = 'Press to enter');
-  const progressTextElEn = document.getElementById('press-progress-text');
-  if (progressTextElEn) progressTextElEn.textContent = 'Loading 0%';
-  // if global control exists and menu already active, set the menu-specific text
-  if (globalControl && menu && menu.classList.contains('active')) updateGlobalLabel();
-
-  document.querySelector('[data-target="page1"]').textContent =
-    "Comfort & Well‑Being at Home";
-  document.querySelector('[data-target="page2"]').textContent =
-    "👨‍👩‍👧‍👦 Connect Me to My Circle";
-  document.querySelector('[data-target="page3"]').textContent =
-    "🌌 Connect Me to New Realities";
-
-  document.querySelector("#page1 h2").textContent =
-    "🌿 Comfort & Well‑Being at Home";
-  document.querySelector("#page2 h2").textContent =
-    "👨‍👩‍👧‍👦 Connect Me to My Circle";
-  document.querySelector("#page3 h2").textContent =
-    "🌌 Connect Me to New Realities";
-
-  // show/hide language content blocks
-  document.querySelectorAll('.lang').forEach(el => el.classList.toggle('active', el.id === 'en'));
-
-  // update global control/back labels and visibility
-  updateGlobalLabel();
-  updateGlobalBackLabel();
-  updateGlobalVisibility();
-  document.querySelectorAll("[data-back]").forEach(btn => { btn.textContent = "⬅ Back to menu"; });
-  // update global control/back labels and visibility
-  updateGlobalLabel();
-  updateGlobalBackLabel();
-  updateGlobalVisibility();
-  if (window._refreshCatalogueAfterLang) window._refreshCatalogueAfterLang();
-  // mark active language on buttons
-  btnEN && btnEN.classList.add('active');
-  btnFR && btnFR.classList.remove('active');
-  // localize selector/cart labels
-  try { document.getElementById('btn-validate').textContent = 'Validate'; document.getElementById('btn-add-selection').textContent = 'Add selection'; document.getElementById('btn-open-cart').title = 'Cart'; document.getElementById('btn-cart-order') && (document.getElementById('btn-cart-order').textContent = 'Checkout'); const f = document.getElementById('catalogue-filter'); if (f) f.placeholder = 'Filter by keyword'; const hide = document.getElementById('btn-hide-selector'); if (hide) hide.textContent = 'Hide'; const cartH = document.querySelector('#page-cart h2'); if (cartH) cartH.textContent = '🧺 Cart'; } catch (e) {}
-}
-
-btnFR.addEventListener("click", setFR);
-btnEN.addEventListener("click", setEN);
-
-// Initialize language on load using stored preference or HTML lang, default to French
-function initLanguageFromStorage() {
-  const stored = localStorage.getItem('cmuc_lang') || document.body.dataset.lang || document.documentElement.lang || 'fr';
-  if (stored === 'en') setEN(); else setFR();
-}
-initLanguageFromStorage();
-// load cart state after language init so UI badge is correct
-loadCart();
-</script>
-
-</div>
-<!-- CMUC Settings Modal -->
-<style>
-  .cmuc-modal.hidden{display:none}
-  .cmuc-modal{position:fixed;inset:0;z-index:10020}
-  .cmuc-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.4)}
-  .cmuc-modal-content{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;color:#222;width:min(90vw,480px);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
-  .cmuc-modal-content h2{margin:0;padding:16px 16px 8px 16px;font-size:18px}
-  .cmuc-modal-content .cmuc-body{padding:0 16px 12px 16px}
-  .cmuc-modal-actions{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid #eee}
-  .cmuc-btn{padding:8px 12px;border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer}
-  .cmuc-btn:hover{background:#f6f6f6}
-  .cmuc-btn-danger{border-color:#d33;color:#d33}
-</style>
-
-<!-- SHARED TV MODAL -->
-<div id="shared-tv-modal" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.95); padding:0;">
-  <!-- Close button removed: exit via yellow pill, image click, or Escape -->
+function goBackToSplash() {
+  const activePage = document.querySelector('.page.active');
+  const menu = document.getElementById('menu');
   
-  <div style="width:100%; height:100%; display:flex; flex-direction:column;">
-    <!-- Header with room info -->
-    <div style="padding:16px; border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.5); display:flex; justify-content:space-between; align-items:center;">
-      <div>
-        <div style="font-size:1.5rem; font-weight:bold; color:var(--accent);" id="shared-tv-code">ROOM XXXX</div>
-        <div style="font-size:0.9rem; color:var(--muted); margin-top:4px;">👥 <span id="shared-tv-players">0</span>/4 • <span id="shared-tv-state">En attente</span></div>
-      </div>
-    </div>
-    
-    <!-- Main TV display content -->
-    <div style="flex:1; display:flex; align-items:center; justify-content:center; overflow:auto; padding:16px;" id="shared-tv-display-container">
-      <div id="shared-tv-main-content" style="max-width:90vw; max-height:90vh; display:flex; align-items:center; justify-content:center; position:relative;">
-        <!-- TV Image or Waiting Message -->
-      </div>
-    </div>
-  </div>
-</div>
+  if (activePage) {
+    activePage.classList.add('zooming');
+    setTimeout(() => {
+      activePage.classList.remove('active','scale-in','frame','zooming');
+      cancelAutoHideControls();
+      globalControl && globalControl.classList.remove('auto-hidden');
+      globalBack && globalBack.classList.remove('auto-hidden');
+      document.body.classList.remove('page-open');
+      
+      // Hide global controls
+      if (globalControl) {
+        globalControl.style.display = 'none';
+        globalControl.classList.remove('show');
+      }
+      if (globalBack) {
+        globalBack.style.display = 'none';
+        globalBack.classList.remove('show');
+      }
+      
+      // Afficher le menu au lieu de recréer le splash
+      if (menu) {
+        menu.classList.add('active');
+      }
+      
+      updateGlobalVisibility();
+    }, 700);
+  } else if (menu && menu.classList.contains('active')) {
+    // Si on est sur le menu, recharger la page pour revenir au splash
+    document.body.classList.remove('hand-left', 'hand-right');
+    delete document.body.dataset.hand;
+    localStorage.removeItem('cmuc_hand');
+    location.reload();
+  }
+}
 
-<div id="cmuc-settings-modal" class="cmuc-modal hidden" aria-hidden="true" role="dialog" aria-labelledby="cmuc-settings-title">
-  <div class="cmuc-modal-backdrop" id="cmuc-settings-backdrop"></div>
-  <div class="cmuc-modal-content">
-    <h2 id="cmuc-settings-title">Paramètres du compte</h2>
-    <div class="cmuc-body">
-      <p><span id="cmuc-settings-username-label">Pseudo:</span> <strong id="cmuc-settings-username">Invité</strong></p>
-      <p id="cmuc-settings-help">Gérez votre compte connecté.</p>
-    </div>
-    <div class="cmuc-modal-actions">
-      <button id="cmuc-logout-btn" class="cmuc-btn cmuc-btn-danger">Se déconnecter</button>
-      <button id="cmuc-close-settings" class="cmuc-btn">Fermer</button>
-    </div>
-  </div>
-  </div>
+// ========================= 
+// BUTTON HANDLERS
+// =========================
+if (globalBack) {
+  globalBack.addEventListener('click', e => {
+    e.preventDefault();
+    goBackToSplash();
+  });
+}
 
-<script>
-  (function(){
-    const lang = (localStorage.getItem('cmuc_lang')||'fr')==='fr' ? 'fr':'en';
-    function getAuth(){
-      try{ const raw = localStorage.getItem('cmuc_auth_v1'); return raw? JSON.parse(raw): null; }catch(e){ return null; }
-    }
-    function setTexts(){
-      const isFR = lang==='fr';
-      document.getElementById('cmuc-settings-title').textContent = isFR? 'Paramètres du compte':'Account Settings';
-      document.getElementById('cmuc-settings-username-label').textContent = isFR? 'Pseudo:':'Username:';
-      document.getElementById('cmuc-settings-help').textContent = isFR? 'Gérez votre compte connecté.':'Manage your signed-in account.';
-      document.getElementById('cmuc-logout-btn').textContent = isFR? 'Se déconnecter':'Sign out';
-      document.getElementById('cmuc-close-settings').textContent = isFR? 'Fermer':'Close';
-    }
-    function initUser(){
-      const auth = getAuth();
-      const username = auth?.username || (lang==='fr'? 'Invité':'Guest');
-      document.getElementById('cmuc-user-btn').textContent = username;
-      document.getElementById('cmuc-settings-username').textContent = username;
-    }
-    function openSettings(){
-      const m = document.getElementById('cmuc-settings-modal');
-      m.classList.remove('hidden'); m.setAttribute('aria-hidden','false');
-    }
-    function closeSettings(){
-      const m = document.getElementById('cmuc-settings-modal');
-      m.classList.add('hidden'); m.setAttribute('aria-hidden','true');
-    }
-    function toggleSettings(){
-      const m = document.getElementById('cmuc-settings-modal');
-      if(m.classList.contains('hidden')){ openSettings(); } else { closeSettings(); }
-    }
-    function logout(){
-      localStorage.removeItem('cmuc_auth_v1');
-      // Redirect to .com entry to re-auth
-      try{ window.location.href = 'index.com.html'; }catch(e){ closeSettings(); }
-    }
-    setTexts();
-    initUser();
-    document.getElementById('cmuc-user-btn').addEventListener('click', toggleSettings);
-    document.getElementById('cmuc-close-settings').addEventListener('click', closeSettings);
-    document.getElementById('cmuc-settings-backdrop').addEventListener('click', closeSettings);
-    document.getElementById('cmuc-logout-btn').addEventListener('click', logout);
-    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeSettings(); });
-  })();
+// Navigation buttons
+document.querySelectorAll('.nav-btn[data-nav]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.nav;
+    navigateToPage(target);
+  });
+});
 
-  // ==========================================
-  // ROOM MANAGEMENT SYSTEM WITH WEBSOCKET
-  // ==========================================
-  (function() {
-    const lang = (localStorage.getItem('cmuc_lang')||'fr')==='fr' ? 'fr':'en';
-    const ROOM_STORAGE_KEY = 'cmuc_room_v1';
-    let sharedTVZoom = 1;
-    function resolveWSUrl(){
-      const saved = localStorage.getItem('cmuc_ws_url');
-      if (saved && /^wss?:\/\//.test(saved)) return saved;
-      const host = window.location.hostname;
-      // Local dev or file://
-      if (!host || host === 'localhost' || host === '127.0.0.1' || host === '::1') return 'ws://localhost:3000';
-      // If site runs on a domain, assume backend on port 3000 on same host
-      return (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + host + ':3000';
+// Menu widgets
+document.querySelectorAll('.menu-widget[data-nav]').forEach(widget => {
+  widget.addEventListener('click', () => {
+    const target = widget.dataset.nav;
+    const menu = document.getElementById('menu');
+    if (menu) {
+      menu.classList.remove('active');
     }
-    const BACKEND_URL = resolveWSUrl();
-    function setWSStatus(text, color){
-      const wsEl = document.getElementById('room-ws-status');
-      if (wsEl){ wsEl.textContent = text; wsEl.style.color = color || 'var(--muted)'; }
-    }
-    // Show initial target immediately so the user sees the WS endpoint
-    setWSStatus(`WS: prêt à se connecter sur ${BACKEND_URL}`, 'var(--muted)');
-    // Prefill WS input
-    const wsInput = document.getElementById('room-ws-input');
-    if (wsInput) wsInput.value = BACKEND_URL;
-    console.log('[ROOM] Backend URL:', BACKEND_URL);
-    
-    class WebSocketRoomManager {
-      constructor() {
-        this.ws = null;
-        this.currentRoom = null;
-        this.readyState = false;
-        this.readyTimeout = null;
-        this.clientType = 'web';
-        this.clientName = localStorage.getItem('cmuc_auth_username') || (lang === 'fr' ? 'Mobile' : 'Mobile');
-        this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 5;
-        this.reconnectDelay = 2000;
-        this.pendingMessages = [];
-      }
-      
-      // Connect to WebSocket server
-      connect() {
-        console.log('[ROOM] connect() entered, creating WebSocket to:', BACKEND_URL);
-        try {
-          this.ws = new WebSocket(BACKEND_URL);
-          console.log('[ROOM] WebSocket created, readyState:', this.ws.readyState);
-          setWSStatus(`WS: connexion à ${BACKEND_URL}...`, 'var(--muted)');
-          // Watchdog: if still not open after 1.5s, notify user
-          setTimeout(() => {
-            if (!this.ws) return;
-            if (this.ws.readyState === WebSocket.OPEN) return;
-            const state = ['CONNECTING','OPEN','CLOSING','CLOSED'][this.ws.readyState] || this.ws.readyState;
-            setWSStatus(`WS: toujours ${state.toLowerCase()} vers ${BACKEND_URL}`, '#ffd700');
-          }, 1500);
-          
-          this.ws.onopen = () => {
-            console.log('✅ WebSocket connected to backend');
-            this.reconnectAttempts = 0;
-            const msgEl = document.getElementById('room-error');
-            if (msgEl){ msgEl.style.display='none'; }
-            setWSStatus(`WS: connecté à ${BACKEND_URL}`, '#2ecc71');
-            this.updateUI();
-            // Flush any queued messages that were triggered before the socket was open
-            if (this.pendingMessages.length) {
-              this.pendingMessages.forEach(msg => this.ws.send(JSON.stringify(msg)));
-              this.pendingMessages = [];
-            }
-          };
-          
-          this.ws.onmessage = (event) => {
-            try {
-              const message = JSON.parse(event.data);
-              this.handleMessage(message);
-            } catch (err) {
-              console.error('WebSocket message parse error:', err);
-            }
-          };
-          
-          this.ws.onerror = (err) => {
-            console.error('WebSocket error:', err);
-            const msgEl = document.getElementById('room-error');
-            if (msgEl){
-              msgEl.textContent = (lang==='fr'?
-                `Connexion WS échouée (${BACKEND_URL}). Vérifiez le serveur.`:
-                `WS connection failed (${BACKEND_URL}). Check server.`);
-              msgEl.style.display = 'block';
-            }
-            setWSStatus(`WS: échec vers ${BACKEND_URL}`, '#ff6b6b');
-          };
-          
-          this.ws.onclose = () => {
-            console.log('❌ WebSocket disconnected, attempting reconnect...');
-            const msgEl = document.getElementById('room-error');
-            if (msgEl){
-              msgEl.textContent = (lang==='fr'?
-                'Déconnecté. Tentative de reconnexion…':'Disconnected. Reconnecting…');
-              msgEl.style.display = 'block';
-            }
-            setWSStatus(`WS: déconnecté, reconnexion... (${this.reconnectAttempts+1}/${this.maxReconnectAttempts})`, '#ffd700');
-            this.attemptReconnect();
-          };
-        } catch (err) {
-          console.error('WebSocket connection error:', err);
-          setWSStatus(`WS: erreur de connexion (${err?.message || err})`, '#ff6b6b');
-          this.attemptReconnect();
-        }
-      }
-      
-      attemptReconnect() {
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
-          this.reconnectAttempts++;
-          setTimeout(() => this.connect(), this.reconnectDelay * this.reconnectAttempts);
-        }
-      }
-      
-      handleMessage(message) {
-        switch(message.type) {
-          case 'ROOM_CREATED':
-          case 'ROOM_JOINED':
-            this.currentRoom = message.room;
-            this.readyState = false;
-            this.updateUI();
-            this.updateTVDisplay(message.room.tvState || null);
-            break;
-            
-          case 'ROOM_UPDATED':
-            this.currentRoom = message.room;
-            this.updateUI();
-            this.updateTVDisplay(message.room.tvState || null);
-            updateSharedTVDisplay();
-            break;
-            
-          case 'ROOM_STATE_UPDATED':
-            if (this.currentRoom) {
-              console.log('[ROOM] TV state updated:', message.tvState);
-              this.currentRoom.tvState = message.tvState;
-              this.updateUI();
-              this.updateTVDisplay(message.tvState);
-              updateSharedTVDisplay();
-            }
-            break;
-            
-          case 'ERROR':
-            const errorEl = document.getElementById('room-error');
-            if (errorEl) {
-              errorEl.textContent = message.error;
-              errorEl.style.display = 'block';
-              // If join failed because room does not exist, auto-create with the requested code
-              if (/Room not found/i.test(message.error) && this._lastJoinCode) {
-                this.createRoomWithCode(this._lastJoinCode);
-              }
-            }
-            break;
-        }
-      }
-      
-      sendMessage(message) {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-          this.ws.send(JSON.stringify(message));
-        } else {
-          setWSStatus(`WS: en attente d'une connexion...`, '#ffd700');
-          // Defer sending until connection is open to avoid dropped join/create clicks
-          this.pendingMessages.push(message);
-          console.warn('WebSocket not connected, message queued:', message);
-          const msgEl = document.getElementById('room-error');
-          if (msgEl){
-            msgEl.textContent = (lang==='fr'? 'Connexion en cours, nouvelle tentative...' : 'Connecting, retrying...');
-            msgEl.style.display = 'block';
-          }
-        }
-      }
-      
-      createRoom() {
-        this.sendMessage({
-          type: 'CREATE_ROOM',
-          clientType: this.clientType,
-          clientName: this.clientName
-        });
-      }
-      
-      createRoomWithCode(code) {
-        const roomCode = String(code || '').trim().toUpperCase();
-        this.sendMessage({
-          type: 'CREATE_ROOM',
-          roomCode,
-          clientType: this.clientType,
-          clientName: this.clientName
-        });
-      }
-      
-      joinRoom(code) {
-        const roomCode = String(code || '').trim().toUpperCase();
-        this._lastJoinCode = roomCode;
-        this.sendMessage({
-          type: 'JOIN_ROOM',
-          roomCode,
-          clientType: this.clientType,
-          clientName: this.clientName
-        });
-      }
-      
-      leaveRoom() {
-        if (this.currentRoom) {
-          this.sendMessage({
-            type: 'LEAVE_ROOM'
-          });
-          this.currentRoom = null;
-          this.readyState = false;
-        }
-        this.updateUI();
-      }
-      
-      toggleReady() {
-        if (!this.currentRoom) return;
-        
-        if (this.readyState) {
-          this.readyState = false;
-          clearTimeout(this.readyTimeout);
-          this.sendMessage({ type: 'TOGGLE_READY' });
-          this.updateUI();
-        } else {
-          const btn = document.getElementById('btn-toggle-ready');
-          if (btn) btn.disabled = true;
-          
-          this.readyTimeout = setTimeout(() => {
-            this.readyState = true;
-            this.sendMessage({ type: 'TOGGLE_READY' });
-            this.updateUI();
-            if (btn) btn.disabled = false;
-          }, 2000);
-        }
-      }
-      
-      toggleRole() {
-        if (!this.currentRoom) return;
-        // Promote this client (web) to host when clicking the button
-        // Optimistic UI: update locally for instant feedback
-        this.currentRoom.host = 'web';
-        this.updateUI();
-        // Prevent rapid double-clicks
-        const roleBtn = document.getElementById('btn-toggle-role');
-        if (roleBtn) {
-          roleBtn.disabled = true;
-          setTimeout(() => { roleBtn.disabled = false; }, 600);
-        }
-        // Send to backend
-        this.sendMessage({ type: 'CHANGE_HOST', host: 'web' });
-      }
-      
-      updateUI() {
-        if (!this.currentRoom) {
-          document.getElementById('room-not-connected').style.display = 'flex';
-          document.getElementById('room-connected').style.display = 'none';
-          return;
-        }
-        
-        document.getElementById('room-not-connected').style.display = 'none';
-        document.getElementById('room-connected').style.display = 'grid';
-        
-        // Room code
-        const roomIdEl = document.getElementById('room-id-display');
-        const tvTitleEl = document.getElementById('tv-title');
-        if (roomIdEl) roomIdEl.textContent = this.currentRoom.code;
-        if (tvTitleEl) tvTitleEl.textContent = `Room ${this.currentRoom.code}`;
-        
-        // Host display
-        const hostDisplay = document.getElementById('room-host-display');
-        if (hostDisplay) {
-          const hostType = this.currentRoom.host === 'tv' ? '📺 TV' : '📱 Mobile';
-          hostDisplay.textContent = hostType;
-        }
-        
-        // Role button display
-        const roleBtn = document.getElementById('btn-toggle-role');
-        if (roleBtn) {
-          const isHost = this.currentRoom.host === 'web';
-          const roleText = isHost ? (lang === 'fr' ? '🎬 Host' : '🎬 Host') : (lang === 'fr' ? '🎬 Guest' : '🎬 Guest');
-          roleBtn.textContent = roleText;
-          roleBtn.style.borderColor = isHost ? '#ff6b6b' : '#ffa500';
-          roleBtn.style.color = isHost ? '#ff6b6b' : '#ffa500';
-        }
-        
-        // Players count
-        const webPlayers = this.currentRoom.players.filter(p => p.type === 'web').length;
-        const tvPlayers = this.currentRoom.players.filter(p => p.type === 'tv').length;
-        const playersCountEl = document.getElementById('room-players-count');
-        const tvWebCountEl = document.getElementById('tv-web-count');
-        const tvTvCountEl = document.getElementById('tv-tv-count');
-        if (playersCountEl) playersCountEl.textContent = `${this.currentRoom.players.length}/4`;
-        if (tvWebCountEl) tvWebCountEl.textContent = webPlayers;
-        if (tvTvCountEl) tvTvCountEl.textContent = tvPlayers;
-        
-        // Status
-        const statusEl = document.getElementById('room-status');
-        if (statusEl) {
-          const tvConnected = this.currentRoom.players.some(p => p.type === 'tv');
-          if (tvConnected) {
-            statusEl.textContent = lang === 'fr' ? '📺 LIVE' : '📺 LIVE';
-            statusEl.style.color = '#2ecc71';
-          } else {
-            statusEl.textContent = lang === 'fr' ? '⏳ EN ATTENTE' : '⏳ WAITING';
-            statusEl.style.color = '#ffd700';
-          }
-        }
-        
-        // Players list
-        const listEl = document.getElementById('room-players-list');
-        listEl.innerHTML = '';
-        this.currentRoom.players.forEach(player => {
-          const playerEl = document.createElement('div');
-          playerEl.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:8px; background:rgba(0,0,0,0.3); border-radius:4px;';
-          
-          const icon = player.type === 'tv' ? '📺' : '📱';
-          const statusDot = player.ready ? 
-            '<span style="color:#2ecc71;">●</span>' : 
-            '<span style="color:#ff9800;">●</span>';
-          
-          playerEl.innerHTML = `
-            <div style="display:flex; align-items:center; gap:8px; flex:1;">
-              ${statusDot} <strong>${icon} ${player.name}</strong>
-            </div>
-            <span style="color:var(--muted); font-size:0.85rem;">${player.ready ? (lang === 'fr' ? 'EN LIGNE' : 'ONLINE') : (lang === 'fr' ? 'PAUSE' : 'PAUSE')}</span>
-          `;
-          listEl.appendChild(playerEl);
-        });
-        
-        // TV Display - Devices list
-        const tvDevicesList = document.getElementById('tv-devices-list');
-        tvDevicesList.innerHTML = '';
-        this.currentRoom.players.forEach(player => {
-          const deviceEl = document.createElement('div');
-          const icon = player.type === 'tv' ? '📺' : '📱';
-          const statusDot = player.ready ? 
-            '<span style="color:#2ecc71;">●</span>' : 
-            '<span style="color:#ff9800;">●</span>';
-          const statusText = player.ready ? 
-            (lang === 'fr' ? 'EN LIGNE' : 'ONLINE') : 
-            (lang === 'fr' ? 'PAUSE' : 'PAUSE');
-          
-          deviceEl.innerHTML = `${statusDot} ${icon} ${player.name} <span style="color:var(--muted);">${statusText}</span>`;
-          tvDevicesList.appendChild(deviceEl);
-        });
-        
-        // TV Global status
-        const allReady = this.currentRoom.players.length > 0 && this.currentRoom.players.every(p => p.ready);
-        const tvGlobalStatus = document.getElementById('tv-global-status');
-        if (tvGlobalStatus) {
-          if (allReady) {
-            tvGlobalStatus.textContent = lang === 'fr' ? '✅ Tous prêts' : '✅ All ready';
-            tvGlobalStatus.style.color = '#2ecc71';
-          } else {
-            tvGlobalStatus.textContent = lang === 'fr' ? '⏳ En attente...' : '⏳ Waiting...';
-            tvGlobalStatus.style.color = '#ffd700';
-          }
-        }
-        
-        // Ready button
-        const readyBtn = document.getElementById('btn-toggle-ready');
-        if (readyBtn) {
-          if (this.readyState) {
-            readyBtn.textContent = lang === 'fr' ? '🟢 EN LIGNE' : '🟢 ONLINE';
-            readyBtn.style.background = '#2ecc71';
-            readyBtn.style.color = '#000';
-          } else {
-            readyBtn.textContent = lang === 'fr' ? '⏸️ PAUSE' : '⏸️ PAUSE';
-            readyBtn.style.background = '#ff9800';
-            readyBtn.style.color = '#000';
-          }
-        }
-      }
-      
-      updateTVDisplay(tvState) {
-        console.log('[ROOM] updateTVDisplay called with:', tvState);
-        const tvDisplayEl = document.getElementById('tv-display');
-        if (!tvDisplayEl) {
-          console.warn('[ROOM] updateTVDisplay: tv-display element not found');
-          return;
-        }
-        
-        // Si pas de state ou state idle, afficher message d'attente
-        if (!tvState || tvState.type === 'idle' || !tvState.type) {
-          const webPlayers = this.currentRoom ? this.currentRoom.players.filter(p=>p.type==='web').length : 0;
-          const tvPlayers = this.currentRoom ? this.currentRoom.players.filter(p=>p.type==='tv').length : 0;
-          const waitingMsg = lang === 'fr' ? '📺 En attente du contenu de la TV...' : '📺 Waiting for TV content...';
-          const html = `
-            <div>
-              <div id="tv-title" style="font-size:1.2rem; font-weight:bold; color:var(--accent); text-align:center; margin-bottom:12px;">Room ${this.currentRoom?.code || 'XXXX'}</div>
-              <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:8px; font-size:0.85rem; color:var(--muted); margin-bottom:12px;">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; text-align:center;">
-                  <div>📱 <span id="tv-web-count">${webPlayers}</span> web</div>
-                  <div>📺 <span id="tv-tv-count">${tvPlayers}</span> TV</div>
-                </div>
-              </div>
-            </div>
-            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--muted);">
-              <div style="font-size:1.5rem;">🎬</div>
-              <div style="font-size:1rem; text-align:center;">${waitingMsg}</div>
-            </div>
-            <div style="margin-top:12px;">
-              <div style="font-size:0.85rem; font-weight:bold; color:var(--text); margin-bottom:8px;">Appareils connectés:</div>
-              <div id="tv-devices-list" style="display:flex; flex-direction:column; gap:6px; font-size:0.8rem;"></div>
-            </div>
-          `;
-          tvDisplayEl.innerHTML = html;
-          
-          // Remplir la liste des appareils
-          const devicesListEl = document.getElementById('tv-devices-list');
-          if (devicesListEl && this.currentRoom) {
-            devicesListEl.innerHTML = '';
-            this.currentRoom.players.forEach(player => {
-              const deviceEl = document.createElement('div');
-              const icon = player.type === 'tv' ? '📺' : '📱';
-              const statusDot = player.ready ? '<span style="color:#2ecc71;">●</span>' : '<span style="color:#ff9800;">●</span>';
-              const statusText = player.ready ? (lang === 'fr' ? 'EN LIGNE' : 'ONLINE') : (lang === 'fr' ? 'PAUSE' : 'PAUSE');
-              deviceEl.innerHTML = `${statusDot} ${icon} ${player.name} <span style="color:var(--muted);">${statusText}</span>`;
-              devicesListEl.appendChild(deviceEl);
-            });
-          }
-          console.log('[ROOM] TV display: showing waiting message');
-          return;
-        }
-        
-        if (tvState.type === 'image') {
-          const html = `
-            <div>
-              <div id="tv-title" style="font-size:1.2rem; font-weight:bold; color:var(--accent); text-align:center; margin-bottom:12px;">Room ${this.currentRoom.code}</div>
-              <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:8px; font-size:0.85rem; color:var(--muted); margin-bottom:12px;">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; text-align:center;">
-                  <div>📱 <span id="tv-web-count">${this.currentRoom.players.filter(p=>p.type==='web').length}</span> web</div>
-                  <div>📺 <span id="tv-tv-count">${this.currentRoom.players.filter(p=>p.type==='tv').length}</span> TV</div>
-                </div>
-              </div>
-            </div>
-            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;">
-              <img src="${tvState.imageUrl}" style="max-width:100%; max-height:300px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.5);" alt="TV Content">
-              <div style="font-size:0.9rem; color:var(--text); font-weight:bold;">${tvState.imageName}</div>
-              <div style="font-size:0.85rem; color:var(--muted);">${tvState.index + 1} / ${tvState.total}</div>
-            </div>
-            <div style="margin-top:12px;">
-              <div style="font-size:0.85rem; font-weight:bold; color:var(--text); margin-bottom:8px;">Appareils connectés:</div>
-              <div id="tv-devices-list" style="display:flex; flex-direction:column; gap:6px; font-size:0.8rem;"></div>
-            </div>
-          `;
-          tvDisplayEl.innerHTML = html;
-          console.log('[ROOM] TV display updated with image:', tvState.imageName);
-          
-          const devicesListEl = document.getElementById('tv-devices-list');
-          if (devicesListEl) {
-            devicesListEl.innerHTML = '';
-            this.currentRoom.players.forEach(player => {
-              const deviceEl = document.createElement('div');
-              const icon = player.type === 'tv' ? '📺' : '📱';
-              const statusDot = player.ready ? '<span style="color:#2ecc71;">●</span>' : '<span style="color:#ff9800;">●</span>';
-              const statusText = player.ready ? (lang === 'fr' ? 'EN LIGNE' : 'ONLINE') : (lang === 'fr' ? 'PAUSE' : 'PAUSE');
-              deviceEl.innerHTML = `${statusDot} ${icon} ${player.name} <span style="color:var(--muted);">${statusText}</span>`;
-              devicesListEl.appendChild(deviceEl);
-            });
-          }
-        } else if (tvState.type === 'idle') {
-          this.updateUI();
-        }
-      }
-    }
-    
-    // Initialize WebSocket room manager
-    const roomManager = new WebSocketRoomManager();
-    console.log('[ROOM] Calling roomManager.connect()...');
-    try {
-      roomManager.connect();
-      console.log('[ROOM] roomManager.connect() called successfully');
-    } catch (err) {
-      console.error('[ROOM] Error calling connect():', err);
-      setWSStatus(`WS: erreur au démarrage (${err.message})`, '#ff6b6b');
-    }
+    navigateToPage(target);
+  });
+});
 
-    function bindRoomUI(){
-      const joinBtn = document.getElementById('btn-join-room');
-      const createBtn = document.getElementById('btn-create-room');
-      const readyBtn = document.getElementById('btn-toggle-ready');
-      const sharedBtn = document.getElementById('btn-open-shared-tv');
-      const settingsBtn = document.getElementById('btn-room-settings');
-      const resetBtn = document.getElementById('btn-reset-ws');
-      const saveWsBtn = document.getElementById('btn-save-ws');
-      const wsInput = document.getElementById('room-ws-input');
-      const codeInput = document.getElementById('room-code-input');
-      const errorEl = document.getElementById('room-error');
+// Initialize from storage if needed
+const storedHand = localStorage.getItem('cmuc_hand');
+if (storedHand === 'left' || storedHand === 'right') {
+  console.debug('Stored hand found:', storedHand);
+}
 
-      if (!joinBtn || !createBtn || !readyBtn || !sharedBtn || !settingsBtn || !resetBtn || !saveWsBtn || !wsInput || !codeInput) {
-        console.warn('Room UI not ready yet, will retry binding...');
-        setTimeout(bindRoomUI, 200);
-        return;
-      }
-
-      joinBtn.addEventListener('click', () => {
-        const code = codeInput.value.trim().toUpperCase();
-        if (!code || code.length !== 4 || !/^[A-Z]{4}$/.test(code)) {
-          errorEl.textContent = lang === 'fr' ? 'Code invalide (4 lettres A-Z)' : 'Invalid code (4 letters A-Z)';
-          errorEl.style.display = 'block';
-          return;
-        }
-        
-        try {
-          roomManager.joinRoom(code);
-        } catch(e) {
-          errorEl.textContent = (lang==='fr'? 'Erreur de connexion WebSocket.':'WebSocket connection error.');
-          errorEl.style.display = 'block';
-        }
-        codeInput.value = '';
-        errorEl.style.display = 'none';
-      });
-      
-      createBtn.addEventListener('click', () => {
-        roomManager.createRoom();
-        errorEl.style.display = 'none';
-      });
-      
-      readyBtn.addEventListener('click', () => {
-        roomManager.toggleReady();
-      });
-      
-      const roleBtn = document.getElementById('btn-toggle-role');
-      if (roleBtn) {
-        roleBtn.addEventListener('click', () => {
-          // Clicking "Guest" should make this web client the host
-          roomManager.toggleRole();
-        });
-      }
-      
-      sharedBtn.addEventListener('click', () => {
-        openSharedTV();
-      });
-      
-      // Click on tv-display to open shared view
-      const tvDisplay = document.getElementById('tv-display');
-      if (tvDisplay) {
-        tvDisplay.addEventListener('click', () => {
-          if (roomManager.currentRoom) {
-            openSharedTV();
-          }
-        });
-      }
-      
-      settingsBtn.addEventListener('click', () => {
-        const message = document.getElementById('room-message');
-        message.textContent = lang === 'fr' ? '⚙️ Paramètres en préparation...' : '⚙️ Settings coming soon...';
-        message.style.color = 'var(--muted)';
-      });
-
-      resetBtn.addEventListener('click', () => {
-        try {
-          localStorage.removeItem('cmuc_ws_url');
-          alert('WS reset. Recharger la page pour reconnecter sur ws://localhost:3000');
-        } catch (e) {
-          console.warn('WS reset failed', e);
-        }
-      });
-
-      saveWsBtn.addEventListener('click', () => {
-        try {
-          const val = (wsInput.value || '').trim();
-          const valid = /^wss?:\/\//.test(val);
-          if (!valid) {
-            alert('URL WS invalide. Exemple: ws://localhost:3000');
-            return;
-          }
-          localStorage.setItem('cmuc_ws_url', val);
-          alert(`WS enregistré: ${val}\nRechargement...`);
-          location.reload();
-        } catch (e) {
-          console.warn('WS save failed', e);
-          alert('Impossible de sauvegarder l\'URL WS');
-        }
-      });
-    }
-
-    // Bind immediately and after DOM is fully loaded (safety)
-    bindRoomUI();
-    window.addEventListener('DOMContentLoaded', bindRoomUI);
-    
-    // Shared TV Modal functions
-    function openSharedTV() {
-      document.getElementById('shared-tv-modal').style.display = 'flex';
-      updateSharedTVDisplay();
-      
-      // Initialize zoom at 1
-      sharedTVZoom = 1;
-      
-      // Keyboard shortcuts
-      document.addEventListener('keydown', handleSharedTVKeydown);
-    }
-    
-    function handleSharedTVKeydown(e) {
-      if (document.getElementById('shared-tv-modal').style.display !== 'flex') return;
-      
-      switch(e.key) {
-        case '+':
-        case '=':
-          sharedTVZoom = Math.min(sharedTVZoom + 0.1, 3);
-          updateSharedTVDisplay();
-          break;
-        case '-':
-        case '_':
-          sharedTVZoom = Math.max(sharedTVZoom - 0.1, 0.5);
-          updateSharedTVDisplay();
-          break;
-        case '0':
-          sharedTVZoom = 1;
-          updateSharedTVDisplay();
-          break;
-        case 'Escape':
-          closeSharedTV();
-          break;
-      }
-    }
-    
-    function closeSharedTV() {
-      console.log('[SharedTV] Closing shared TV modal');
-      document.getElementById('shared-tv-modal').style.display = 'none';
-      document.removeEventListener('keydown', handleSharedTVKeydown);
-    }
-    
-    function handleImageClick() {
-      console.log('[SharedTV] Image clicked, current zoom:', sharedTVZoom);
-      if (sharedTVZoom !== 1) {
-        // Reset zoom first
-        console.log('[SharedTV] Resetting zoom to 1');
-        sharedTVZoom = 1;
-        updateSharedTVDisplay();
-      } else {
-        // Close modal
-        console.log('[SharedTV] Closing modal');
-        closeSharedTV();
-      }
-    }
-    
-    // Expose globally for inline onclick
-    window.closeSharedTV = closeSharedTV;
-    window.handleImageClick = handleImageClick;
-    
-    function updateSharedTVDisplay() {
-      if (!roomManager.currentRoom) return;
-      
-      const room = roomManager.currentRoom;
-      
-      // Update header
-      document.getElementById('shared-tv-code').textContent = `ROOM ${room.code}`;
-      document.getElementById('shared-tv-players').textContent = room.players.length;
-      
-      // Update state
-      const allReady = room.players.length > 0 && room.players.every(p => p.ready);
-      const stateEl = document.getElementById('shared-tv-state');
-      if (stateEl) {
-        // Remove back button rendering on this part: hide state element and clear handlers
-        stateEl.textContent = '';
-        stateEl.style.display = 'none';
-        stateEl.style.cursor = 'default';
-        stateEl.onclick = null;
-      }
-      
-      // Main content area: display TV state
-      const mainContent = document.getElementById('shared-tv-main-content');
-      const tvState = room.tvState;
-      
-      if (!tvState || tvState.type === 'idle' || !tvState.type) {
-        // Show waiting message
-        mainContent.innerHTML = `
-          <div style="text-align:center; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:20px;">
-            <div style="font-size:4rem;">🎬</div>
-            <div style="font-size:2rem; font-weight:bold;">${lang === 'fr' ? 'En attente du contenu...' : 'Waiting for content...'}</div>
-            <div style="font-size:1.2rem; color:var(--muted);">${lang === 'fr' ? 'Ouvrez une image sur la TV' : 'Open an image on the TV'}</div>
-          </div>
-        `;
-      } else if (tvState.type === 'image') {
-        // Show image with zoom
-        mainContent.innerHTML = `
-          <div style="transform:scale(${sharedTVZoom}); transform-origin:center; cursor:pointer; display:flex; align-items:center; justify-content:center;" onclick="handleImageClick()">
-            <div style="text-align:center;">
-              <img src="${tvState.imageUrl}" style="max-width:80vw; max-height:80vh; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.8);" alt="TV Content">
-              <div style="margin-top:16px; color:var(--text); font-weight:bold; font-size:1.2rem;">${tvState.imageName}</div>
-              <div style="color:var(--muted); margin-top:8px; font-size:1rem;">${tvState.index + 1} / ${tvState.total}</div>
-            </div>
-          </div>
-        `;
-      }
-    }
-    
-    // Update shared TV when room state changes
-    const originalUpdateUI = roomManager.updateUI.bind(roomManager);
-    roomManager.updateUI = function() {
-      originalUpdateUI();
-      const modal = document.getElementById('shared-tv-modal');
-      if (modal && modal.style.display !== 'none') {
-        updateSharedTVDisplay();
-      }
-    };
-    
-    document.getElementById('close-shared-tv').addEventListener('click', closeSharedTV);
-    
-    // Close modal on Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeSharedTV();
-      }
-    });
-    
-    // Make roomManager global for debugging
-    window.roomManager = roomManager;
-  })();
+console.debug('All handlers initialized');
 </script>
 
 </body>
-</html> 
+</html>

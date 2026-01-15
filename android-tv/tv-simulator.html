@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Android TV App - Test Simulator</title>
-    <link rel="stylesheet" href="../Site/theme.css">
     <style>
         :root {
             --bg: #0b0b0b;
@@ -431,9 +430,24 @@
     <script>
         // Simulate Android TV app behavior
         const API_BASE = 'http://localhost:3000';
-        const WS_URL = window.location.hostname === 'localhost' 
-          ? 'ws://localhost:3000'
-          : 'wss://' + window.location.host;
+        
+        // WebSocket URL resolver - must match main site logic
+        function resolveWSUrl() {
+            const host = window.location.hostname;
+            // Local dev
+            if (!host || host === 'localhost' || host === '127.0.0.1') {
+                return 'ws://localhost:3000/room/';
+            }
+            // Production: Use Cloudflare Worker with Durable Objects
+            if (host.includes('connectmeifucan-tv.pages.dev') || host.includes('connectmeifucan.com')) {
+                return 'wss://cmuc-backend-dev.connectmeifucan.workers.dev/room/';
+            }
+            // Fallback
+            return 'wss://' + host + '/room/';
+        }
+        
+        const WS_BASE_URL = resolveWSUrl();
+        let WS_URL = null; // Will be set dynamically when joining a room
         
         let username = 'demo';
         let token = 'test-token-123';
@@ -453,22 +467,28 @@
         let currentRoomHost = null;
         const maxWsReconnect = 5;
         
-        function connectWebSocket() {
+        function connectWebSocket(roomCode) {
+          if (!roomCode) {
+            console.error('Cannot connect WebSocket without room code');
+            return;
+          }
+          
           try {
+            WS_URL = WS_BASE_URL + roomCode;
             ws = new WebSocket(WS_URL);
             
             ws.onopen = () => {
-              console.log('✅ TV WebSocket connected');
+              console.log('✅ TV WebSocket connected to room:', roomCode);
               wsReconnectAttempts = 0;
-              if (currentRoomId) {
-                // Re-join room after reconnect
+              // Send JOIN_ROOM message after connection
+              setTimeout(() => {
                 sendWSMessage({
                   type: 'JOIN_ROOM',
-                  roomCode: currentRoomId,
+                  roomCode: roomCode,
                   clientType: 'tv',
                   clientName: username
                 });
-              }
+              }, 100);
             };
             
             ws.onmessage = (event) => {
@@ -495,9 +515,9 @@
         }
         
         function attemptWSReconnect() {
-          if (wsReconnectAttempts < maxWsReconnect) {
+          if (wsReconnectAttempts < maxWsReconnect && currentRoomId) {
             wsReconnectAttempts++;
-            setTimeout(() => connectWebSocket(), 2000 * wsReconnectAttempts);
+            setTimeout(() => connectWebSocket(currentRoomId), 2000 * wsReconnectAttempts);
           }
         }
         
@@ -508,20 +528,28 @@
         }
         
         function handleWSMessage(message) {
+          console.log('📩 TV received message:', message.type, message);
+          
           switch(message.type) {
             case 'ROOM_CREATED':
             case 'ROOM_JOINED':
-              console.log('Room synced:', message.room);
-                            if (message.room && message.room.host) {
-                                currentRoomHost = message.room.host;
-                            }
-              updateRoomUI(message.room);
+            case 'PARTICIPANT_JOINED':
+            case 'PARTICIPANT_LEFT':
+            case 'READY_STATE_CHANGED':
+            case 'HOST_CHANGED':
+              // Build room object from message properties
+              const room = {
+                roomCode: message.roomCode,
+                host: message.host,
+                participants: message.participants || [],
+                tvState: message.tvState
+              };
+              console.log('Room synced:', room);
+              currentRoomHost = message.host;
+              updateRoomUI(room);
               break;
-            case 'ROOM_UPDATED':
-                            if (message.room && message.room.host) {
-                                currentRoomHost = message.room.host;
-                            }
-                            updateRoomUI(message.room);
+            case 'CONTROL_COMMAND':
+              handleControlCommand(message.command);
               break;
             case 'ERROR':
               showStatus('⚠ ' + message.error, 'error');
@@ -530,28 +558,45 @@
         }
         
         function updateRoomUI(room) {
-          if (room) {
-            const tvPlayer = room.players.find(p => p.type === 'tv');
-            if (tvPlayer && tvPlayer.ready) {
+          if (room && room.participants) {
+            // Find TV participant using clientType
+            const tvParticipant = room.participants.find(p => p.clientType === 'tv');
+            
+            if (tvParticipant && tvParticipant.isReady) {
               document.getElementById('readyBtn').textContent = 'EN LIGNE';
               document.getElementById('readyBtn').style.backgroundColor = '#2ecc71';
             } else {
               document.getElementById('readyBtn').textContent = 'PAUSE';
               document.getElementById('readyBtn').style.backgroundColor = '#ff6b35';
             }
-                        // Immediate role button update
-                        const roleBtn = document.getElementById('roleBtn');
-                        if (roleBtn && currentRoomHost) {
-                            const hostType = currentRoomHost === 'tv' ? 'Guest' : 'Host';
-                            roleBtn.textContent = `🎬 ${hostType}`;
-                            roleBtn.style.borderColor = (currentRoomHost === 'web') ? '#ff6b6b' : '#ffa500';
-                            roleBtn.style.color = (currentRoomHost === 'web') ? '#ff6b6b' : '#ffa500';
-                        }
+            
+            // Update role button
+            const roleBtn = document.getElementById('roleBtn');
+            if (roleBtn && currentRoomHost) {
+              const hostType = currentRoomHost === 'tv' ? 'Guest' : 'Host';
+              roleBtn.textContent = `🎬 ${hostType}`;
+              roleBtn.style.borderColor = (currentRoomHost === 'web') ? '#ff6b6b' : '#ffa500';
+              roleBtn.style.color = (currentRoomHost === 'web') ? '#ff6b6b' : '#ffa500';
+            }
+            
+            // Display room info
+            console.log('🏠 Room:', room.roomCode, '| Participants:', room.participants.length);
           }
         }
         
-        // Connect WebSocket on load
-        connectWebSocket();
+        // Handle control commands from host
+        function handleControlCommand(command) {
+          console.log('📺 TV received control command:', command);
+          
+          if (command === 'START_GAME') {
+            showStatus('🎮 Game started by host!', 'success');
+            // Additional game start logic here
+          }
+        }
+        
+        // WebSocket will be connected when joining a room
+        // connectWebSocket() is now called in joinRoom() with the room code
+
         
         // Translation helper function
         function t(key) {
@@ -833,60 +878,32 @@
             localStorage.setItem('cmuc_last_room', roomId);
             showStatus(`Creating room ${roomId}...`, 'loading');
             
-            // Try WebSocket first (backend), fallback to dev mode
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                sendWSMessage({
-                    type: 'CREATE_ROOM',
-                    roomCode: roomId,
-                    clientType: 'tv',
-                    clientName: username
-                });
-                currentRoomId = roomId;
-                enterRoom(roomId);
-                return;
-            }
+            // Connect to WebSocket with room code first
+            currentRoomId = roomId;
+            connectWebSocket(roomId);
             
-            if (devMode) {
-                const res = devCreateRoom(roomId, username);
-                if (res.success) {
-                    showStatus(`✓ [DEV] Room ${roomId} created. Host: ${res.host}`, 'success');
-                    renderDevRooms();
+            // Wait for WebSocket to connect, then send CREATE_ROOM
+            const checkInterval = setInterval(() => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    clearInterval(checkInterval);
+                    sendWSMessage({
+                        type: 'CREATE_ROOM',
+                        roomCode: roomId,
+                        clientType: 'tv',
+                        clientName: username
+                    });
                     enterRoom(roomId);
-                } else {
-                    showStatus(`✗ [DEV] ${res.message} - Try joining instead or use a different code`, 'error');
-                    setTimeout(() => {
-                        const input = document.getElementById('roomIdInput');
-                        input.select();
-                        input.focus();
-                    }, 100);
+                    showStatus(`✓ Room ${roomId} created!`, 'success');
                 }
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/rooms/create`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        roomId: roomId,
-                        username: username,
-                        host: true
-                    })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    showStatus(`✓ Room ${roomId} created successfully! You are the host.`, 'success');
-                    enterRoom(roomId);
-                } else {
-                    showStatus(`✗ ${data.message}`, 'error');
+            }, 100);
+            
+            // Timeout after 5 seconds
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                if (!ws || ws.readyState !== WebSocket.OPEN) {
+                    showStatus(`✗ Could not connect to create room`, 'error');
                 }
-            } catch (error) {
-                showStatus(`✗ Connection error: ${error.message}`, 'error');
-                console.error('Create room error:', error);
-            }
+            }, 5000);
         }
         
         async function joinRoom() {
@@ -905,54 +922,13 @@
             localStorage.setItem('cmuc_last_room', roomId);
             showStatus(`Joining room ${roomId}...`, 'loading');
             
-            // Try WebSocket first (backend), fallback to dev mode
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                sendWSMessage({
-                  type: 'JOIN_ROOM',
-                  roomCode: roomId,
-                  clientType: 'tv',
-                  clientName: username
-                });
-                currentRoomId = roomId;
-                enterRoom(roomId);
-                return;
-            }
+            // Connect to WebSocket with room code
+            currentRoomId = roomId;
+            connectWebSocket(roomId);
             
-            if (devMode) {
-                const res = devJoinRoom(roomId, username);
-                if (res.success) {
-                    showStatus(`✓ [DEV] Joined ${roomId}. Host: ${res.host}. Players: ${res.players.join(', ')}`, 'success');
-                    renderDevRooms();
-                    enterRoom(roomId);
-                } else {
-                    showStatus(`✗ [DEV] ${res.message}`, 'error');
-                }
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/rooms/join`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        roomId: roomId,
-                        username: username
-                    })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    showStatus(`✓ Joined room ${roomId}! Host: ${data.host}`, 'success');
-                    enterRoom(roomId);
-                } else {
-                    showStatus(`✗ ${data.message}`, 'error');
-                }
-            } catch (error) {
-                showStatus(`✗ Connection error: ${error.message}`, 'error');
-                console.error('Join room error:', error);
-            }
+            // Enter room UI
+            enterRoom(roomId);
+            showStatus(`✓ Connecting to room ${roomId}...`, 'success');
         }
         
         function generateRoomId() {
@@ -1009,15 +985,10 @@
                 btn.dataset.ready = isReady ? 'true' : 'false';
                 btn.style.backgroundColor = isReady ? '#2ecc71' : '#ff9800';
                 btn.style.color = '#fff';
-            } else {
-                btn.textContent = t('readyBtn');
-                btn.dataset.ready = 'false';
-                btn.style.backgroundColor = '#ff9800';
-                btn.style.color = '#fff';
             }
 
-            console.log('Starting polling and refreshing view...');
-            startPolling();
+            console.log('WebSocket connected, refreshing view...');
+            // Polling removed - using WebSocket for real-time updates
             refreshRoomView();
             refreshImagesPanel();
         }
@@ -1295,6 +1266,10 @@
         }
 
         async function refreshImagesPanel() {
+            // Images feature disabled in WebSocket mode - would require backend implementation
+            console.log('⚠️ Images panel disabled in WebSocket mode');
+            return;
+            
             const input = document.getElementById('imageInput');
             const meta = document.getElementById('imagesMeta');
             const list = document.getElementById('imagesList');
@@ -1774,6 +1749,10 @@
         }
 
         function startPolling() {
+            // Polling disabled - using WebSocket for real-time updates
+            console.log('⚠️ Polling disabled - using WebSocket instead');
+            return;
+            
             stopPolling();
             pollTimer = setInterval(async () => {
                 if (!currentRoomId) return;
