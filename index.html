@@ -67,7 +67,7 @@ body {
   transform: translate(-50%, -50%);
   object-fit: cover;
   z-index: 1;
-  opacity: 0.8;
+  opacity: 1;
   will-change: auto;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -83,40 +83,78 @@ body {
 }
 
 /* CONTENU AU-DESSUS DE LA VIDÉO */
-#splash > h1,
-#splash > p,
-#splash .enter-sides,
-#splash #press-progress-bar {
-  position: relative;
+#splash > h1 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -40% );
   z-index: 3;
+  text-align: center;
+  transition: opacity .3s ease, transform .3s ease;
 }
 
-#splash > h1,
 #splash > p {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 50px));
+  z-index: 3;
+  text-align: center;
   transition: opacity .3s ease, transform .3s ease;
+  font-size: 1.2rem;
+  max-width: 80%;
 }
 
 /* ========================= */
 /* SPLASH: ENTER SIDES + PROGRESS */
 /* ========================= */
-.enter-sides {
-  position: absolute;
+.top-container {
+  position: fixed;
   left: 0;
   right: 0;
-  bottom: 28%;
+  top: 0;
   display: block;
   padding: 0 24px;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
   pointer-events: none;
+  background: #000;
+  height: 120px;
+  z-index: 10000;
+}
+
+.enter-sides {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  padding: 0 24px;
+  width: 100%;
+  pointer-events: none;
+  background: #000;
+  height: 120px;
+  z-index: 10000;
+}
+
+.enter-sides {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  padding: 0 24px;
+  width: 100%;
+  pointer-events: none;
+  background: #000;
+  height: 120px;
+  z-index: 10000;
 }
 .enter-sides .enter-side {
   pointer-events: auto;
 }
 .enter-side {
   position: absolute;
-  top: 50%;
+  bottom: 50%;
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -153,9 +191,9 @@ body {
 #press-progress-bar {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
-  bottom: 5%;
-  width: 60%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 54%;
   max-width: 640px;
   height: 14px;
   background: rgba(255,255,255,0.12);
@@ -163,6 +201,8 @@ body {
   overflow: hidden;
   display: none;
   align-items: center;
+  z-index: 1;
+  opacity: 0.97;
 }
 #press-progress-bar.visible { display: flex; }
 #press-progress-fill {
@@ -198,6 +238,7 @@ body {
 }
 .global.show { display: inline-flex; }
 body.hand-left .global { left: 18px; right: auto; }
+
 body.hand-right .global { right: 18px; left: auto; }
 body.hand-left .global.back { right: 18px; left: auto; }
 body.hand-right .global.back { left: 18px; right: auto; }
@@ -271,7 +312,8 @@ body.hand-right #enter-left {
 
 /* Mobile adjustments */
 @media (max-width: calc(var(--mobile) - 1px)) {
-  .enter-sides { bottom: 6%; padding: 0 6%; }
+  .top-container { opacity: 0; }
+  .enter-sides { bottom: 6%; padding: 0 6%; opacity: 0; }
   #enter-left { left: 6%; }
   #enter-right { right: 6%; }
   .global { bottom: 6%; }
@@ -533,20 +575,22 @@ body.hand-right #enter-left {
   <div id="splash-overlay"></div>
   
   <h1>Bienvenue</h1>
-  <p>Choisissez votre main pour commencer</p>
+  <p>Appuyer sur un bouton pour entrer</p>
+
+  <div class="top-container">
+  </div>
 
   <div class="enter-sides">
+    <div id="press-progress-bar" aria-hidden="true">
+      <div id="press-progress-fill"></div>
+      <div id="press-progress-text">0%</div>
+    </div>
     <button id="enter-left" class="enter-side" aria-label="Entrer - main gauche" title="Entrer — Main gauche">
       <span class="enter-label">Appuyer pour entrer</span>
     </button>
     <button id="enter-right" class="enter-side" aria-label="Entrer - main droite" title="Entrer — Main droite">
       <span class="enter-label">Appuyer pour entrer</span>
     </button>
-  </div>
-
-  <div id="press-progress-bar" aria-hidden="true">
-    <div id="press-progress-fill"></div>
-    <div id="press-progress-text">0%</div>
   </div>
 </div>
 
@@ -633,6 +677,77 @@ body.hand-right #enter-left {
 <script>
 console.debug('Script loaded');
 
+// ========================= 
+// TRANSLATIONS / TRADUCTIONS
+// =========================
+const translations = {
+  fr: {
+    // Splash screen
+    splash_title: "Bienvenue",
+    splash_subtitle: "Vivez une nouvelle expérience chaque jour depuis chez vous, dès maintenant",
+    enter_label: "Appuyer pour entrer",
+    progress_wait: "Patienter",
+    
+    // Menu
+    menu_title: "Choisissez une catégorie",
+    menu_subtitle: "Sélectionnez votre expérience",
+    
+    // Widgets
+    widget1_title: "Confort & Bien-être",
+    widget1_desc: "Créez votre environnement domestique parfait",
+    widget2_title: "Jeu du Dessin en Chaîne",
+    widget2_desc: "Expérience créative collaborative",
+    widget3_title: "Nouvelles Réalités",
+    widget3_desc: "Explorez les connexions immersives",
+    
+    // Controls
+    control_pages: "Pages",
+    control_back: "Retour",
+    
+    // Pages
+    page_title: "Page",
+    page_content: "Contenu de la page"
+  },
+  en: {
+    // Splash screen
+    splash_title: "Welcome",
+    splash_subtitle: "Live a new experience every day from home",
+    enter_label: "Press to enter",
+    progress_wait: "Wait",
+    
+    // Menu
+    menu_title: "Choose a category",
+    menu_subtitle: "Select your experience",
+    
+    // Widgets
+    widget1_title: "Comfort & Well-Being",
+    widget1_desc: "Create your perfect home environment",
+    widget2_title: "Drawing Chain Game",
+    widget2_desc: "Collaborative creative experience",
+    widget3_title: "New Realities",
+    widget3_desc: "Explore immersive connections",
+    
+    // Controls
+    control_pages: "Pages",
+    control_back: "Back",
+    
+    // Pages
+    page_title: "Page",
+    page_content: "Page content"
+  }
+};
+
+// Detect browser language
+const browserLang = navigator.language || navigator.userLanguage;
+const currentLang = browserLang.startsWith('fr') ? 'fr' : 'en';
+
+// Translation function
+function t(key) {
+  return translations[currentLang][key] || translations['en'][key] || key;
+}
+
+console.debug('Language detected:', currentLang);
+
 const splash = document.getElementById("splash");
 const btnLeft = document.getElementById('enter-left');
 const btnRight = document.getElementById('enter-right');
@@ -654,7 +769,7 @@ const splashVideo = document.getElementById('splash-video');
 
 function updateProgressUI(percent) {
   if (progressFill) progressFill.style.width = percent + '%';
-  if (progressText) progressText.textContent = 'Chargement ' + Math.round(percent) + '%';
+  if (progressText) progressText.textContent = t('progress_wait') + ' ' + Math.round(percent) + '%';
 }
 
 function resetProgress() {
@@ -1007,6 +1122,63 @@ if (storedHand === 'left' || storedHand === 'right') {
 }
 
 console.debug('All handlers initialized');
+
+// ========================= 
+// APPLY TRANSLATIONS TO DOM
+// =========================
+function applyTranslations() {
+  // Splash screen
+  const splashTitle = splash?.querySelector('h1');
+  const splashSubtitle = splash?.querySelector('p');
+  if (splashTitle) splashTitle.textContent = t('splash_title');
+  if (splashSubtitle) splashSubtitle.textContent = t('splash_subtitle');
+  
+  // Enter buttons
+  document.querySelectorAll('.enter-label').forEach(label => {
+    if (label.closest('#enter-left') || label.closest('#enter-right')) {
+      label.textContent = t('enter_label');
+    }
+  });
+  
+  // Menu
+  const menuTitle = document.querySelector('.menu-title');
+  const menuSubtitle = document.querySelector('.menu-subtitle');
+  if (menuTitle) menuTitle.textContent = t('menu_title');
+  if (menuSubtitle) menuSubtitle.textContent = t('menu_subtitle');
+  
+  // Widgets
+  const widgets = document.querySelectorAll('.menu-widget');
+  if (widgets[0]) {
+    widgets[0].querySelector('.menu-widget-title').textContent = t('widget1_title');
+    widgets[0].querySelector('.menu-widget-desc').textContent = t('widget1_desc');
+  }
+  if (widgets[1]) {
+    widgets[1].querySelector('.menu-widget-title').textContent = t('widget2_title');
+    widgets[1].querySelector('.menu-widget-desc').textContent = t('widget2_desc');
+  }
+  if (widgets[2]) {
+    widgets[2].querySelector('.menu-widget-title').textContent = t('widget3_title');
+    widgets[2].querySelector('.menu-widget-desc').textContent = t('widget3_desc');
+  }
+  
+  // Global controls
+  const globalControlLabel = globalControl?.querySelector('.enter-label');
+  const globalBackLabel = globalBack?.querySelector('.enter-label');
+  if (globalControlLabel) globalControlLabel.textContent = t('control_pages');
+  if (globalBackLabel) globalBackLabel.textContent = t('control_back');
+  
+  // Pages
+  document.querySelectorAll('.page').forEach((page, index) => {
+    const pageNum = index + 1;
+    const h2 = page.querySelector('h2');
+    const p = page.querySelector('p');
+    if (h2) h2.textContent = `📄 ${t('page_title')} ${pageNum}`;
+    if (p) p.textContent = `${t('page_content')} ${pageNum}`;
+  });
+}
+
+// Apply translations on page load
+applyTranslations();
 </script>
 
 </body>
